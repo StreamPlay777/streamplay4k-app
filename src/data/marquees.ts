@@ -35,10 +35,10 @@ export const whySwitch = [
 /**
  * Four device cards on the coverage section.
  *
- * `image` points at src/assets/devices/<file>. Supply the product photos as
- * transparent PNGs — run them through `python3 scripts/strip-bg.py` first to
- * knock out the white studio backdrop, otherwise they sit in a white box on
- * the dark page. Cards fall back to a labelled placeholder until then.
+ * `image` points at src/assets/devices/<file> — transparent WebP, produced by
+ * running the studio photo through `python3 scripts/strip-bg.py` (knocks out
+ * the white backdrop) and saving as WebP for the alpha at a fraction of PNG
+ * weight. Cards fall back to a labelled placeholder if a file is missing.
  */
 export interface DeviceTile {
   name: string;
@@ -54,28 +54,28 @@ export const deviceTiles: DeviceTile[] = [
   {
     name: 'Smart TV',
     note: 'Samsung, LG, Philips and Android TV. Straight from the app store.',
-    image: 'smart-tv.png',
+    image: 'smart-tv.webp',
     brandLabel: 'Compatible brands',
     brands: ['Samsung', 'LG', 'Philips', 'Android TV'],
   },
   {
     name: 'Phone',
     note: 'iOS and Android — watch where you want, when you want.',
-    image: 'phone.png',
+    image: 'phone.webp',
     brandLabel: 'Compatible brands',
     brands: ['Apple', 'Samsung', 'Google', 'Xiaomi'],
   },
   {
     name: 'Tablet',
     note: 'iPad, Samsung Galaxy Tab and Lenovo. Full screen, every app.',
-    image: 'tablet.png',
+    image: 'tablet.webp',
     brandLabel: 'Compatible brands',
     brands: ['iPad', 'Samsung', 'Lenovo', 'Surface'],
   },
   {
     name: 'Computer',
     note: 'Windows, macOS and Linux — straight in the browser. No app needed.',
-    image: 'laptop.png',
+    image: 'laptop.webp',
     brandLabel: 'Compatible systems',
     brands: ['Windows', 'macOS', 'Linux', 'ChromeOS'],
   },

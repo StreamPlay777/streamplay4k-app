@@ -6,8 +6,8 @@ dark page.
 Usage:
     python3 scripts/strip-bg.py raw/*.png
 
-Writes <name>.png (RGBA, transparent backdrop, cropped to the device) into
-src/assets/devices/.
+Writes <name>.webp (transparent backdrop, cropped and capped at MAX_HEIGHT)
+into src/assets/devices/.
 
 Approach: flood-fill inward from the four edges, taking every pixel within
 `TOLERANCE` of white as backdrop. Flood fill rather than a global colour key so
@@ -21,6 +21,7 @@ from PIL import Image
 
 OUT_DIR = Path("src/assets/devices")
 TOLERANCE = 26      # per-channel distance from pure white counted as backdrop
+MAX_HEIGHT = 460    # output cap; cards display at ~210px, so this is 2x
 FEATHER = 1         # px of edge softening, keeps the cutout from looking cut out
 
 
@@ -65,10 +66,17 @@ def strip(path: Path) -> None:
 
     img = img.crop(img.getbbox() or (0, 0, w, h))
 
+    # Cards render ~210px tall; 2x is plenty and keeps the bundle light.
+    if img.height > MAX_HEIGHT:
+        img = img.resize(
+            (round(img.width * MAX_HEIGHT / img.height), MAX_HEIGHT), Image.LANCZOS
+        )
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    out = OUT_DIR / (path.stem + ".png")
-    img.save(out, "PNG", optimize=True)
-    print(f"  {path.name:28} -> {out}  {img.size[0]}x{img.size[1]}")
+    out = OUT_DIR / (path.stem + ".webp")
+    # WebP keeps the alpha at roughly an eighth of the equivalent PNG.
+    img.save(out, "WEBP", quality=88, method=6)
+    print(f"  {path.name:28} -> {out}  {img.size[0]}x{img.size[1]}  {out.stat().st_size // 1024} KB")
 
 
 if __name__ == "__main__":

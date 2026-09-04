@@ -3,7 +3,7 @@ import type { DeviceTile } from '../data/marquees';
 
 // Vite resolves every device photo at build time; missing files simply stay
 // undefined and the card falls back to its placeholder.
-const images = import.meta.glob('../assets/devices/*.png', {
+const images = import.meta.glob('../assets/devices/*.webp', {
   eager: true,
   import: 'default',
 }) as Record<string, string>;
@@ -21,8 +21,11 @@ export default function DeviceCard({ tile }: { tile: DeviceTile }) {
 
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-white/[.08] bg-white/[.02]">
-      {/* Device photo, lifted off the dark card by a soft glow */}
-      <div className="relative grid h-[210px] place-items-center px-6 pt-7">
+      {/* Device photo, lifted off the dark card by a soft glow.
+          The image is sized by object-contain inside a fixed-height box rather
+          than by max-height, so the portrait phone shot cannot outgrow the
+          card the way an auto-sized grid item would. */}
+      <div className="relative h-[210px] px-6 pt-7">
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -36,7 +39,7 @@ export default function DeviceCard({ tile }: { tile: DeviceTile }) {
             alt={`${tile.name} running Streamplay4k`}
             loading="lazy"
             onError={() => setFailed(true)}
-            className="relative max-h-full w-auto max-w-full object-contain
+            className="relative h-full w-full object-contain object-bottom
                        drop-shadow-[0_18px_36px_rgba(0,0,0,.55)]"
           />
         ) : (
