@@ -11,6 +11,7 @@ import { basketMonthly, basketYearly, paymentsPerYear, smallPrint } from '../dat
 import { reviews } from '../data/reviews';
 import { SectionHeading, Placeholder, Marquee, TitleMarquee, Tick, Stars } from '../components/ui';
 import Poster from '../components/Poster';
+import DeviceCard from '../components/DeviceCard';
 import Receipt from '../components/Receipt';
 import { PlanCard, FeaturesCard } from '../components/PlanCard';
 import Faq from '../components/Faq';
@@ -295,22 +296,20 @@ function DeviceCoverage() {
       <div className="mx-auto max-w-shell">
         <SectionHeading
           label="What is on"
-          title={<>Every screen in the house. <span className="text-accent">One login.</span></>}
+          title={
+            <>
+              Every screen in the house.
+              <br />
+              <span className="font-semibold italic text-ink-3">One login.</span>
+            </>
+          }
           sub="Install it everywhere you watch. Pick how many screens play at the same time — the rest is the same subscription."
         />
 
-        <div className="mt-14 grid gap-3.5 lg:grid-cols-[1.4fr_1fr]">
-          <div className="grid gap-3.5 sm:grid-cols-2 lg:contents">
-            {deviceTiles.map((tile) => (
-              <div key={tile.name} className="overflow-hidden rounded-2xl border border-white/[.08] bg-surface-2">
-                <Placeholder label={tile.caption} height={tile.tall ? 300 : 220} />
-                <div className="px-[18px] py-3.5">
-                  <div className="font-display text-[16px] font-bold text-ink">{tile.name}</div>
-                  <div className="mt-1 text-[13.5px] text-ink-3">{tile.note}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {deviceTiles.map((tile) => (
+            <DeviceCard key={tile.name} tile={tile} />
+          ))}
         </div>
 
         <div className="mx-auto mt-12 grid max-w-[900px] gap-3 sm:grid-cols-2 sm:gap-x-8">

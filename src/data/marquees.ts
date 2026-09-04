@@ -32,12 +32,53 @@ export const whySwitch = [
   { title: 'Humans on chat, 24/7', body: 'Live chat staffed around the clock by people who know the devices. Median first reply is under two minutes.' },
 ];
 
-/** Four device tiles on the coverage section. */
-export const deviceTiles = [
-  { name: 'Smart TV & Firestick', note: 'Live sport and the full guide on the big screen.', caption: '[ living room — TV ]', tall: true },
-  { name: 'Laptop & desktop', note: 'Box sets and films in a browser or desktop player.', caption: '[ laptop — series ]', tall: true },
-  { name: 'Tablet', note: 'Kids and family programming in the kitchen.', caption: '[ tablet — kids ]', tall: false },
-  { name: 'Phone', note: 'News and highlights wherever you are.', caption: '[ phone — highlights ]', tall: false },
+/**
+ * Four device cards on the coverage section.
+ *
+ * `image` points at src/assets/devices/<file>. Supply the product photos as
+ * transparent PNGs — run them through `python3 scripts/strip-bg.py` first to
+ * knock out the white studio backdrop, otherwise they sit in a white box on
+ * the dark page. Cards fall back to a labelled placeholder until then.
+ */
+export interface DeviceTile {
+  name: string;
+  note: string;
+  /** Filename in src/assets/devices, or undefined to show the placeholder. */
+  image?: string;
+  /** Heading above the compatibility row. */
+  brandLabel: string;
+  brands: string[];
+}
+
+export const deviceTiles: DeviceTile[] = [
+  {
+    name: 'Smart TV',
+    note: 'Samsung, LG, Philips and Android TV. Straight from the app store.',
+    image: 'smart-tv.png',
+    brandLabel: 'Compatible brands',
+    brands: ['Samsung', 'LG', 'Philips', 'Android TV'],
+  },
+  {
+    name: 'Phone',
+    note: 'iOS and Android — watch where you want, when you want.',
+    image: 'phone.png',
+    brandLabel: 'Compatible brands',
+    brands: ['Apple', 'Samsung', 'Google', 'Xiaomi'],
+  },
+  {
+    name: 'Tablet',
+    note: 'iPad, Samsung Galaxy Tab and Lenovo. Full screen, every app.',
+    image: 'tablet.png',
+    brandLabel: 'Compatible brands',
+    brands: ['iPad', 'Samsung', 'Lenovo', 'Surface'],
+  },
+  {
+    name: 'Computer',
+    note: 'Windows, macOS and Linux — straight in the browser. No app needed.',
+    image: 'laptop.png',
+    brandLabel: 'Compatible systems',
+    brands: ['Windows', 'macOS', 'Linux', 'ChromeOS'],
+  },
 ];
 
 export const coverageChecklist = [
