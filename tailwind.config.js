@@ -4,17 +4,78 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          red: '#E8322A',
-          orange: '#F5A623',
-          dark: '#1A1A1A',
-          darker: '#111111',
-          card: '#222222',
-          border: '#333333',
+        // Brand pair — sampled from the client logo
+        accent: {
+          DEFAULT: '#FF2B2A',
+          hover: '#FF5347',
+          bright: '#FF6A5A',
+          soft: '#FF7A63',
+          link: '#FF8A72',
+          2: '#FF9A3E',
+          print: '#E0201C',
         },
+        // Dark navy ground
+        bg: {
+          DEFAULT: '#06080F',
+          alt: '#080B16',
+          deep: '#05070D',
+          deepest: '#04060B',
+        },
+        surface: {
+          DEFAULT: '#0A0E1B',
+          2: '#0B1020',
+          3: '#0F1526',
+        },
+        ink: {
+          DEFAULT: '#E8ECF5',
+          2: '#C4CCDC',
+          3: '#97A2B8',
+          4: '#6B7689',
+          5: '#5C6680',
+          6: '#465066',
+        },
+        // Receipt stock
+        paper: {
+          DEFAULT: '#F7F5F0',
+          ink: '#14161C',
+          rule: '#C3BEB2',
+          meta: '#6E6A61',
+        },
+        success: '#35C86A',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Outfit', 'system-ui', 'sans-serif'],
+        sans: ['"Public Sans"', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        hand: ['Caveat', 'cursive'],
+      },
+      maxWidth: {
+        shell: '1180px',
+        wide: '1320px',
+        nav: '1260px',
+        narrow: '820px',
+      },
+      backgroundImage: {
+        'accent-gradient': 'linear-gradient(100deg, #FF2B2A, #FF9A3E)',
+      },
+      boxShadow: {
+        'cta-sm': '0 6px 22px rgba(255,43,42,.35)',
+        cta: '0 10px 32px rgba(255,43,42,.33)',
+        pill: '0 12px 40px rgba(0,0,0,.45)',
+        dropdown: '0 24px 60px rgba(0,0,0,.6)',
+      },
+      keyframes: {
+        'marquee-l': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },
+        'marquee-r': { from: { transform: 'translateX(-50%)' }, to: { transform: 'translateX(0)' } },
+        pulseDot: {
+          '0%,100%': { opacity: '1', transform: 'scale(1)' },
+          '50%': { opacity: '.45', transform: 'scale(.82)' },
+        },
+      },
+      animation: {
+        'marquee-l': 'marquee-l 42s linear infinite',
+        'marquee-r': 'marquee-r 52s linear infinite',
+        'pulse-dot': 'pulseDot 1.8s ease-in-out infinite',
       },
     },
   },
