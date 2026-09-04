@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { site } from '../data/site';
-import { countries, getChannels, categoryCounts, type Category } from '../data/channels';
+import { countries, getChannels, categoryCounts, channelInitials, type Category } from '../data/channels';
 
 /**
  * Channel guide.
@@ -185,15 +185,32 @@ export default function Channels() {
                     className="rounded-[11px] border border-white/[.07] bg-white/[.02] px-[15px] py-3.5
                                transition-colors hover:border-accent/40 hover:bg-accent/[.05]"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="font-display text-[14.5px] font-bold text-ink">{ch.name}</span>
+                    <div className="flex items-start gap-2.5">
+                      {/* Real logo when the feed supplies one, initials tile until then */}
+                      {ch.logo ? (
+                        <img
+                          src={ch.logo}
+                          alt=""
+                          loading="lazy"
+                          className="h-8 w-8 flex-none rounded-md object-contain"
+                        />
+                      ) : (
+                        <span className="grid h-8 w-8 flex-none place-items-center rounded-md border border-white/[.09] bg-white/[.04] font-display text-[10.5px] font-bold text-ink-3">
+                          {channelInitials(ch.name)}
+                        </span>
+                      )}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-display text-[14.5px] font-bold text-ink">{ch.name}</span>
+                        <span className="mt-0.5 block text-[11.5px] uppercase tracking-[.08em] text-ink-4">
+                          {ch.category}
+                        </span>
+                      </span>
                       {ch.uhd && (
                         <span className="flex-none rounded border border-accent/30 bg-accent/10 px-1.5 py-0.5 font-mono text-[9px] text-accent-bright">
                           4K
                         </span>
                       )}
                     </div>
-                    <div className="mt-1 text-[11.5px] uppercase tracking-[.08em] text-ink-4">{ch.category}</div>
                   </div>
                 ))}
               </div>

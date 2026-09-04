@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import type { Title } from '../data/vod';
+import Poster from './Poster';
 
 /** Centred section header: eyebrow label, h2, optional sub-paragraph. */
 export function SectionHeading({
@@ -92,6 +94,33 @@ export function Stars({ size = 14 }: { size?: number }) {
   return (
     <div className="tracking-[.2em] text-accent" style={{ fontSize: size }} aria-label="5 out of 5 stars">
       ★★★★★
+    </div>
+  );
+}
+
+/** Marquee of poster cards — the on-demand rails. */
+export function TitleMarquee({ titles, direction, duration }: {
+  titles: Title[];
+  direction: 'left' | 'right';
+  duration: number;
+}) {
+  return (
+    <div className="mask-rail-tight overflow-hidden">
+      <div
+        className="marquee-track flex w-max gap-2.5"
+        style={{
+          animationName: direction === 'left' ? 'marquee-l' : 'marquee-r',
+          animationDuration: `${duration}s`,
+          animationTimingFunction: 'linear',
+          animationIterationCount: 'infinite',
+        }}
+      >
+        {[0, 1].map((pass) => (
+          <div key={pass} className="flex gap-2.5" aria-hidden={pass === 1}>
+            {titles.map((t) => <Poster key={`${pass}-${t.name}`} title={t} />)}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -3,12 +3,14 @@ import { site, heroStats, paymentMethods } from '../data/site';
 import { terms } from '../data/plans';
 import { usePlan } from '../hooks/usePlan';
 import {
-  networksRowA, networksRowB, postersA, postersB,
+  networksRowA, networksRowB,
   whySwitch, deviceTiles, coverageChecklist,
 } from '../data/marquees';
+import { railA, railB, featured } from '../data/vod';
 import { basketMonthly, basketYearly, paymentsPerYear, smallPrint } from '../data/receipt';
 import { reviews } from '../data/reviews';
-import { SectionHeading, Placeholder, Marquee, Tick, Stars } from '../components/ui';
+import { SectionHeading, Placeholder, Marquee, TitleMarquee, Tick, Stars } from '../components/ui';
+import Poster from '../components/Poster';
 import Receipt from '../components/Receipt';
 import { PlanCard, FeaturesCard } from '../components/PlanCard';
 import Faq from '../components/Faq';
@@ -241,16 +243,6 @@ function CostComparison() {
 
 /* ── 1.5 On-demand library ─────────────────────────────────────────────────── */
 function OnDemand() {
-  const poster = (label: string, key: string) => (
-    <div
-      key={key}
-      className="placeholder-stripes relative flex-none overflow-hidden rounded-[10px]"
-      style={{ width: 160, height: 240, backgroundColor: '#0E1424' }}
-    >
-      <span className="absolute bottom-2.5 left-3 font-mono text-[9.5px] text-ink-5">{label}</span>
-    </div>
-  );
-
   return (
     <section className="bg-bg pb-[90px] pt-[86px]">
       <div className="px-7">
@@ -259,10 +251,19 @@ function OnDemand() {
           title={<>Thousands of hours of <span className="text-accent">premium content</span></>}
           sub={`${site.vod} films and series sitting alongside the live line-up, on the same subscription.`}
         />
+
+        {/* Featured strip */}
+        <div className="mx-auto mt-12 grid max-w-shell grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {featured.map((t) => (
+            <Poster key={t.name} title={t} width={undefined} height={260} />
+          ))}
+        </div>
       </div>
-      <div className="mt-14 flex flex-col gap-2.5">
-        <Marquee items={postersA} direction="left" duration={60} tight renderItem={poster} />
-        <Marquee items={postersB} direction="right" duration={72} tight renderItem={poster} />
+
+      {/* Two rails: films one way, series the other */}
+      <div className="mt-10 flex flex-col gap-2.5">
+        <TitleMarquee titles={railA} direction="left" duration={60} />
+        <TitleMarquee titles={railB} direction="right" duration={72} />
       </div>
     </section>
   );

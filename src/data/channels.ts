@@ -17,6 +17,13 @@ export interface Channel {
   category: string;
   /** Marked 4K/8K in the provider line-up. */
   uhd?: boolean;
+  /**
+   * Channel logo URL. Your Xtream Codes panel already returns one per channel
+   * as `stream_icon` on get_live_streams — map it straight onto this field when
+   * you wire the live feed and every card picks it up automatically.
+   * Do NOT scrape broadcaster logos from other sites.
+   */
+  logo?: string;
 }
 
 export interface Country {
@@ -377,6 +384,17 @@ export function getChannels(countryId: string, category: Category | null, query:
       (!category || ch.category === category) &&
       (!q || ch.name.toLowerCase().includes(q) || ch.category.toLowerCase().includes(q)),
   );
+}
+
+/** Initials fallback shown until a real channel logo is supplied. */
+export function channelInitials(name: string): string {
+  return name
+    .replace(/[^A-Za-z0-9 ]/g, '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join('');
 }
 
 /** Per-category counts for the filter chips, scaled to the country's real total. */
