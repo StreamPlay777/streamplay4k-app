@@ -94,8 +94,26 @@
   .nums { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
 }
 
-/* Marquees pause on hover, and stop entirely for reduced-motion users */
-.marquee-track:hover { animation-play-state: paused; }
+/* Marquee keyframes.
+   These live here rather than in tailwind.config because the tracks set
+   `animation-name` through an inline style — Tailwind's scanner only emits
+   keyframes it can see referenced by an `animate-*` class in the source, so
+   configuring them there produced a name pointing at nothing and the rails
+   never moved. translate3d promotes each track to its own compositor layer,
+   which keeps a 13,000px-wide row scrolling on the GPU. */
+@keyframes marquee-l {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes marquee-r {
+  from { transform: translate3d(-50%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+
+.marquee-track {
+  will-change: transform;
+  backface-visibility: hidden;
+}
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

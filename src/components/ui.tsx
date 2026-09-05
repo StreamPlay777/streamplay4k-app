@@ -171,7 +171,11 @@ export function LogoMarquee({ logos, direction, duration }: {
                 <img
                   src={logo.src}
                   alt={pass === 0 ? logo.name : ''}
-                  loading="lazy"
+                  /* Every mark scrolls through within one cycle, so lazy
+                     loading only bought a visible pop-in. Low priority keeps
+                     them from competing with above-the-fold work. */
+                  decoding="async"
+                  fetchPriority="low"
                   className="max-h-[20px] max-w-[104px] object-contain sm:max-h-[24px] sm:max-w-[124px] lg:max-h-[28px] lg:max-w-[140px]"
                   style={logo.invert ? { filter: 'invert(1)' } : undefined}
                 />

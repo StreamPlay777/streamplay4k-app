@@ -64,17 +64,14 @@ export default {
         pill: '0 12px 40px rgba(0,0,0,.45)',
         dropdown: '0 24px 60px rgba(0,0,0,.6)',
       },
+      // Marquee keyframes live in index.css — see the note there.
       keyframes: {
-        'marquee-l': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },
-        'marquee-r': { from: { transform: 'translateX(-50%)' }, to: { transform: 'translateX(0)' } },
         pulseDot: {
           '0%,100%': { opacity: '1', transform: 'scale(1)' },
           '50%': { opacity: '.45', transform: 'scale(.82)' },
         },
       },
       animation: {
-        'marquee-l': 'marquee-l 42s linear infinite',
-        'marquee-r': 'marquee-r 52s linear infinite',
         'pulse-dot': 'pulseDot 1.8s ease-in-out infinite',
       },
     },
