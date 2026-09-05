@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { Title } from '../data/vod';
+import type { NetworkLogo } from '../data/logos';
 import Poster from './Poster';
 
 /** Centred section header: eyebrow label, h2, optional sub-paragraph. */
@@ -118,6 +119,55 @@ export function TitleMarquee({ titles, direction, duration }: {
         {[0, 1].map((pass) => (
           <div key={pass} className="flex gap-2.5" aria-hidden={pass === 1}>
             {titles.map((t) => <Poster key={`${pass}-${t.name}`} title={t} />)}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Marquee of network marks.
+ *
+ * Marks sit at natural colour on a light chip. The dark page cannot show them
+ * as supplied — 17 have no fill and paint black — and forcing them all white
+ * destroys any logo built as knockout type on a solid shape. A light chip
+ * keeps every mark legible and on-brand; only the three white-only marks are
+ * inverted.
+ */
+export function LogoMarquee({ logos, direction, duration }: {
+  logos: NetworkLogo[];
+  direction: 'left' | 'right';
+  duration: number;
+}) {
+  return (
+    <div className="mask-rail overflow-hidden">
+      <div
+        className="marquee-track flex w-max gap-3"
+        style={{
+          animationName: direction === 'left' ? 'marquee-l' : 'marquee-r',
+          animationDuration: `${duration}s`,
+          animationTimingFunction: 'linear',
+          animationIterationCount: 'infinite',
+        }}
+      >
+        {[0, 1].map((pass) => (
+          <div key={pass} className="flex gap-3" aria-hidden={pass === 1}>
+            {logos.map((logo) => (
+              <span
+                key={`${pass}-${logo.slug}`}
+                className="flex h-[64px] w-[136px] flex-none items-center justify-center rounded-xl
+                           bg-[#F2F4F8] px-5 opacity-90 transition-opacity duration-200 hover:opacity-100"
+              >
+                <img
+                  src={logo.src}
+                  alt={pass === 0 ? logo.name : ''}
+                  loading="lazy"
+                  className="max-h-[30px] max-w-full object-contain"
+                  style={logo.invert ? { filter: 'invert(1)' } : undefined}
+                />
+              </span>
+            ))}
           </div>
         ))}
       </div>

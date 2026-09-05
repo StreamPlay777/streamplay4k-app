@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { site } from '../data/site';
 import { countries, getChannels, categoryCounts, channelInitials, type Category } from '../data/channels';
+import { logoFor } from '../data/logos';
 
 /**
  * Channel guide.
@@ -186,19 +187,21 @@ export default function Channels() {
                                transition-colors hover:border-accent/40 hover:bg-accent/[.05]"
                   >
                     <div className="flex items-start gap-2.5">
-                      {/* Real logo when the feed supplies one, initials tile until then */}
-                      {ch.logo ? (
-                        <img
-                          src={ch.logo}
-                          alt=""
-                          loading="lazy"
-                          className="h-8 w-8 flex-none rounded-md object-contain"
-                        />
-                      ) : (
-                        <span className="grid h-8 w-8 flex-none place-items-center rounded-md border border-white/[.09] bg-white/[.04] font-display text-[10.5px] font-bold text-ink-3">
-                          {channelInitials(ch.name)}
-                        </span>
-                      )}
+                      {/* Feed logo first, then a bundled network mark, then
+                          initials. Marks sit on a light chip for the same
+                          reason as the wall — most are dark artwork. */}
+                      {(() => {
+                        const mark = ch.logo ?? logoFor(ch.name);
+                        return mark ? (
+                          <span className="grid h-8 w-8 flex-none place-items-center overflow-hidden rounded-md bg-[#F2F4F8] p-1">
+                            <img src={mark} alt="" loading="lazy" className="max-h-full max-w-full object-contain" />
+                          </span>
+                        ) : (
+                          <span className="grid h-8 w-8 flex-none place-items-center rounded-md border border-white/[.09] bg-white/[.04] text-[10.5px] font-bold text-ink-3">
+                            {channelInitials(ch.name)}
+                          </span>
+                        );
+                      })()}
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-display text-[14.5px] font-bold text-ink">{ch.name}</span>
                         <span className="mt-0.5 block text-[11.5px] uppercase tracking-[.08em] text-ink-4">

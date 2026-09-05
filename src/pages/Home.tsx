@@ -2,14 +2,12 @@ import { Link } from 'react-router-dom';
 import { site, heroStats, paymentMethods } from '../data/site';
 import { terms } from '../data/plans';
 import { usePlan } from '../hooks/usePlan';
-import {
-  networksRowA, networksRowB,
-  whySwitch, deviceTiles, coverageChecklist,
-} from '../data/marquees';
+import { whySwitch, deviceTiles, coverageChecklist } from '../data/marquees';
+import { logoRowA, logoRowB, networkLogos } from '../data/logos';
 import { railA, railB, featured } from '../data/vod';
 import { basketMonthly, basketYearly, paymentsPerYear, smallPrint } from '../data/receipt';
 import { reviews } from '../data/reviews';
-import { SectionHeading, Placeholder, Marquee, TitleMarquee, Tick, Stars } from '../components/ui';
+import { SectionHeading, Placeholder, LogoMarquee, TitleMarquee, Tick, Stars } from '../components/ui';
 import Poster from '../components/Poster';
 import DeviceCard from '../components/DeviceCard';
 import Receipt from '../components/Receipt';
@@ -125,27 +123,17 @@ function StatBar() {
 
 /* ── 1.3 Network wall ──────────────────────────────────────────────────────── */
 function NetworkWall() {
-  const chip = (name: string, key: string) => (
-    <span
-      key={key}
-      className="flex h-[54px] flex-none items-center whitespace-nowrap rounded-[9px] border border-white/[.09]
-                 bg-white/[.03] px-5 font-display text-[14px] font-bold uppercase tracking-[.04em] text-ink-3"
-    >
-      {name}
-    </span>
-  );
-
   return (
     <section className="overflow-hidden bg-bg pb-[42px] pt-[46px]">
-      <p className="mb-7 text-center font-display text-[12px] font-bold uppercase tracking-[.18em] text-ink-4">
+      <p className="mb-8 text-center text-[12px] font-bold uppercase tracking-[.18em] text-ink-4">
         Every network you are already paying for
       </p>
-      <div className="flex flex-col gap-2.5">
-        <Marquee items={networksRowA} direction="left" duration={42} renderItem={chip} />
-        <Marquee items={networksRowB} direction="right" duration={52} renderItem={chip} />
+      <div className="flex flex-col gap-3">
+        <LogoMarquee logos={logoRowA} direction="left" duration={60} />
+        <LogoMarquee logos={logoRowB} direction="right" duration={72} />
       </div>
-      <p className="mt-6 text-center nums text-[10.5px] text-ink-6">
-        edit this list to match your own line-up
+      <p className="mt-7 text-center text-[12px] text-ink-5">
+        {networkLogos.length}+ of the networks included, and thousands more besides.
       </p>
     </section>
   );
