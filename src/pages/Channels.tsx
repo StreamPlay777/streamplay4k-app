@@ -101,7 +101,7 @@ export default function Channels() {
                       <span className={`flex-1 text-[14.5px] font-semibold ${on ? 'text-white' : 'text-ink-2'}`}>
                         {c.name}
                       </span>
-                      <span className={`font-mono text-[11.5px] ${on ? 'text-white/80' : 'text-ink-4'}`}>
+                      <span className={`nums text-[11.5px] ${on ? 'text-white/80' : 'text-ink-4'}`}>
                         {c.count.toLocaleString('en-US')}
                       </span>
                     </button>
@@ -145,7 +145,7 @@ export default function Channels() {
                   }`}
                 >
                   All categories
-                  <span className={`font-mono text-[11px] ${category === null ? 'text-white/75' : 'text-ink-4'}`}>
+                  <span className={`nums text-[11px] ${category === null ? 'text-white/75' : 'text-ink-4'}`}>
                     {country.count.toLocaleString('en-US')}
                   </span>
                 </button>
@@ -158,7 +158,7 @@ export default function Channels() {
                     }`}
                   >
                     {cat}
-                    <span className={`font-mono text-[11px] ${category === cat ? 'text-white/75' : 'text-ink-4'}`}>
+                    <span className={`nums text-[11px] ${category === cat ? 'text-white/75' : 'text-ink-4'}`}>
                       {count.toLocaleString('en-US')}
                     </span>
                   </button>
@@ -206,7 +206,7 @@ export default function Channels() {
                         </span>
                       </span>
                       {ch.uhd && (
-                        <span className="flex-none rounded border border-accent/30 bg-accent/10 px-1.5 py-0.5 font-mono text-[9px] text-accent-bright">
+                        <span className="flex-none rounded border border-accent/30 bg-accent/10 px-1.5 py-0.5 nums text-[9px] text-accent-bright">
                           4K
                         </span>
                       )}
@@ -232,7 +232,7 @@ export default function Channels() {
           </div>
         </div>
 
-        <p className="mx-auto mt-5 max-w-shell font-mono text-[10.5px] text-ink-6">
+        <p className="mx-auto mt-5 max-w-shell nums text-[10.5px] text-ink-6">
           Showing a browsable sample of the {site.channels} line-up across {site.countries} countries and regions.
         </p>
       </section>

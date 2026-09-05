@@ -44,7 +44,7 @@ export default function Poster({ title, width = 160, height = 240 }: {
         style={{ background: 'linear-gradient(180deg, transparent, rgba(4,6,11,.92))' }}
       >
         <div className="truncate font-display text-[12px] font-bold leading-tight text-ink">{title.name}</div>
-        <div className="mt-0.5 font-mono text-[9.5px] text-ink-5">
+        <div className="mt-0.5 nums text-[9.5px] text-ink-5">
           {title.year} · {title.genre}
         </div>
       </div>

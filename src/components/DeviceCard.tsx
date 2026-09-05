@@ -44,7 +44,7 @@ export default function DeviceCard({ tile }: { tile: DeviceTile }) {
           />
         ) : (
           <div className="placeholder-stripes relative grid h-full w-full place-items-center rounded-xl">
-            <span className="font-mono text-[11px] text-ink-5">[ {tile.name.toLowerCase()} photo ]</span>
+            <span className="nums text-[11px] text-ink-5">[ {tile.name.toLowerCase()} photo ]</span>
           </div>
         )}
       </div>

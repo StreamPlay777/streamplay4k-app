@@ -21,33 +21,29 @@ const tearStyle = (img: string) => ({
 
 export default function Receipt() {
   return (
-    <div className="relative pt-[68px] sm:pt-[52px]">
-      {/* Two absolutely positioned labels the column padding clears.
-          On narrow screens the handwritten note drops onto its own line so it
-          cannot collide with the label or push the page sideways. */}
-      <div className="absolute left-0 top-0 font-display text-[12.5px] font-extrabold uppercase tracking-[.2em] text-accent">
-        Without Streamplay4k
-      </div>
-      <div
-        className="absolute right-0 top-[22px] whitespace-nowrap font-hand text-[22px] font-bold
-                   text-accent sm:top-[-22px] sm:text-[25px] lg:right-[-30px]"
-        style={{ transform: 'rotate(-6deg)' }}
-      >
-        Every. Single. Month.
-      </div>
-      <div
-        className="absolute right-[86px] top-[52px] text-[26px] text-accent sm:top-3 lg:right-24"
-        style={{ transform: 'rotate(22deg)' }}
-      >
-        ↙
+    <div className="relative">
+      {/* Label and annotation share a flow row rather than being absolutely
+          positioned. Single-typeface text is wider than the handwriting face
+          this originally used, and overlapped it; a flex row cannot collide
+          at any width. */}
+      <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+        <span className="text-[12.5px] font-extrabold uppercase tracking-[.2em] text-accent">
+          Without Streamplay4k
+        </span>
+        <span className="flex items-center gap-1.5 whitespace-nowrap text-accent">
+          <span className="text-[19px] font-bold italic sm:text-[21px]">Every. Single. Month.</span>
+          <span className="text-[18px]" style={{ transform: 'rotate(28deg)' }} aria-hidden="true">
+            ↙
+          </span>
+        </span>
       </div>
 
       <div style={{ filter: 'drop-shadow(0 26px 60px rgba(0,0,0,.55))' }}>
         <div style={tearStyle(tearUp)} />
 
-        <div className="bg-paper px-[22px] pb-5 pt-[18px] font-mono text-paper-ink">
+        <div className="bg-paper px-[22px] pb-5 pt-[18px] nums text-paper-ink">
           {/* Meta */}
-          <div className="flex justify-between text-[11px] text-paper-meta">
+          <div className="nums flex justify-between text-[11px] text-paper-meta">
             <span>{receiptMeta.customer}</span>
             <span>{receiptMeta.date}</span>
           </div>
@@ -58,13 +54,13 @@ export default function Receipt() {
             {basket.map((line) => (
               <div key={line.code} className="flex items-center gap-2.5">
                 <span
-                  className="grid h-[22px] w-[22px] flex-none place-items-center rounded font-mono text-[9px] font-bold text-white"
+                  className="grid h-[22px] w-[22px] flex-none place-items-center rounded nums text-[9px] font-bold text-white"
                   style={{ background: line.chip }}
                 >
                   {line.code}
                 </span>
                 <span className="flex-1 text-[12.5px]">{line.name}</span>
-                <span className="text-[12.5px]">{line.price.toFixed(2)}</span>
+                <span className="nums text-[12.5px]">{line.price.toFixed(2)}</span>
               </div>
             ))}
           </div>
@@ -88,18 +84,18 @@ export default function Receipt() {
               </div>
             </div>
             <div className="mt-2 text-[9.5px] tracking-[.22em] text-paper-meta">PER MONTH</div>
-            <div className="mt-1 text-[11px] text-accent-print">
+            <div className="nums mt-1 text-[11px] text-accent-print">
               ${(basketMonthly * 12).toLocaleString('en-US', { minimumFractionDigits: 2 })} a year
             </div>
           </div>
 
           <div className="my-3 border-t border-dashed border-paper-rule" />
 
-          <div className="flex justify-between text-[11px] text-accent-print">
+          <div className="nums flex justify-between text-[11px] text-accent-print">
             <span>Separate payments a year</span>
             <span>{basket.length * 12}×</span>
           </div>
-          <div className="mt-1.5 flex justify-between text-[11px]" style={{ color: '#2F6B4F' }}>
+          <div className="nums mt-1.5 flex justify-between text-[11px]" style={{ color: '#2F6B4F' }}>
             <span>Card {receiptMeta.card}</span>
             <span>APPROVED</span>
           </div>
@@ -114,7 +110,7 @@ export default function Receipt() {
                 'repeating-linear-gradient(90deg, #14161C 0 2px, transparent 2px 5px, #14161C 5px 8px, transparent 8px 10px)',
             }}
           />
-          <div className="mt-1.5 text-center text-[10px] tracking-[.14em] text-paper-meta">
+          <div className="nums mt-1.5 text-center text-[10px] tracking-[.14em] text-paper-meta">
             {receiptMeta.barcodeRef}
           </div>
         </div>
@@ -122,12 +118,12 @@ export default function Receipt() {
         <div style={tearStyle(tearDown)} />
       </div>
 
-      {/* Handwritten notes under the paper */}
-      <div className="mt-5 flex justify-between px-2">
-        <div className="font-hand text-[22px] font-bold leading-tight text-accent" style={{ transform: 'rotate(-3deg)' }}>
+      {/* Notes under the paper */}
+      <div className="mt-6 flex justify-between gap-4 px-2">
+        <div className="text-[19px] font-bold italic leading-tight text-accent">
           6 apps.<br />6 logins.
         </div>
-        <div className="font-hand text-[22px] font-bold leading-tight text-ink" style={{ transform: 'rotate(3deg)' }}>
+        <div className="text-right text-[19px] font-bold italic leading-tight text-ink">
           More content.<br />More fun.
         </div>
       </div>

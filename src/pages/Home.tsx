@@ -144,7 +144,7 @@ function NetworkWall() {
         <Marquee items={networksRowA} direction="left" duration={42} renderItem={chip} />
         <Marquee items={networksRowB} direction="right" duration={52} renderItem={chip} />
       </div>
-      <p className="mt-6 text-center font-mono text-[10.5px] text-ink-6">
+      <p className="mt-6 text-center nums text-[10.5px] text-ink-6">
         edit this list to match your own line-up
       </p>
     </section>
@@ -334,7 +334,7 @@ function WhySwitch() {
         <div className="mt-14 grid gap-[18px] md:grid-cols-2 lg:grid-cols-3">
           {whySwitch.map((card, i) => (
             <div key={card.title} className="card-hover px-[26px] pb-[30px] pt-7">
-              <div className="font-mono text-[13px] font-bold text-accent">
+              <div className="nums text-[13px] font-bold text-accent">
                 {String(i + 1).padStart(2, '0')}
               </div>
               <h3 className="mt-4 font-display text-[21px] font-bold text-ink">{card.title}</h3>
@@ -401,7 +401,7 @@ function ThreeSteps() {
           <button className="btn-accent mt-5 w-full !py-3 !text-[14px]">Checkout</button>
           <div className="mt-4 flex flex-wrap gap-1.5">
             {paymentMethods.map((p) => (
-              <span key={p} className="rounded-[5px] border border-white/10 px-2 py-1 font-mono text-[9.5px] text-ink-4">
+              <span key={p} className="rounded-[5px] border border-white/10 px-2 py-1 nums text-[9.5px] text-ink-4">
                 {p}
               </span>
             ))}

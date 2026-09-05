@@ -43,11 +43,11 @@ export default {
         },
         success: '#35C86A',
       },
+      // Outfit is the only typeface on the site. `display` is kept as an
+      // alias so heading markup still reads as intentional.
       fontFamily: {
-        display: ['Outfit', 'system-ui', 'sans-serif'],
-        sans: ['"Public Sans"', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
-        hand: ['Caveat', 'cursive'],
+        sans: ['"Outfit Variable"', 'Outfit', 'system-ui', 'sans-serif'],
+        display: ['"Outfit Variable"', 'Outfit', 'system-ui', 'sans-serif'],
       },
       maxWidth: {
         shell: '1180px',

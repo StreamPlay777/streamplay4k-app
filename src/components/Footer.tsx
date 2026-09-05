@@ -18,7 +18,7 @@ export default function Footer() {
               {footerPayments.map((p) => (
                 <span
                   key={p}
-                  className="rounded-[7px] border border-white/10 px-3 py-[7px] font-mono text-[12px] text-ink-4"
+                  className="rounded-[7px] border border-white/10 px-3 py-[7px] nums text-[12px] text-ink-4"
                 >
                   {p}
                 </span>

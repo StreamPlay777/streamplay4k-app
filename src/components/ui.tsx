@@ -42,8 +42,8 @@ export function Placeholder({ label, note, height }: { label: string; note?: str
       style={{ height }}
     >
       <div>
-        <div className="font-mono text-[11px] text-ink-5">{label}</div>
-        {note && <div className="mt-1.5 font-mono text-[10px] text-ink-6">{note}</div>}
+        <div className="nums text-[11px] text-ink-5">{label}</div>
+        {note && <div className="mt-1.5 nums text-[10px] text-ink-6">{note}</div>}
       </div>
     </div>
   );

@@ -86,7 +86,7 @@ export default function Navbar() {
                         >
                           <span
                             className="grid h-[30px] w-[30px] flex-none place-items-center rounded-lg border
-                                       border-accent/30 bg-accent/[.14] font-mono text-[10px] text-accent-bright"
+                                       border-accent/30 bg-accent/[.14] nums text-[10px] text-accent-bright"
                           >
                             {row.code}
                           </span>

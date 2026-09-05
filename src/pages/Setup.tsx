@@ -43,7 +43,7 @@ export default function Setup() {
           <div className="card px-6 py-6">
             <div className="label">Downloader code</div>
             <div className="mt-3 flex flex-wrap items-center gap-3">
-              <span className="font-mono text-[26px] font-bold tracking-[.12em] text-ink">{site.downloaderCode}</span>
+              <span className="nums text-[26px] font-bold tracking-[.12em] text-ink">{site.downloaderCode}</span>
               <button onClick={copyCode} className="btn-sm border border-white/[.16] text-ink hover:border-accent">
                 {copied ? 'Copied' : 'Copy'}
               </button>

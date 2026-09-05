@@ -41,7 +41,7 @@ export default function Reviews() {
                   <div className="h-[9px] flex-1 overflow-hidden rounded-[5px] bg-white/[.07]">
                     <div className="h-full rounded-[5px] bg-accent" style={{ width: `${row.percent}%` }} />
                   </div>
-                  <span className="w-11 flex-none text-right font-mono text-[12px] text-ink-3">{row.percent}%</span>
+                  <span className="nums w-11 flex-none text-right text-[12px] text-ink-3">{row.percent}%</span>
                 </div>
               ))}
             </div>

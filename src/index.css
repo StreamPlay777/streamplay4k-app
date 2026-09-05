@@ -1,4 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Caveat:wght@600;700&display=swap');
+/* Outfit is the single typeface for the site.
+   Self-hosted as a variable font rather than pulled from Google: it removes a
+   render-blocking third-party request, guarantees the face is there rather
+   than silently falling back to a system sans, and keeps EU visitors' IPs off
+   a US font endpoint. One file covers the whole 300-900 weight range. */
+@import '@fontsource-variable/outfit';
 
 @tailwind base;
 @tailwind components;
@@ -11,14 +16,14 @@
     margin: 0;
     background: #06080F;
     color: #E8ECF5;
-    font-family: 'Public Sans', system-ui, sans-serif;
+    font-family: 'Outfit Variable', 'Outfit', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
   a { color: #FF2B2A; text-decoration: none; }
   a:hover { color: #FF8A72; }
   ::selection { background: #FF2B2A; color: #fff; }
 
-  h1, h2, h3, h4 { font-family: 'Outfit', system-ui, sans-serif; margin: 0; }
+  h1, h2, h3, h4 { margin: 0; }
   h1 { letter-spacing: -.035em; }
   h2 { letter-spacing: -.035em; }
   h3 { letter-spacing: -.02em; }
@@ -83,6 +88,10 @@
       rgba(255,255,255,.045) 0 12px, transparent 12px 24px);
   }
   .text-balance { text-wrap: balance; }
+  /* Outfit's default figures are proportional. Number columns — receipt
+     prices, channel counts, rating percentages — need tabular figures to
+     stay aligned now that the monospace face is gone. */
+  .nums { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
 }
 
 /* Marquees pause on hover, and stop entirely for reduced-motion users */
