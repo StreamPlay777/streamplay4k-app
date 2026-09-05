@@ -25,7 +25,38 @@ const files = import.meta.glob('../assets/logos/*.svg', {
 
 /** Names that title-casing gets wrong. */
 const OVERRIDES: Record<string, string> = {
+  'acc-network': 'ACC Network',
   aande: 'A&E',
+  'apple-tvplus': 'Apple TV+',
+  'axs-tv': 'AXS TV',
+  'c-span': 'C-SPAN',
+  cmt: 'CMT',
+  'cozi-tv': 'COZI TV',
+  dazn: 'DAZN',
+  'espn-deportes': 'ESPN Deportes',
+  'fanduel-tv': 'FanDuel TV',
+  'fox-sports': 'FOX Sports',
+  'france-24': 'France 24',
+  fs1: 'FS1',
+  fs2: 'FS2',
+  hbo: 'HBO',
+  id: 'ID',
+  'ion-television': 'ION Television',
+  metv: 'MeTV',
+  mlb: 'MLB',
+  mls: 'MLS',
+  msnbc: 'MSNBC',
+  mynetworktv: 'MyNetworkTV',
+  'nat-geo-wild': 'Nat Geo WILD',
+  'nhk-world': 'NHK World',
+  'prime-video': 'Prime Video',
+  'roku-channel': 'The Roku Channel',
+  tbn: 'TBN',
+  'the-cw': 'The CW',
+  tlc: 'TLC',
+  'tv-land': 'TV Land',
+  tv5monde: 'TV5MONDE',
+  wwe: 'WWE',
   abc: 'ABC',
   amc: 'AMC',
   bbc: 'BBC',
@@ -103,7 +134,7 @@ function displayName(slug: string): string {
  * Marks drawn in white only. Everything else sits on the light chip as-is;
  * these need inverting to black or they vanish into it.
  */
-const INVERT_ON_LIGHT = new Set(['cartoon-network', 'nhl-network', 'syfy']);
+const INVERT_ON_LIGHT = new Set(['cartoon-network', 'nhl-network', 'syfy', 'tbn']);
 
 export interface NetworkLogo {
   slug: string;
@@ -120,9 +151,15 @@ export const networkLogos: NetworkLogo[] = Object.entries(files)
   })
   .sort((a, b) => a.slug.localeCompare(b.slug));
 
-/** Two rails of roughly equal length, dealt alternately so each row mixes. */
-export const logoRowA = networkLogos.filter((_, i) => i % 2 === 0);
-export const logoRowB = networkLogos.filter((_, i) => i % 2 === 1);
+/**
+ * Three rails of roughly equal length, dealt round-robin so each row carries a
+ * mix of well-known and long-tail marks rather than one row of A-names.
+ */
+export const logoRows: NetworkLogo[][] = [
+  networkLogos.filter((_, i) => i % 3 === 0),
+  networkLogos.filter((_, i) => i % 3 === 1),
+  networkLogos.filter((_, i) => i % 3 === 2),
+];
 
 /** Look a mark up by channel name, for the channel guide cards. */
 const bySlug = new Map(networkLogos.map((l) => [l.slug, l]));

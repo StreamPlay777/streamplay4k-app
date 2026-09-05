@@ -3,7 +3,7 @@ import { site, heroStats, paymentMethods } from '../data/site';
 import { terms } from '../data/plans';
 import { usePlan } from '../hooks/usePlan';
 import { whySwitch, deviceTiles, coverageChecklist } from '../data/marquees';
-import { logoRowA, logoRowB, networkLogos } from '../data/logos';
+import { logoRows, networkLogos } from '../data/logos';
 import { railA, railB, featured } from '../data/vod';
 import { basketMonthly, basketYearly, paymentsPerYear, smallPrint } from '../data/receipt';
 import { reviews } from '../data/reviews';
@@ -123,18 +123,39 @@ function StatBar() {
 
 /* ── 1.3 Network wall ──────────────────────────────────────────────────────── */
 function NetworkWall() {
+  // Alternating directions, and each row a different speed so the rows never
+  // fall into step with one another.
+  const rows = [
+    { direction: 'left' as const, duration: 64 },
+    { direction: 'right' as const, duration: 78 },
+    { direction: 'left' as const, duration: 88 },
+  ];
+
   return (
-    <section className="overflow-hidden bg-bg pb-[42px] pt-[46px]">
-      <p className="mb-8 text-center text-[12px] font-bold uppercase tracking-[.18em] text-ink-4">
-        Every network you are already paying for
-      </p>
-      <div className="flex flex-col gap-3">
-        <LogoMarquee logos={logoRowA} direction="left" duration={60} />
-        <LogoMarquee logos={logoRowB} direction="right" duration={72} />
+    <section className="relative overflow-hidden bg-bg py-12 sm:py-14">
+      {/* Red wash behind the rails, echoing the band on the brand sites */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 90% 70% at 50% 50%, rgba(255,43,42,.16), transparent 72%)',
+        }}
+      />
+      <div className="relative">
+        <p className="mb-7 px-6 text-center text-[11px] font-bold uppercase tracking-[.18em] text-ink-4 sm:mb-8 sm:text-[12px]">
+          Every network you are already paying for
+        </p>
+
+        <div className="flex flex-col gap-2 sm:gap-2.5">
+          {rows.map((row, i) => (
+            <LogoMarquee key={i} logos={logoRows[i]} direction={row.direction} duration={row.duration} />
+          ))}
+        </div>
+
+        <p className="mt-7 px-6 text-center text-[12px] text-ink-5 sm:mt-8">
+          {networkLogos.length} of the networks included — and thousands more besides.
+        </p>
       </div>
-      <p className="mt-7 text-center text-[12px] text-ink-5">
-        {networkLogos.length}+ of the networks included, and thousands more besides.
-      </p>
     </section>
   );
 }

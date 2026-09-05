@@ -127,13 +127,16 @@ export function TitleMarquee({ titles, direction, duration }: {
 }
 
 /**
- * Marquee of network marks.
+ * Marquee of network marks — the logo wall.
  *
- * Marks sit at natural colour on a light chip. The dark page cannot show them
- * as supplied — 17 have no fill and paint black — and forcing them all white
- * destroys any logo built as knockout type on a solid shape. A light chip
- * keeps every mark legible and on-brand; only the three white-only marks are
- * inverted.
+ * Chips are frosted white glass: the marks arrive as dark and brand-colour
+ * artwork, so a light chip is what makes them legible on the dark page (and
+ * forcing them all white destroys any mark built as knockout type on a solid
+ * shape). Chip width hugs the logo rather than being fixed, so a wide wordmark
+ * and a square badge both sit correctly.
+ *
+ * Sizing steps down for phone and tablet so marks stay readable rather than
+ * shrinking to illegible slivers.
  */
 export function LogoMarquee({ logos, direction, duration }: {
   logos: NetworkLogo[];
@@ -143,7 +146,7 @@ export function LogoMarquee({ logos, direction, duration }: {
   return (
     <div className="mask-rail overflow-hidden">
       <div
-        className="marquee-track flex w-max gap-3"
+        className="marquee-track flex w-max gap-2 sm:gap-2.5"
         style={{
           animationName: direction === 'left' ? 'marquee-l' : 'marquee-r',
           animationDuration: `${duration}s`,
@@ -152,18 +155,24 @@ export function LogoMarquee({ logos, direction, duration }: {
         }}
       >
         {[0, 1].map((pass) => (
-          <div key={pass} className="flex gap-3" aria-hidden={pass === 1}>
+          <div key={pass} className="flex gap-2 sm:gap-2.5" aria-hidden={pass === 1}>
             {logos.map((logo) => (
               <span
                 key={`${pass}-${logo.slug}`}
-                className="flex h-[64px] w-[136px] flex-none items-center justify-center rounded-xl
-                           bg-[#F2F4F8] px-5 opacity-90 transition-opacity duration-200 hover:opacity-100"
+                className="flex h-11 min-w-[84px] flex-none items-center justify-center rounded-xl
+                           border border-white/40 px-4 shadow-[0_4px_16px_rgba(0,0,0,.28)]
+                           sm:h-[52px] sm:min-w-[104px] sm:px-5 lg:h-[58px] lg:min-w-[116px]"
+                style={{
+                  background: 'rgba(255,255,255,.93)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                }}
               >
                 <img
                   src={logo.src}
                   alt={pass === 0 ? logo.name : ''}
                   loading="lazy"
-                  className="max-h-[30px] max-w-full object-contain"
+                  className="max-h-[20px] max-w-[104px] object-contain sm:max-h-[24px] sm:max-w-[124px] lg:max-h-[28px] lg:max-w-[140px]"
                   style={logo.invert ? { filter: 'invert(1)' } : undefined}
                 />
               </span>
