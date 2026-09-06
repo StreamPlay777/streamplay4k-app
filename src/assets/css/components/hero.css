@@ -106,10 +106,14 @@
 
 .sp-hero__eyebrow {
   display: flex;
-  flex-wrap: wrap;
+  /* Mobile and small tablet: the accent sits as a short centred rule
+     directly above the text. Inline, it fills the line to the left edge
+     and stops reading as part of the centred eyebrow. */
+  flex-direction: column;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
-  gap: var(--sp-space-3);
+  gap: var(--sp-space-2);
   font-size: var(--sp-text-xs);
   font-weight: var(--sp-weight-semibold);
   /* Narrow tracking below 30em so the line survives 320px without the
@@ -117,6 +121,16 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--sp-text-muted);
+}
+
+/* From 768px the eyebrow has enough slack either side to read as a centred
+   group, so the accent returns inline — the desktop treatment, unchanged. */
+@media (min-width: 48em) {
+  .sp-hero__eyebrow {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--sp-space-3);
+  }
 }
 
 /* Keeps a wrapped eyebrow centred as a block rather than ragged beside
