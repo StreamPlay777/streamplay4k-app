@@ -5,6 +5,7 @@ import { TERMS, quote, money, DEFAULT_TERM_ID } from '../data/pricing';
 import { whySwitch, deviceTiles, coverageChecklist } from '../data/marquees';
 import { logoRows, networkLogos } from '../data/logos';
 import PosterWall from '../components/PosterWall';
+import ShowcaseRow from '../components/ShowcaseRow';
 import Check from '../components/pricing/Check';
 import { basketMonthly, basketYearly, paymentsPerYear, smallPrint } from '../data/receipt';
 import { reviews } from '../data/reviews';
@@ -37,8 +38,20 @@ export default function Home() {
 /* ── 1.1 Hero ──────────────────────────────────────────────────────────────── */
 function Hero() {
   return (
-    <section className="relative overflow-hidden px-7 pt-[92px]">
-      {/* Decorative layers, both non-interactive */}
+    <section className="relative isolate overflow-hidden px-7 pt-[92px]">
+      {/* Drifting wall of artwork, blurred well back. Layer order matters:
+          artwork, then a scrim heavy enough to hold the headline's contrast,
+          then the brand glow, then the grid. */}
+      <PosterWall variant="backdrop" />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(6,8,15,.70) 0%, rgba(6,8,15,.80) 45%, rgba(6,8,15,.95) 84%, #06080F 100%)',
+        }}
+      />
+
+      {/* Decorative layers, all non-interactive */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -75,7 +88,7 @@ function Hero() {
           <span className="text-accent">One Powerful Platform.</span>
         </h1>
 
-        <p className="mx-auto mt-6 max-w-[620px] text-[18.5px] leading-relaxed text-ink-3">
+        <p className="mx-auto mt-6 max-w-[620px] text-[18.5px] leading-relaxed text-ink-2">
           {site.channels} live channels and {site.vod} films and series across every screen in the house.
           Live sports, news, kids and international TV in HD and 4K — activated the minute you pay.
         </p>
@@ -85,7 +98,7 @@ function Hero() {
           <Link to="/contact" className="btn-outline">Start 24h free trial</Link>
         </div>
 
-        <p className="mt-5 text-[13px] text-ink-4">
+        <p className="mt-5 text-[13px] text-ink-3">
           No hidden fees · Money-back guarantee · 24/7 live chat
         </p>
 
@@ -256,44 +269,64 @@ function OnDemand() {
   const points = [
     `${site.vod} films and series on demand`,
     'New releases added every week',
-    'Watch in HD and 4K where the studio provides it',
+    '4K and HD where the studio provides it',
     'Box sets, kids, documentaries and world cinema',
   ];
 
   return (
-    <section className="overflow-hidden bg-bg py-[86px]">
-      <div className="mx-auto grid max-w-shell items-center gap-10 px-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-14">
-        {/* Copy */}
-        <div>
-          <p className="text-[12px] font-bold uppercase tracking-[.18em] text-ink-4">On demand</p>
+    <section className="relative isolate overflow-hidden bg-bg py-[86px]">
+      {/* Blurred wall of artwork behind everything — the library, felt rather
+          than listed. Scrimmed heavily so the copy in front stays readable. */}
+      <PosterWall variant="backdrop" />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, #06080F 0%, rgba(6,8,15,.58) 26%, rgba(6,8,15,.58) 74%, #06080F 100%)',
+        }}
+      />
+
+      <div className="relative mx-auto max-w-shell px-5 sm:px-7">
+        {/* Header */}
+        <div className="mx-auto max-w-[760px] text-center">
+          <p className="flex items-center justify-center gap-3 text-[12px] font-bold uppercase tracking-[.18em] text-accent">
+            <span className="h-px w-8 bg-accent/50" aria-hidden="true" />
+            And there's more
+            <span className="h-px w-8 bg-accent/50" aria-hidden="true" />
+          </p>
           <h2
-            className="mt-4 font-display font-extrabold leading-[1.04] text-ink"
-            style={{ fontSize: 'clamp(32px, 4.6vw, 50px)' }}
+            className="mt-5 font-display font-extrabold leading-[1.04] text-ink"
+            style={{ fontSize: 'clamp(30px, 4.6vw, 50px)' }}
           >
-            Thousands of hours of{' '}
+            Enjoy thousands of hours of{' '}
             <span className="text-accent">premium content</span>
           </h2>
-          <p className="mt-5 max-w-[520px] text-[16.5px] leading-relaxed text-ink-3">
-            Every film and series sits alongside the live line-up, on the same subscription —
-            nothing extra to buy, nothing extra to install.
+          <p className="mx-auto mt-5 max-w-[560px] text-[16.5px] leading-relaxed text-ink-3">
+            The channels are up top. This is everything else — films, series and box sets
+            on demand, in 4K where it exists.
           </p>
-
-          <ul className="mt-7 space-y-3">
-            {points.map((t) => (
-              <li key={t} className="flex items-start gap-3">
-                <span className="mt-[3px] grid h-[18px] w-[18px] flex-none place-items-center rounded-full bg-accent text-white">
-                  <Check />
-                </span>
-                <span className="text-[15px] leading-snug text-ink-2">{t}</span>
-              </li>
-            ))}
-          </ul>
-
-          <Link to="/pricing" className="btn-accent mt-8">See what's included</Link>
         </div>
 
-        {/* Poster collage */}
-        <PosterWall />
+        {/* Labelled cards */}
+        <div className="mt-12 -mx-5 sm:mx-0">
+          <ShowcaseRow />
+        </div>
+
+        {/* The copy that actually sells, kept from the previous version */}
+        <ul className="mx-auto mt-14 grid max-w-[840px] gap-3 sm:grid-cols-2 sm:gap-x-10">
+          {points.map((t) => (
+            <li key={t} className="flex items-start gap-3">
+              <span className="mt-[3px] grid h-[18px] w-[18px] flex-none place-items-center rounded-full bg-accent text-white">
+                <Check />
+              </span>
+              <span className="text-[15px] leading-snug text-ink-2">{t}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-10 text-center">
+          <Link to="/pricing" className="btn-accent">See what's included</Link>
+        </div>
       </div>
     </section>
   );
