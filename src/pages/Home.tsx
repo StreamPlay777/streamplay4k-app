@@ -4,12 +4,11 @@ import { site, heroStats, paymentMethods } from '../data/site';
 import { TERMS, quote, money, DEFAULT_TERM_ID } from '../data/pricing';
 import { whySwitch, deviceTiles, coverageChecklist } from '../data/marquees';
 import { logoRows, networkLogos } from '../data/logos';
-import { useBestTitles } from '../hooks/useBestTitles';
-import { TMDB_ATTRIBUTION } from '../lib/tmdb';
+import PosterWall from '../components/PosterWall';
+import Check from '../components/pricing/Check';
 import { basketMonthly, basketYearly, paymentsPerYear, smallPrint } from '../data/receipt';
 import { reviews } from '../data/reviews';
-import { SectionHeading, Placeholder, LogoMarquee, TitleMarquee, Tick, Stars } from '../components/ui';
-import Poster from '../components/Poster';
+import { SectionHeading, Placeholder, LogoMarquee, Tick, Stars } from '../components/ui';
 import DeviceCard from '../components/DeviceCard';
 import Receipt from '../components/Receipt';
 import PricingOrder from '../components/pricing/PricingOrder';
@@ -254,37 +253,48 @@ function CostComparison() {
 
 /* ── 1.5 On-demand library ─────────────────────────────────────────────────── */
 function OnDemand() {
-  // 20 titles in total — 10 films, 10 series. Capped deliberately: every poster
-  // is an image request, and this section sits mid-page where weight is felt.
-  const { films, series, live } = useBestTitles();
-  const featured = [...films.slice(0, 3), ...series.slice(0, 3)];
+  const points = [
+    `${site.vod} films and series on demand`,
+    'New releases added every week',
+    'Watch in HD and 4K where the studio provides it',
+    'Box sets, kids, documentaries and world cinema',
+  ];
 
   return (
-    <section className="bg-bg pb-[90px] pt-[86px]">
-      <div className="px-7">
-        <SectionHeading
-          label="On demand"
-          title={<>Thousands of hours of <span className="text-accent">premium content</span></>}
-          sub={`${site.vod} films and series sitting alongside the live line-up, on the same subscription.`}
-        />
+    <section className="overflow-hidden bg-bg py-[86px]">
+      <div className="mx-auto grid max-w-shell items-center gap-10 px-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-14">
+        {/* Copy */}
+        <div>
+          <p className="text-[12px] font-bold uppercase tracking-[.18em] text-ink-4">On demand</p>
+          <h2
+            className="mt-4 font-display font-extrabold leading-[1.04] text-ink"
+            style={{ fontSize: 'clamp(32px, 4.6vw, 50px)' }}
+          >
+            Thousands of hours of{' '}
+            <span className="text-accent">premium content</span>
+          </h2>
+          <p className="mt-5 max-w-[520px] text-[16.5px] leading-relaxed text-ink-3">
+            Every film and series sits alongside the live line-up, on the same subscription —
+            nothing extra to buy, nothing extra to install.
+          </p>
 
-        {/* Featured strip */}
-        <div className="mx-auto mt-12 grid max-w-shell grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {featured.map((t) => (
-            <Poster key={`f-${t.name}`} title={t} width={undefined} height={260} />
-          ))}
+          <ul className="mt-7 space-y-3">
+            {points.map((t) => (
+              <li key={t} className="flex items-start gap-3">
+                <span className="mt-[3px] grid h-[18px] w-[18px] flex-none place-items-center rounded-full bg-accent text-white">
+                  <Check />
+                </span>
+                <span className="text-[15px] leading-snug text-ink-2">{t}</span>
+              </li>
+            ))}
+          </ul>
+
+          <Link to="/pricing" className="btn-accent mt-8">See what's included</Link>
         </div>
-      </div>
 
-      {/* Two rails: films one way, series the other */}
-      <div className="mt-10 flex flex-col gap-2.5">
-        <TitleMarquee titles={films} direction="left" duration={60} />
-        <TitleMarquee titles={series} direction="right" duration={72} />
+        {/* Poster collage */}
+        <PosterWall count={15} />
       </div>
-
-      {live && (
-        <p className="mt-8 px-7 text-center text-[11px] text-ink-6">{TMDB_ATTRIBUTION}</p>
-      )}
     </section>
   );
 }
