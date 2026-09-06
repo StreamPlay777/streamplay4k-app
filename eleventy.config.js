@@ -21,9 +21,13 @@ export default function (eleventyConfig) {
   /* ---------------------------------------------------------------------
    * Passthrough assets
    * ------------------------------------------------------------------ */
+  /* Developer notes sit next to the assets they describe; they are not
+     part of the site. */
+  const ASSETS_ONLY = { filter: ["**/*", "!**/*.md"] };
+
   eleventyConfig.addPassthroughCopy({ "src/assets/js": "assets/js" });
-  eleventyConfig.addPassthroughCopy({ "src/assets/img": "assets/img" });
-  eleventyConfig.addPassthroughCopy({ "src/assets/fonts": "assets/fonts" });
+  eleventyConfig.addPassthroughCopy({ "src/assets/img": "assets/img" }, ASSETS_ONLY);
+  eleventyConfig.addPassthroughCopy({ "src/assets/fonts": "assets/fonts" }, ASSETS_ONLY);
   eleventyConfig.addPassthroughCopy({ "src/assets/root": "/" });
 
   /* Asset folder docs are notes for developers, not pages. */

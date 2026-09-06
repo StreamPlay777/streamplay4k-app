@@ -1,20 +1,28 @@
 /* =====================================================================
-   Font loading
-   ---------------------------------------------------------------------
-   No web font is requested yet — the stack in tokens.css falls back to
-   system UI so the foundation ships with zero blocking font requests.
+   Font loading — Manrope Variable, self-hosted
 
-   To activate the brand face: drop the woff2 files into
-   src/assets/fonts/ and uncomment the declarations below. Keep
-   `font-display: swap` and self-host (no third-party font CDN).
+   One variable file covers every weight the design system uses (400–800),
+   so there are no per-weight requests. Served from our own origin: no
+   Google Fonts, no third-party font CDN.
+
+   STATUS: the font file has not been supplied yet. The declaration below
+   is live and points at the final path, so dropping the file in activates
+   the brand face with no code change. Until then the request 404s and the
+   system stack in tokens.css renders instead — `font-display: swap` means
+   nothing is ever invisible or shifted by the failure.
+
+   To add it: place `manrope-variable.woff2` in src/assets/fonts/.
+   Once present, consider preloading it from partials/head.njk:
+     <link rel="preload" href="/assets/fonts/manrope-variable.woff2"
+           as="font" type="font/woff2" crossorigin>
    ================================================================== */
 
-/*
 @font-face {
-  font-family: "StreamPlaySans";
-  src: url("/assets/fonts/streamplay-sans-variable.woff2") format("woff2-variations");
-  font-weight: 400 800;
+  font-family: "Manrope";
+  src: url("/assets/fonts/manrope-variable.woff2") format("woff2-variations"),
+       url("/assets/fonts/manrope-variable.woff2") format("woff2");
+  /* Manrope's variable weight axis. */
+  font-weight: 200 800;
   font-style: normal;
   font-display: swap;
 }
-*/

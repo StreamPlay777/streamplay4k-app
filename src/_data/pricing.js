@@ -1,12 +1,13 @@
 /**
  * LOCKED pricing. Prices must not change without an explicit instruction.
  *
- * Additional device rule: each device beyond the ones included in the plan
- * costs 50% of that plan's ORIGINAL BASE PRICE (not a per-month figure).
+ * Device rule (confirmed): a base price covers ONE device. Devices 2–5 each
+ * add 50% of that plan's ORIGINAL BASE PRICE — not 50% of a per-month figure
+ * and not compounded.
  */
 const CURRENCY = { code: "USD", symbol: "$" };
 
-/** Devices covered by the base price of every plan. */
+/** Devices covered by the base price of every plan. Confirmed: one. */
 const INCLUDED_DEVICES = 1;
 
 /** Hard ceiling on simultaneous devices for any plan. */

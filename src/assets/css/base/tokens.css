@@ -37,10 +37,10 @@
     rgba(255, 122, 24, 0.16) 100%
   );
 
-  /* Ink used on top of the accent gradient.
-     #fff is the brand look but measures ~3.7:1 (WCAG AA Large only).
-     Switch to var(--sp-text-inverse) for full AA on normal-size labels. */
-  --sp-on-accent: #ffffff;
+  /* Ink placed directly on the bright accent gradient (primary CTA text
+     and icons). Dark ink clears WCAG AA at normal label sizes against both
+     gradient stops; white would only reach AA Large. */
+  --sp-on-accent: #090a0c;
 
   /* --- Feedback ---------------------------------------------------- */
   --sp-success: #35d07f;
@@ -49,10 +49,10 @@
   --sp-focus: #ffffff;
 
   /* --- Typography --------------------------------------------------
-     Self-hosted faces drop into /assets/fonts/ and are declared in
-     base/fonts.css. The stack degrades to system UI until then.       */
-  --sp-font-sans: "StreamPlaySans", "Inter", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+     Manrope Variable is the brand face, self-hosted and declared in
+     base/fonts.css. The stack degrades to system UI if it is missing.  */
+  --sp-font-sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
   --sp-font-display: var(--sp-font-sans);
   --sp-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
 

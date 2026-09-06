@@ -3,6 +3,7 @@
 Static marketing site for StreamPlay4K, built with [Eleventy](https://www.11ty.dev/).
 Semantic HTML, modern CSS, vanilla JavaScript, Markdown content. No SPA
 framework, no CSS framework, no runtime dependencies in the browser.
+Manrope Variable is the brand typeface, self-hosted from `src/assets/fonts/`.
 
 ## Commands
 
