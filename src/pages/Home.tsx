@@ -293,7 +293,7 @@ function OnDemand() {
         </div>
 
         {/* Poster collage */}
-        <PosterWall count={15} />
+        <PosterWall />
       </div>
     </section>
   );

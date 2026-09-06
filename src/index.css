@@ -110,6 +110,18 @@
   to   { transform: translate3d(0, 0, 0); }
 }
 
+/* Vertical pair, for the poster wall's drifting columns. Each column renders
+   its posters twice, so travelling exactly -50% lands the second copy where
+   the first began and the loop is seamless. */
+@keyframes marquee-up {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -50%, 0); }
+}
+@keyframes marquee-down {
+  from { transform: translate3d(0, -50%, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+
 .marquee-track {
   will-change: transform;
   backface-visibility: hidden;
