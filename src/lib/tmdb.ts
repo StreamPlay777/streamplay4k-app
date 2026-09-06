@@ -26,6 +26,17 @@ const BASE = 'https://api.themoviedb.org/3';
 const IMG = 'https://image.tmdb.org/t/p';
 
 export const TMDB_ENABLED = Boolean(KEY);
+
+// A missing key is a silent failure otherwise: the section quietly serves the
+// bundled list and looks like TMDB simply returned nothing. Say so plainly,
+// because the usual cause is a deploy host that has not been given the
+// variable — it lives in .env locally, which is never committed.
+if (!KEY && typeof console !== 'undefined') {
+  console.info(
+    '[tmdb] VITE_TMDB_KEY is not set, so the bundled title list is being used. ' +
+    'Add it to your hosting provider\'s environment variables and redeploy to show live titles.',
+  );
+}
 export const TMDB_ATTRIBUTION =
   'This product uses the TMDB API but is not endorsed or certified by TMDB.';
 
