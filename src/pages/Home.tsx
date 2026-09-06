@@ -4,7 +4,8 @@ import { site, heroStats, paymentMethods } from '../data/site';
 import { TERMS, quote, money, DEFAULT_TERM_ID } from '../data/pricing';
 import { whySwitch, deviceTiles, coverageChecklist } from '../data/marquees';
 import { logoRows, networkLogos } from '../data/logos';
-import { railA, railB, featured } from '../data/vod';
+import { useBestTitles } from '../hooks/useBestTitles';
+import { TMDB_ATTRIBUTION } from '../lib/tmdb';
 import { basketMonthly, basketYearly, paymentsPerYear, smallPrint } from '../data/receipt';
 import { reviews } from '../data/reviews';
 import { SectionHeading, Placeholder, LogoMarquee, TitleMarquee, Tick, Stars } from '../components/ui';
@@ -253,6 +254,11 @@ function CostComparison() {
 
 /* ── 1.5 On-demand library ─────────────────────────────────────────────────── */
 function OnDemand() {
+  // 20 titles in total — 10 films, 10 series. Capped deliberately: every poster
+  // is an image request, and this section sits mid-page where weight is felt.
+  const { films, series, live } = useBestTitles();
+  const featured = [...films.slice(0, 3), ...series.slice(0, 3)];
+
   return (
     <section className="bg-bg pb-[90px] pt-[86px]">
       <div className="px-7">
@@ -265,16 +271,20 @@ function OnDemand() {
         {/* Featured strip */}
         <div className="mx-auto mt-12 grid max-w-shell grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {featured.map((t) => (
-            <Poster key={t.name} title={t} width={undefined} height={260} />
+            <Poster key={`f-${t.name}`} title={t} width={undefined} height={260} />
           ))}
         </div>
       </div>
 
       {/* Two rails: films one way, series the other */}
       <div className="mt-10 flex flex-col gap-2.5">
-        <TitleMarquee titles={railA} direction="left" duration={60} />
-        <TitleMarquee titles={railB} direction="right" duration={72} />
+        <TitleMarquee titles={films} direction="left" duration={60} />
+        <TitleMarquee titles={series} direction="right" duration={72} />
       </div>
+
+      {live && (
+        <p className="mt-8 px-7 text-center text-[11px] text-ink-6">{TMDB_ATTRIBUTION}</p>
+      )}
     </section>
   );
 }
