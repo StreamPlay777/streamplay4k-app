@@ -30,8 +30,16 @@ const ALL = Object.entries(files)
 const COLUMNS = 5;
 const PER_COLUMN = 5;
 
+/** A backdrop uses more, smaller posters — at showcase scale the artwork reads
+ *  as a few huge crops rather than a wall of films. The count steps down on
+ *  narrow screens, where 13 columns would shrink each poster to a smudge. */
+const BACKDROP_COLUMNS = 13;
+const BACKDROP_PER_COLUMN = 4;
+const BACKDROP_VISIBLE_SM = 6;    // phones
+const BACKDROP_VISIBLE_MD = 9;    // tablets
+
 /** Different speeds so the columns never fall into step with one another. */
-const DURATIONS = [38, 46, 32, 52, 42];
+const DURATIONS = [38, 46, 32, 52, 42, 44, 36, 50, 40, 48, 34, 54, 43];
 
 /** Backdrops drift at roughly a third of the pace. */
 const BACKDROP_SLOWDOWN = 3;
@@ -44,9 +52,12 @@ export interface PosterWallProps {
 
 export default function PosterWall({ variant = 'showcase', className = '' }: PosterWallProps) {
   const backdrop = variant === 'backdrop';
+  const cols = backdrop ? BACKDROP_COLUMNS : COLUMNS;
+  const perCol = backdrop ? BACKDROP_PER_COLUMN : PER_COLUMN;
+
   // Deal the posters across the columns so no two neighbours repeat.
-  const columns = Array.from({ length: COLUMNS }, (_, c) =>
-    Array.from({ length: PER_COLUMN }, (_, r) => ALL[(c * PER_COLUMN + r) % ALL.length]),
+  const columns = Array.from({ length: cols }, (_, c) =>
+    Array.from({ length: perCol }, (_, r) => ALL[(c * perCol + r) % ALL.length]),
   );
 
   return (
@@ -70,13 +81,22 @@ export default function PosterWall({ variant = 'showcase', className = '' }: Pos
         style={{
           // A backdrop is scaled harder so the blur never reveals a soft edge
           // where the plane stops.
-          width: backdrop ? '155%' : '132%',
-          height: backdrop ? '200%' : '175%',
+          width: backdrop ? '142%' : '132%',
+          height: backdrop ? '240%' : '175%',
           transform: 'translate(-50%, -50%) rotate(-9deg)',
         }}
       >
         {columns.map((col, c) => (
-          <div key={c} className="h-full min-w-0 flex-1 overflow-hidden">
+          <div
+            key={c}
+            className={`h-full min-w-0 flex-1 overflow-hidden ${
+              backdrop && c >= BACKDROP_VISIBLE_MD
+                ? 'hidden lg:block'
+                : backdrop && c >= BACKDROP_VISIBLE_SM
+                  ? 'hidden sm:block'
+                  : ''
+            }`}
+          >
             <div
               className="marquee-track flex flex-col gap-2 sm:gap-2.5"
               style={{

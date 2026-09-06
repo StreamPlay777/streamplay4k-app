@@ -10,6 +10,11 @@
 @tailwind utilities;
 
 @layer base {
+  /* Height of the floating nav, so a full-bleed hero can sit underneath it.
+     The pill wraps to a second row on narrow screens, hence the two values. */
+  :root { --nav-h: 124px; }
+  @media (min-width: 768px) { :root { --nav-h: 86px; } }
+
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {

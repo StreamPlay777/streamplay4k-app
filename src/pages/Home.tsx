@@ -6,6 +6,7 @@ import { whySwitch, deviceTiles, coverageChecklist } from '../data/marquees';
 import { logoRows, networkLogos } from '../data/logos';
 import PosterWall from '../components/PosterWall';
 import ShowcaseRow from '../components/ShowcaseRow';
+import LiveGuideMock from '../components/LiveGuideMock';
 import Check from '../components/pricing/Check';
 import { basketMonthly, basketYearly, paymentsPerYear, smallPrint } from '../data/receipt';
 import { reviews } from '../data/reviews';
@@ -38,7 +39,15 @@ export default function Home() {
 /* ── 1.1 Hero ──────────────────────────────────────────────────────────────── */
 function Hero() {
   return (
-    <section className="relative isolate overflow-hidden px-7 pt-[92px]">
+    <section
+      className="relative isolate overflow-hidden px-7"
+      // Pulled up behind the floating nav so the artwork runs to the very top
+      // of the window, with the padding put back so the copy sits where it did.
+      style={{
+        marginTop: 'calc(var(--nav-h) * -1)',
+        paddingTop: 'calc(var(--nav-h) + 92px)',
+      }}
+    >
       {/* Drifting wall of artwork, blurred well back. Layer order matters:
           artwork, then a scrim heavy enough to hold the headline's contrast,
           then the brand glow, then the grid. */}
@@ -47,7 +56,7 @@ function Hero() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'linear-gradient(180deg, rgba(6,8,15,.70) 0%, rgba(6,8,15,.80) 45%, rgba(6,8,15,.95) 84%, #06080F 100%)',
+            'linear-gradient(180deg, rgba(6,8,15,.52) 0%, rgba(6,8,15,.66) 46%, rgba(6,8,15,.90) 82%, #06080F 100%)',
         }}
       />
 
@@ -109,7 +118,7 @@ function Hero() {
               <span key={i} className="h-[9px] w-[9px] rounded-full bg-[#2A3350]" />
             ))}
           </div>
-          <Placeholder label="[ app screenshot — live TV grid ]" note="drop a 1880×600 image here" height={300} />
+          <LiveGuideMock />
         </div>
       </div>
     </section>
@@ -308,7 +317,7 @@ function OnDemand() {
         </div>
 
         {/* Labelled cards */}
-        <div className="mt-12 -mx-5 sm:mx-0">
+        <div className="mt-12">
           <ShowcaseRow />
         </div>
 

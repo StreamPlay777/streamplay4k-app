@@ -11,57 +11,79 @@ function posterFor(slug: string): string | undefined {
 }
 
 /**
- * Row of labelled poster cards, the centre one raised.
+ * Auto-scrolling rails of labelled poster cards.
  *
  * Unlike the wall behind it, these are content rather than decoration: each
- * card names the title and says "4K Stream · Subtitles", which is the point of
- * the section. So they carry real alt text and are not hidden from readers.
+ * card names the title and says "4K · Subtitles", which is the point of the
+ * section. So they carry real alt text and are not hidden from readers.
+ *
+ * Split across two rails moving opposite ways, so the whole catalogue passes
+ * by rather than the same handful looping. Each rail renders its cards twice
+ * and travels exactly -50%, which is what makes the loop seamless.
  */
 export default function ShowcaseRow() {
-  // An odd count keeps a true centre card to raise.
-  const cards = showcase.slice(0, 5);
-  const middle = Math.floor(cards.length / 2);
+  const half = Math.ceil(showcase.length / 2);
+  const rails = [
+    { items: showcase.slice(0, half), direction: 'marquee-l', duration: 72 },
+    { items: showcase.slice(half), direction: 'marquee-r', duration: 84 },
+  ];
 
   return (
-    <ul className="flex items-center justify-center gap-3 overflow-x-auto px-5 pb-2 sm:gap-4 sm:overflow-visible sm:px-0">
-      {cards.map((t, i) => {
-        const src = posterFor(t.slug);
-        const isMiddle = i === middle;
-        return (
-          <li
-            key={t.slug}
-            className={`relative w-[150px] flex-none overflow-hidden rounded-xl sm:w-[172px] lg:w-[196px] ${
-              isMiddle
-                ? 'z-10 border-2 border-white/70 shadow-[0_24px_60px_rgba(0,0,0,.7)] sm:scale-[1.14]'
-                : 'border border-white/10 shadow-[0_14px_36px_rgba(0,0,0,.55)] sm:opacity-90'
-            }`}
+    <div className="flex flex-col gap-3 sm:gap-4">
+      {rails.map((rail, r) => (
+        <div key={r} className="mask-rail overflow-hidden">
+          <ul
+            className="marquee-track flex w-max gap-3 sm:gap-4"
+            style={{
+              animationName: rail.direction,
+              animationDuration: `${rail.duration}s`,
+              animationTimingFunction: 'linear',
+              animationIterationCount: 'infinite',
+            }}
           >
-            {src ? (
-              <img
-                src={src}
-                alt={`${t.name} — ${t.genre}`}
-                loading="lazy"
-                decoding="async"
-                className="block aspect-[2/3] w-full object-cover"
-              />
-            ) : (
-              <div className="placeholder-stripes aspect-[2/3] w-full" />
-            )}
+            {[0, 1].map((pass) =>
+              rail.items.map((t) => {
+                const src = posterFor(t.slug);
+                return (
+                  <li
+                    key={`${pass}-${t.slug}`}
+                    className="relative w-[132px] flex-none overflow-hidden rounded-xl border
+                               border-white/10 shadow-[0_14px_36px_rgba(0,0,0,.55)]
+                               sm:w-[152px] lg:w-[168px]"
+                    aria-hidden={pass === 1}
+                  >
+                    {src ? (
+                      <img
+                        src={src}
+                        alt={pass === 0 ? `${t.name} — ${t.genre}` : ''}
+                        loading="lazy"
+                        decoding="async"
+                        className="block aspect-[2/3] w-full object-cover"
+                      />
+                    ) : (
+                      <div className="placeholder-stripes aspect-[2/3] w-full" />
+                    )}
 
-            {/* Scrim keeps the label readable over any artwork */}
-            <div
-              className="absolute inset-x-0 bottom-0 px-3 pb-3 pt-10"
-              style={{ background: 'linear-gradient(180deg, transparent, rgba(4,6,11,.93))' }}
-            >
-              <span className="inline-block rounded bg-accent px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-white">
-                {t.genre}
-              </span>
-              <p className="mt-1.5 truncate font-display text-[14px] font-bold text-white">{t.name}</p>
-              <p className="text-[11px] text-white/70">{STREAM_NOTE}</p>
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+                    {/* Scrim keeps the label readable over any artwork */}
+                    <div
+                      className="absolute inset-x-0 bottom-0 px-2.5 pb-2.5 pt-9"
+                      style={{ background: 'linear-gradient(180deg, transparent, rgba(4,6,11,.94))' }}
+                    >
+                      <span className="inline-block rounded bg-accent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                        {t.genre}
+                      </span>
+                      <p className="mt-1.5 truncate font-display text-[13px] font-bold text-white">
+                        {t.name}
+                      </p>
+                      <p className="text-[10.5px] text-white/70">{STREAM_NOTE}</p>
+                    </div>
+                  </li>
+                );
+              }),
+            )}
+          </ul>
+        </div>
+      ))}
+    </div>
   );
 }
