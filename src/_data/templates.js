@@ -11,6 +11,9 @@
  *
  * `defaults` are the values a duplicate inherits when it leaves the matching
  * field empty (heroHeadline, heroSubtext, seoTitle, metaDescription, ogImage).
+ *
+ * `hasHero` marks a template whose body opens with a full-bleed hero, so the
+ * layout knows not to reserve space for the fixed header above it.
  */
 export default {
   homepage: {
@@ -18,6 +21,7 @@ export default {
     label: "Homepage",
     body: "templates/homepage.njk",
     canonicalPath: "/",
+    hasHero: true,
     defaults: {
       seoTitle: "",
       metaDescription: "",

@@ -1,64 +1,142 @@
 /* =====================================================================
-   Site header — FOUNDATION SHELL
-   Deliberately plain. The finished header design arrives with the
-   header/hero prompt; only structure, responsiveness and accessibility
-   are settled here.
+   Site header — floating navigation
+
+   A centred glass bar that sits over the hero rather than a full-width
+   rectangle. It is fixed, so pages that do not open with a hero reserve
+   space through .sp-main (see base/layout.css).
    ================================================================== */
 
 .sp-header {
-  position: sticky;
+  position: fixed;
+  inset-inline: 0;
   top: 0;
   z-index: var(--sp-z-header);
-  border-bottom: 1px solid var(--sp-border);
+  pointer-events: none;    /* only the bar itself is interactive */
 }
 
-.sp-header__inner {
+.sp-header__shell {
+  width: 100%;
+  max-width: var(--sp-container-wide);
+  margin-inline: auto;
+  padding: var(--sp-header-top) var(--sp-gutter) 0;
+}
+
+.sp-header__bar {
+  pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--sp-space-5);
+  gap: var(--sp-space-4);
   min-height: var(--sp-header-height);
+  padding-inline: var(--sp-space-4);
+  border-radius: var(--sp-radius-lg);
+  box-shadow: var(--sp-shadow-lg);
 }
 
 .sp-header__brand {
   display: inline-flex;
   align-items: center;
   gap: var(--sp-space-3);
-  font-weight: var(--sp-weight-bold);
-  letter-spacing: var(--sp-tracking-heading);
+  padding-inline: var(--sp-space-2);
+  font-size: var(--sp-text-lg);
+  font-weight: var(--sp-weight-black);
+  letter-spacing: -0.035em;
   text-decoration: none;
+  white-space: nowrap;
 }
 
-.sp-header__logo { height: 1.75rem; width: auto; }
+.sp-header__logo { height: 1.6rem; width: auto; }
 
 .sp-header__nav { display: none; }
+.sp-header__actions { display: flex; align-items: center; gap: var(--sp-space-2); }
+.sp-header__cta { display: none; }
 
-.sp-header__list {
+/* --- Desktop navigation --------------------------------------------- */
+
+.sp-nav {
   display: flex;
   align-items: center;
-  gap: var(--sp-space-5);
+  gap: var(--sp-space-1);
 }
 
-.sp-header__link {
+.sp-nav__item { position: relative; display: flex; align-items: center; }
+
+.sp-nav__link {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  height: 2.5rem;
+  padding-inline: var(--sp-space-3);
+  border-radius: var(--sp-radius-sm);
   font-size: var(--sp-text-sm);
   font-weight: var(--sp-weight-medium);
   color: var(--sp-text-muted);
   text-decoration: none;
-  transition: color var(--sp-duration) var(--sp-ease);
+  white-space: nowrap;
+  transition:
+    color var(--sp-duration) var(--sp-ease),
+    background-color var(--sp-duration) var(--sp-ease);
 }
 
-.sp-header__link:hover { color: var(--sp-text); }
+.sp-nav__link:hover { color: var(--sp-text); background-color: rgba(255, 255, 255, 0.05); }
 
 /* Current page is marked by aria-current, not by colour alone. */
-.sp-header__link[aria-current="page"] {
+.sp-nav__link[aria-current="page"] {
   color: var(--sp-text);
   font-weight: var(--sp-weight-semibold);
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
-.sp-header__actions { display: flex; align-items: center; gap: var(--sp-space-3); }
+/* --- Setup Guide dropdown -------------------------------------------- */
+
+.sp-nav__item--menu .sp-nav__link { padding-inline-end: var(--sp-space-1); }
+
+.sp-nav__disclosure {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 2.5rem;
+  border-radius: var(--sp-radius-sm);
+  color: var(--sp-text-muted);
+  transition: color var(--sp-duration) var(--sp-ease), transform var(--sp-duration) var(--sp-ease);
+}
+
+.sp-nav__disclosure:hover { color: var(--sp-text); }
+.sp-nav__disclosure[aria-expanded="true"] { color: var(--sp-text); transform: rotate(180deg); }
+
+.sp-nav__menu {
+  /* Near-opaque rather than glass: a menu has to stay readable over the
+     hero headline, which .sp-glass alone does not guarantee. */
+  background-color: rgba(20, 21, 26, 0.97);
+  border: 1px solid var(--sp-border-strong);
+  position: absolute;
+  top: calc(100% + var(--sp-space-3));
+  left: 50%;
+  translate: -50% 0;
+  z-index: var(--sp-z-overlay);
+  min-width: 12rem;
+  padding: var(--sp-space-2);
+  border-radius: var(--sp-radius-md);
+  box-shadow: var(--sp-shadow-lg);
+}
+
+.sp-nav__menu[hidden] { display: none; }
+
+.sp-nav__menu-link {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: var(--sp-space-3);
+  border-radius: var(--sp-radius-xs);
+  font-size: var(--sp-text-sm);
+  color: var(--sp-text-muted);
+  text-decoration: none;
+  transition: color var(--sp-duration) var(--sp-ease), background-color var(--sp-duration) var(--sp-ease);
+}
+
+.sp-nav__menu-link:hover { color: var(--sp-text); background-color: rgba(255, 255, 255, 0.06); }
+
+/* --- Menu trigger ---------------------------------------------------- */
 
 .sp-header__toggle {
   display: inline-flex;
@@ -69,53 +147,130 @@
   border: 1px solid var(--sp-border-strong);
   border-radius: var(--sp-radius-sm);
   color: var(--sp-text);
+  transition: border-color var(--sp-duration) var(--sp-ease), background-color var(--sp-duration) var(--sp-ease);
 }
 
-/* --- Mobile panel --------------------------------------------------- */
-.sp-header__panel {
-  border-top: 1px solid var(--sp-border);
-  padding-block: var(--sp-space-5);
+.sp-header__toggle:hover { background-color: rgba(255, 255, 255, 0.06); }
+
+/* Two bars that become a cross when the drawer is open. */
+.sp-header__toggle-bars,
+.sp-header__toggle-bars::before,
+.sp-header__toggle-bars::after {
+  display: block;
+  width: 17px;
+  height: 1.75px;
+  border-radius: 2px;
+  background-color: currentColor;
+  transition: transform var(--sp-duration) var(--sp-ease), opacity var(--sp-duration-fast) var(--sp-ease);
 }
 
-.sp-header__panel[hidden] { display: none; }
+.sp-header__toggle-bars { background-color: transparent; position: relative; }
+.sp-header__toggle-bars::before { content: ""; position: absolute; top: -4px; }
+.sp-header__toggle-bars::after { content: ""; position: absolute; top: 4px; }
 
-.sp-header__panel-list { display: flex; flex-direction: column; }
+.sp-header__toggle[aria-expanded="true"] .sp-header__toggle-bars::before { transform: translateY(4px) rotate(45deg); }
+.sp-header__toggle[aria-expanded="true"] .sp-header__toggle-bars::after { transform: translateY(-4px) rotate(-45deg); }
 
-.sp-header__panel-list a {
+/* --- Mobile drawer ---------------------------------------------------- */
+
+.sp-drawer {
+  pointer-events: auto;
+  position: fixed;
+  inset: 0;
+  z-index: -1;             /* behind the floating bar, above the page */
+  padding-top: calc(var(--sp-header-height) + var(--sp-header-top) * 2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Fully opaque: a translucent overlay lets the 70px hero headline read
+     straight through it, and a menu has to be the only thing legible. */
+  background-color: var(--sp-bg);
+}
+
+.sp-drawer[hidden] { display: none; }
+
+.sp-drawer__panel {
+  max-width: var(--sp-container-wide);
+  margin-inline: auto;
+  padding: var(--sp-space-5) var(--sp-gutter) var(--sp-space-9);
+}
+
+.sp-drawer__list { display: flex; flex-direction: column; }
+
+.sp-drawer__link {
   display: flex;
   align-items: center;
-  min-height: 48px;
-  font-size: var(--sp-text-lg);
-  font-weight: var(--sp-weight-medium);
+  min-height: 52px;
+  font-size: var(--sp-text-xl);
+  font-weight: var(--sp-weight-semibold);
+  letter-spacing: var(--sp-tracking-heading);
+  text-decoration: none;
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-drawer__link[aria-current="page"] { color: var(--sp-accent-text); }
+
+.sp-drawer__sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-space-2);
+  padding-block: var(--sp-space-3);
+}
+
+.sp-drawer__sub a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: var(--sp-space-4);
+  border: 1px solid var(--sp-border);
+  border-radius: var(--sp-radius-pill);
+  background-color: rgba(255, 255, 255, 0.03);
+  font-size: var(--sp-text-sm);
+  color: var(--sp-text-muted);
   text-decoration: none;
 }
 
-.sp-header__panel-sub {
-  display: flex;
-  flex-direction: column;
-  padding-left: var(--sp-space-4);
-  border-left: 1px solid var(--sp-border);
-  margin-block: var(--sp-space-1);
-}
+.sp-drawer__sub a:hover { color: var(--sp-text); border-color: var(--sp-border-strong); }
 
-.sp-header__panel-sub a {
-  min-height: 44px;
-  font-size: var(--sp-text-base);
-  color: var(--sp-text-muted);
-}
-
-.sp-header__panel-actions {
+.sp-drawer__actions {
   display: flex;
   flex-direction: column;
   gap: var(--sp-space-3);
-  margin-top: var(--sp-space-5);
+  margin-top: var(--sp-space-7);
 }
 
+.sp-drawer__contact { margin-top: var(--sp-space-3); }
+
+.sp-drawer__contact a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--sp-text);
+}
+
+/* Body scroll lock while the drawer is open. */
+body.sp-nav-open { overflow: hidden; }
+
+/* --- Breakpoints ------------------------------------------------------ */
+
+/* Full navigation from 1024px. Between 1024 and 1280 the links tighten
+   rather than dropping to a hamburger. */
 @media (min-width: 64em) {
   .sp-header__nav { display: block; }
+  .sp-header__cta { display: block; }
   .sp-header__toggle,
-  .sp-header__panel { display: none !important; }
+  .sp-drawer { display: none !important; }
+  .sp-header__bar { padding-inline: var(--sp-space-4); }
+  .sp-nav { gap: 0; }
+  .sp-nav__link { padding-inline: var(--sp-space-2); }
 }
 
-/* Body scroll lock while the mobile panel is open. */
-body.sp-nav-open { overflow: hidden; }
+@media (min-width: 80em) {
+  .sp-header__bar { padding-inline: var(--sp-space-5); }
+  .sp-nav { gap: var(--sp-space-1); }
+  .sp-nav__link { padding-inline: var(--sp-space-3); }
+}
+
+@media (min-width: 90em) {
+  .sp-nav { gap: var(--sp-space-2); }
+  .sp-nav__link { font-size: var(--sp-text-base); }
+}

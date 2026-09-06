@@ -16,6 +16,11 @@
    where the design needs it. */
 .sp-container--flush { max-width: none; padding-inline: 0; }
 
+/* The header is fixed, so pages reserve room for it. Pages whose source
+   template opens with a hero handle the offset inside the hero instead. */
+.sp-main { padding-top: calc(var(--sp-header-height) + var(--sp-header-top) * 2); }
+.sp-main--flush { padding-top: 0; }
+
 .sp-section { padding-block: var(--sp-section-y); }
 .sp-section--tight { padding-block: var(--sp-section-y-tight); }
 .sp-section--flush-top { padding-block-start: 0; }

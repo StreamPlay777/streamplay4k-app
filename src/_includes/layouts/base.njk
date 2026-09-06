@@ -8,7 +8,9 @@
 
   {% include "partials/header.njk" %}
 
-  <main id="main" tabindex="-1">
+  {# A source template that opens with a hero absorbs the fixed header offset itself. #}
+  <main id="main" tabindex="-1"
+        class="sp-main{% if templates[sourceTemplate] and templates[sourceTemplate].hasHero %} sp-main--flush{% endif %}">
     {{ content | safe }}
   </main>
 

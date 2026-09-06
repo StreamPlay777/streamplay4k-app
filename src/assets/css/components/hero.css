@@ -1,0 +1,297 @@
+/* =====================================================================
+   SECTION 01 — Homepage hero
+
+   Layered cinematic background, centred content, four floating stat cards
+   and a curved bottom transition into the next dark surface.
+   ================================================================== */
+
+.sp-hero {
+  /* Width reserved for the centred column on desktop. The stat rails use
+     the same value as their column gap, so cards can never collide with
+     the headline at any viewport width. */
+  --sp-hero-centre: clamp(34rem, 62vw, 56rem);
+  --sp-hero-curve: clamp(2.5rem, 6vw, 7.5rem);
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  min-height: 92svh;
+  padding-block:
+    calc(var(--sp-header-height) + var(--sp-header-top) * 2 + var(--sp-space-7))
+    calc(var(--sp-hero-curve) + var(--sp-space-8));
+  overflow: hidden;
+}
+
+/* --- Background ------------------------------------------------------
+   With no image supplied the scrim, lighting and vignette layers are the
+   design in their own right — a premium dark atmosphere, not a grey box. */
+
+.sp-hero__backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: #05060a;
+  pointer-events: none;
+}
+
+.sp-hero__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 40%;
+}
+
+/* Darkens whatever sits beneath so headline contrast never depends on the
+   image. Heavier at the bottom, where the curve and CTAs live. */
+.sp-hero__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(9, 10, 12, 0.82) 0%, rgba(9, 10, 12, 0.62) 38%, rgba(9, 10, 12, 0.92) 100%);
+}
+
+/* Restrained accent lighting — atmosphere, not a gradient wash. */
+.sp-hero__lighting {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.5;
+}
+
+.sp-hero__lighting--warm {
+  width: min(46rem, 70vw);
+  aspect-ratio: 1;
+  top: -18%;
+  left: 50%;
+  translate: -50% 0;
+  background: radial-gradient(circle, rgba(255, 90, 24, 0.28) 0%, transparent 68%);
+}
+
+.sp-hero__lighting--deep {
+  width: min(38rem, 80vw);
+  aspect-ratio: 1.4;
+  bottom: -22%;
+  left: -10%;
+  background: radial-gradient(circle, rgba(255, 43, 32, 0.2) 0%, transparent 70%);
+}
+
+.sp-hero__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 85% at 50% 42%, transparent 38%, rgba(4, 5, 7, 0.78) 100%);
+}
+
+/* --- Layout ----------------------------------------------------------- */
+
+.sp-hero__inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-space-8);
+  width: 100%;
+}
+
+.sp-hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-space-5);
+  max-width: 46rem;
+  text-align: center;
+}
+
+/* --- Eyebrow ----------------------------------------------------------- */
+
+.sp-hero__eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-space-3);
+  font-size: var(--sp-text-xs);
+  font-weight: var(--sp-weight-semibold);
+  /* Narrow tracking below 30em so the line survives 320px without the
+     rule and the text falling out of alignment. */
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sp-text-muted);
+}
+
+/* Keeps a wrapped eyebrow centred as a block rather than ragged beside
+   the accent rule. */
+.sp-hero__eyebrow-text { text-align: center; }
+
+@media (min-width: 30em) {
+  .sp-hero__eyebrow { letter-spacing: 0.16em; }
+}
+
+.sp-hero__eyebrow-mark {
+  width: 1.75rem;
+  height: 2px;
+  border-radius: 2px;
+  background-image: var(--sp-gradient);
+}
+
+/* --- Headline ---------------------------------------------------------- */
+
+.sp-hero__title {
+  font-size: clamp(2.375rem, 1.8rem + 2.875vw, 5.25rem);
+  font-weight: var(--sp-weight-black);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  /* Keeps the two lines evenly weighted instead of leaving an orphan. */
+  text-wrap: balance;
+}
+
+.sp-hero__title-lead,
+.sp-hero__title-accent { display: block; }
+
+.sp-hero__title-accent {
+  background-image: var(--sp-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* Fallback for engines without background-clip: text. */
+  @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+    color: var(--sp-accent-text);
+  }
+}
+
+.sp-hero__lead {
+  max-width: 42ch;
+  font-size: var(--sp-text-lg);
+  line-height: var(--sp-leading-snug);
+  color: var(--sp-text-muted);
+}
+
+.sp-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-space-3);
+  width: 100%;
+  margin-top: var(--sp-space-2);
+}
+
+/* --- Stat cards -------------------------------------------------------- */
+
+.sp-hero__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
+  gap: var(--sp-space-3);
+  width: 100%;
+  max-width: 34rem;
+}
+
+.sp-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-1);
+  height: 100%;
+  padding: var(--sp-space-4);
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-md);
+  background-color: rgba(17, 18, 22, 0.62);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  box-shadow: var(--sp-shadow-md);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .sp-stat { background-color: rgba(17, 18, 22, 0.94); }
+}
+
+.sp-stat__icon { color: var(--sp-accent-text); margin-bottom: var(--sp-space-1); }
+
+.sp-stat__value {
+  font-size: var(--sp-text-xl);
+  font-weight: var(--sp-weight-bold);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.sp-stat__label {
+  font-size: var(--sp-text-xs);
+  font-weight: var(--sp-weight-medium);
+  color: var(--sp-text-muted);
+}
+
+/* --- Bottom transition -------------------------------------------------- */
+
+.sp-hero__curve {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;            /* hides sub-pixel seams */
+  height: var(--sp-hero-curve);
+  line-height: 0;
+  pointer-events: none;
+}
+
+.sp-hero__curve svg { width: 100%; height: 100%; display: block; }
+
+/* =====================================================================
+   Breakpoints
+   ================================================================== */
+
+/* Tablet: roomier centre column, stats stay below the CTAs as a 2x2. */
+@media (min-width: 48em) {
+  .sp-hero__stats { max-width: 38rem; gap: var(--sp-space-4); }
+  .sp-stat { padding: var(--sp-space-5); }
+  .sp-stat__value { font-size: var(--sp-text-2xl); }
+}
+
+/* Laptop: a single quiet row of four, below the content. Cards are present
+   but deliberately less prominent than the floating desktop treatment. */
+@media (min-width: 64em) {
+  .sp-hero__stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: 54rem;
+  }
+}
+
+/* Desktop: cards float at the four corners around the centred column.
+   The column gap reserves the centre, so overlap is structurally
+   impossible rather than hand-tuned. */
+@media (min-width: 80em) {
+  .sp-hero__inner { display: block; }
+
+  .sp-hero__content {
+    max-width: calc(var(--sp-hero-centre) - 2rem);
+    margin-inline: auto;
+  }
+
+  .sp-hero__stats {
+    position: absolute;
+    inset: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, auto);
+    column-gap: var(--sp-hero-centre);
+    row-gap: clamp(7rem, 22vh, 14rem);
+    align-content: center;
+    max-width: none;
+    pointer-events: none;
+  }
+
+  .sp-hero__stat { pointer-events: auto; width: clamp(9.5rem, 12vw, 12rem); }
+  .sp-hero__stat--1, .sp-hero__stat--3 { justify-self: start; }
+  .sp-hero__stat--2, .sp-hero__stat--4 { justify-self: end; }
+
+  /* Extremely restrained tilt so the group reads as placed, not scattered. */
+  .sp-hero__stat--1 { rotate: -1.5deg; margin-left: clamp(0rem, 2vw, 2.5rem); }
+  .sp-hero__stat--2 { rotate: 1.5deg; }
+  .sp-hero__stat--3 { rotate: 1.25deg; }
+  .sp-hero__stat--4 { rotate: -1.25deg; margin-right: clamp(0rem, 2vw, 2.5rem); }
+
+  .sp-hero { min-height: clamp(44rem, 94svh, 62rem); }
+  .sp-hero__lead { font-size: var(--sp-text-xl); }
+}
+
+/* Very small screens: one column keeps the figures readable. */
+@media (max-width: 22.5em) {
+  .sp-hero__stats { grid-template-columns: 1fr; }
+  .sp-stat { flex-direction: row; align-items: center; gap: var(--sp-space-3); }
+  .sp-stat__icon { margin-bottom: 0; }
+  .sp-stat__label { margin-left: auto; }
+}

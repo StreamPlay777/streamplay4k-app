@@ -1,0 +1,86 @@
+{#
+  SECTION 01 — Homepage hero.
+
+  Content comes from _data/hero.js. Page-level overrides still win, so a
+  duplicate or campaign page on `sourceTemplate: "homepage"` can replace the
+  opening copy without touching this file:
+
+    heroHeadline -> replaces the two-part headline with one plain line
+    heroSubtext  -> replaces the supporting copy
+
+  The background image slot is empty until a licensed file is supplied; the
+  atmospheric fallback below is the design, not a placeholder.
+#}
+{% from "components/button.njk" import button with context %}
+{% from "components/hero-icon.njk" import heroIcon %}
+
+<section class="sp-hero" aria-labelledby="sp-hero-title">
+  <div class="sp-hero__backdrop" aria-hidden="true">
+    {% if hero.background.image %}
+    <img class="sp-hero__image" src="{{ hero.background.image }}" alt=""
+         width="{{ hero.background.width }}" height="{{ hero.background.height }}"
+         style="object-position: {{ hero.background.focal }}"
+         fetchpriority="high" decoding="async">
+    {% endif %}
+    <span class="sp-hero__scrim"></span>
+    <span class="sp-hero__lighting sp-hero__lighting--warm"></span>
+    <span class="sp-hero__lighting sp-hero__lighting--deep"></span>
+    <span class="sp-hero__vignette"></span>
+  </div>
+
+  <div class="sp-hero__inner sp-container sp-container--wide">
+    <div class="sp-hero__content">
+      <p class="sp-hero__eyebrow sp-reveal">
+        <span class="sp-hero__eyebrow-mark" aria-hidden="true"></span>
+        <span class="sp-hero__eyebrow-text">{{ hero.eyebrow }}</span>
+      </p>
+
+      <h1 class="sp-hero__title sp-reveal" id="sp-hero-title" style="--sp-reveal-delay: 70ms">
+        {%- if heroHeadline -%}
+          {{ heroHeadline }}
+        {%- else -%}
+          <span class="sp-hero__title-lead">{{ hero.headline.lead }}</span>
+          <span class="sp-hero__title-accent">{{ hero.headline.accent }}</span>
+        {%- endif -%}
+      </h1>
+
+      <p class="sp-hero__lead sp-reveal" style="--sp-reveal-delay: 140ms">
+        {{ heroSubtext or hero.subtext }}
+      </p>
+
+      <div class="sp-hero__actions sp-reveal" style="--sp-reveal-delay: 210ms">
+        {{ button(navigation.ctas.primary.label, navigation.ctas.primary.url, "primary", { size: "lg", icon: true, event: "view_pricing", eventData: { location: "hero" } }) }}
+        {{ button(navigation.ctas.secondary.label, navigation.ctas.secondary.url, "secondary", { size: "lg", event: "free_trial_click", eventData: { location: "hero" } }) }}
+      </div>
+    </div>
+
+    <ul class="sp-hero__stats">
+      {% for stat in hero.stats %}
+      <li class="sp-hero__stat sp-hero__stat--{{ loop.index }}">
+        <div class="sp-stat sp-float" style="--sp-float-duration: {{ 8 + loop.index0 * 1.7 }}s">
+          {{ heroIcon(stat.icon) }}
+          <span class="sp-stat__value sp-numeric">{{ stat.value }}</span>
+          <span class="sp-stat__label">{{ stat.label }}</span>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  {# Bottom transition into the next dark surface. Purely decorative. #}
+  <div class="sp-hero__curve" aria-hidden="true">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none" focusable="false">
+      <defs>
+        <linearGradient id="spHeroCurve" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="var(--sp-red)" stop-opacity="0"/>
+          <stop offset="35%" stop-color="var(--sp-red)" stop-opacity="0.75"/>
+          <stop offset="65%" stop-color="var(--sp-orange)" stop-opacity="0.75"/>
+          <stop offset="100%" stop-color="var(--sp-orange)" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="M0,92 C 320,0 1120,0 1440,92 L1440,120 L0,120 Z" fill="var(--sp-bg)"/>
+      <path d="M0,92 C 320,0 1120,0 1440,92" fill="none"
+            stroke="url(#spHeroCurve)" stroke-width="1.5"/>
+    </svg>
+  </div>
+</section>

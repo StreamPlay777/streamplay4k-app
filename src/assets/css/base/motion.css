@@ -49,7 +49,9 @@
   50% { transform: translate3d(0, -12px, 0); }
 }
 
-.sp-float { animation: sp-float 9s var(--sp-ease) infinite; }
+/* Duration is per element so a group of floating cards never moves in
+   mechanical lockstep: style="--sp-float-duration: 11s". */
+.sp-float { animation: sp-float var(--sp-float-duration, 9s) var(--sp-ease) infinite; }
 
 /* Restrained accent lighting. Decorative: always aria-hidden. */
 .sp-glow {

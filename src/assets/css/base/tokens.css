@@ -108,6 +108,8 @@
   --sp-section-y-tight: clamp(2.5rem, 1.6rem + 4vw, 4.5rem);
   --sp-grid-gap: clamp(1rem, 0.7rem + 1.4vw, 1.75rem);
   --sp-header-height: 4.5rem;
+  /* Gap between the viewport top and the floating header bar. */
+  --sp-header-top: clamp(0.625rem, 0.35rem + 0.9vw, 1.25rem);
 
   /* --- Radius ------------------------------------------------------ */
   --sp-radius-xs: 6px;

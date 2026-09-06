@@ -33,11 +33,34 @@ export default {
 
   /**
    * Catalog marketing figures. These are the ONLY approved numbers.
-   * `label` is what templates render.
+   * `label` is the full phrase; `display` and `noun` let a component split
+   * the figure from its subject (stat cards) without restating either.
    */
   catalog: {
-    liveChannels: { value: 120000, label: "120,000+ Live Channels" },
-    vod: { value: 120000, label: "120,000+ Movies & Series" }
+    liveChannels: {
+      value: 120000,
+      display: "120,000+",
+      noun: "Live Channels",
+      label: "120,000+ Live Channels"
+    },
+    vod: {
+      value: 120000,
+      display: "120,000+",
+      noun: "Movies & Series",
+      label: "120,000+ Movies & Series"
+    }
+  },
+
+  /** Support availability. */
+  support: {
+    availability: "24/7",
+    channels: "WhatsApp and email"
+  },
+
+  /** Maximum stream quality offered. */
+  quality: {
+    max: "4K",
+    label: "Up to 4K"
   },
 
   /**

@@ -1,64 +1,95 @@
 {#
-  FOUNDATION SHELL — structure, responsiveness and accessibility only.
-  The finished header design is delivered by the header/hero prompt.
-  Links come from _data/navigation.js; nothing is hardcoded here.
+  Global header — floating navigation.
+
+  Sits over the hero on pages whose source template declares a hero, and over
+  the page background everywhere else. Links come from _data/navigation.js;
+  nothing is hardcoded. Behaviour lives in assets/js/main.js.
 #}
-{# `with context` so the macro can read the brand/site data. #}
+{# `with context` so the macros can read the brand/site data. #}
 {% from "components/logo.njk" import logo with context %}
-{% from "components/button.njk" import button %}
+{% from "components/button.njk" import button with context %}
 
-<header class="sp-header sp-glass">
-  <div class="sp-container sp-header__inner">
-    <a class="sp-header__brand" href="/" aria-label="{{ site.name }} — home">
-      {{ logo("white", "sp-header__logo", true) }}
-    </a>
+<header class="sp-header">
+  <div class="sp-header__shell">
+    <div class="sp-header__bar sp-glass">
+      <a class="sp-header__brand" href="/" aria-label="{{ site.name }} — home">
+        {{ logo("white", "sp-header__logo", true) }}
+      </a>
 
-    <nav class="sp-header__nav" aria-label="Primary">
-      <ul class="sp-header__list">
-        {% for item in navigation.primary %}
-        <li>
-          <a class="sp-header__link" href="{{ item.url }}"
-             {% if page.url == item.url %}aria-current="page"{% endif %}>{{ item.label }}</a>
-        </li>
-        {% endfor %}
-      </ul>
-    </nav>
-
-    <div class="sp-header__actions">
-      <div class="sp-hide-mobile">
-        {{ button(navigation.ctas.primary.label, navigation.ctas.primary.url, "primary", { size: "sm", event: "view_pricing", eventData: { location: "header" } }) }}
-      </div>
-      <button class="sp-header__toggle sp-hide-desktop" type="button"
-              data-sp-nav-toggle aria-expanded="false" aria-controls="sp-nav-panel" aria-label="Open menu">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
-          <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-
-  <div class="sp-header__panel sp-hide-desktop" id="sp-nav-panel" data-sp-nav-panel hidden>
-    <div class="sp-container">
-      <nav aria-label="Mobile">
-        <ul class="sp-header__panel-list">
+      <nav class="sp-header__nav" aria-label="Primary">
+        <ul class="sp-nav">
           {% for item in navigation.primary %}
-          <li>
-            <a href="{{ item.url }}" {% if page.url == item.url %}aria-current="page"{% endif %}>{{ item.label }}</a>
+          <li class="sp-nav__item{% if item.children %} sp-nav__item--menu{% endif %}"
+              {% if item.children %}data-sp-menu{% endif %}>
+            <a class="sp-nav__link" href="{{ item.url }}"
+               {% if page.url == item.url %}aria-current="page"{% endif %}>{{ item.label }}</a>
+
             {% if item.children %}
-            <div class="sp-header__panel-sub">
+            {% set menuId = "sp-menu-" ~ loop.index %}
+            <button class="sp-nav__disclosure" type="button"
+                    data-sp-menu-toggle
+                    aria-expanded="false" aria-controls="{{ menuId }}"
+                    aria-label="Show {{ item.label }} devices">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false">
+                <path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" stroke-width="1.6"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <ul class="sp-nav__menu" id="{{ menuId }}" data-sp-menu-list hidden>
               {% for child in item.children %}
-              <a href="{{ child.url }}">{{ child.label }}</a>
+              <li><a class="sp-nav__menu-link" href="{{ child.url }}">{{ child.label }}</a></li>
               {% endfor %}
-            </div>
+            </ul>
             {% endif %}
           </li>
           {% endfor %}
         </ul>
       </nav>
-      <div class="sp-header__panel-actions">
+
+      <div class="sp-header__actions">
+        <div class="sp-header__cta">
+          {{ button(navigation.ctas.primary.label, navigation.ctas.primary.url, "primary", { size: "sm", event: "view_pricing", eventData: { location: "header" } }) }}
+        </div>
+
+        <button class="sp-header__toggle" type="button"
+                data-sp-nav-toggle aria-expanded="false" aria-controls="sp-nav-drawer" aria-label="Open menu">
+          <span class="sp-header__toggle-bars" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {# Mobile drawer. Sits below the floating bar and owns its own scrolling. #}
+  <div class="sp-drawer" id="sp-nav-drawer" data-sp-nav-panel hidden>
+    <div class="sp-drawer__panel">
+      <nav aria-label="Mobile">
+        <ul class="sp-drawer__list">
+          {% for item in navigation.primary %}
+          <li>
+            <a class="sp-drawer__link" href="{{ item.url }}"
+               {% if page.url == item.url %}aria-current="page"{% endif %}>{{ item.label }}</a>
+            {% if item.children %}
+            <ul class="sp-drawer__sub">
+              {% for child in item.children %}
+              <li><a href="{{ child.url }}">{{ child.label }}</a></li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </nav>
+
+      <div class="sp-drawer__actions">
         {{ button(navigation.ctas.primary.label, navigation.ctas.primary.url, "primary", { block: true, event: "view_pricing", eventData: { location: "mobile_nav" } }) }}
         {{ button(navigation.ctas.secondary.label, navigation.ctas.secondary.url, "secondary", { block: true, event: "free_trial_click", eventData: { location: "mobile_nav" } }) }}
       </div>
+
+      <p class="sp-drawer__contact sp-small sp-muted">
+        Need a hand?
+        <a href="{{ business.phone.whatsappUrl }}" rel="noopener"
+           data-sp-event="whatsapp_click" data-sp-event-location="mobile_nav">WhatsApp us</a>
+      </p>
     </div>
   </div>
 </header>
