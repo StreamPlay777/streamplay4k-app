@@ -29,9 +29,19 @@ export interface Title {
 
 const POSTER_BASE = import.meta.env.VITE_POSTER_BASE ?? '';
 
-/** Returns a usable poster URL, or null to render the placeholder instead. */
+/**
+ * Returns a usable poster URL, or null to render the placeholder instead.
+ *
+ * `poster` arrives in one of two shapes: a complete URL (TMDB builds these
+ * itself), or a bare filename from your own artwork pack. Absolute URLs are
+ * passed straight through — an earlier version required VITE_POSTER_BASE for
+ * every case, which silently discarded every TMDB poster and left the whole
+ * rail showing placeholders.
+ */
 export function posterUrl(title: Title): string | null {
-  if (!POSTER_BASE || !title.poster) return null;
+  if (!title.poster) return null;
+  if (/^https?:\/\//i.test(title.poster)) return title.poster;
+  if (!POSTER_BASE) return null;
   return `${POSTER_BASE.replace(/\/$/, '')}/${title.poster}`;
 }
 
