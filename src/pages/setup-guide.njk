@@ -1,0 +1,22 @@
+---
+layout: layouts/page.njk
+permalink: /setup-guide/index.html
+title: Setup Guide
+seoTitle: "Setup Guide"
+metaDescription: "Install StreamPlay4K on Firestick, Smart TV, Android TV, Apple TV, mobile or computer."
+---
+{#
+  ONE interactive setup page. Device instructions switch in place; there are
+  deliberately no /setup-guide/<device>/ routes. Deep links use the hash:
+  /setup-guide/#firestick etc. Device list: _data/devices.js
+  The selector, instructions and shared info are delivered by the setup prompt.
+#}
+<section class="sp-section sp-section--flush-top">
+  <div class="sp-container">
+    <ul class="sp-cluster">
+      {% for device in devices %}
+      <li><a class="sp-badge" href="#{{ device.id }}">{{ device.label }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>

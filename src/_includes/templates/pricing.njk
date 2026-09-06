@@ -1,0 +1,17 @@
+{#
+  SOURCE TEMPLATE: pricing
+  FOUNDATION SHELL ONLY — the pricing UI is designed in its own prompt.
+  Plan data comes from _data/pricing.js and must not be restated in markup.
+#}
+<section class="sp-section">
+  <div class="sp-container">
+    <div class="sp-section-head">
+      <h1 class="sp-h1">{{ heroHeadline or title }}</h1>
+      {% if heroSubtext %}<p class="sp-lead">{{ heroSubtext }}</p>{% endif %}
+    </div>
+    <p class="sp-muted">
+      {{ pricing.plans.length }} plans configured &middot; up to {{ pricing.maxDevices }} devices &middot;
+      each additional device costs 50% of the plan's base price.
+    </p>
+  </div>
+</section>

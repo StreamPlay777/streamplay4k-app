@@ -1,0 +1,17 @@
+{#
+  Logo. Renders the supplied asset when brand.logo.<variant> is set in
+  _data/brand.js, otherwise a plain text wordmark so no placeholder graphic
+  is ever invented.
+
+  Usage: {% from "components/logo.njk" import logo with context %}{{ logo("white", "sp-header__logo") }}
+#}
+{% macro logo(variant="white", class="", eager=false) %}
+  {%- set src = brand.logo.white if variant == "white" else brand.logo.dark -%}
+  {%- if src -%}
+    <img class="{{ class }}" src="{{ src }}" alt="{{ brand.logo.alt }}"
+         width="{{ brand.logo.width }}" height="{{ brand.logo.height }}"
+         {% if eager %}fetchpriority="high"{% else %}loading="lazy" decoding="async"{% endif %}>
+  {%- else -%}
+    <span class="{{ class }}">{{ site.name }}</span>
+  {%- endif -%}
+{% endmacro %}

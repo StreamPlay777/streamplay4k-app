@@ -1,0 +1,110 @@
+/* =====================================================================
+   Buttons
+   Variants: primary (accent), secondary (translucent), text (link CTA).
+   Every variant carries hover, focus-visible, active and disabled states,
+   and none of them signals state through colour alone.
+   ================================================================== */
+
+.sp-btn {
+  --sp-btn-height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-space-2);
+  min-height: var(--sp-btn-height);
+  padding: 0 var(--sp-space-6);
+  border: 1px solid transparent;
+  border-radius: var(--sp-radius-sm);
+  font-size: var(--sp-text-base);
+  font-weight: var(--sp-weight-semibold);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform var(--sp-duration-fast) var(--sp-ease),
+    background-color var(--sp-duration) var(--sp-ease),
+    border-color var(--sp-duration) var(--sp-ease),
+    box-shadow var(--sp-duration) var(--sp-ease),
+    opacity var(--sp-duration) var(--sp-ease);
+}
+
+.sp-btn__icon {
+  flex: none;
+  transition: transform var(--sp-duration) var(--sp-ease);
+}
+
+.sp-btn:hover .sp-btn__icon { transform: translateX(3px); }
+
+.sp-btn:active { transform: translateY(1px); }
+
+.sp-btn[aria-disabled="true"],
+.sp-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+  /* Disabled is also announced, never colour-only. */
+}
+
+/* --- Primary -------------------------------------------------------- */
+.sp-btn--primary {
+  background-image: var(--sp-gradient);
+  color: var(--sp-on-accent);
+  box-shadow: var(--sp-shadow-accent);
+}
+
+.sp-btn--primary:hover { filter: brightness(1.07); }
+.sp-btn--primary:active { filter: brightness(0.95); }
+
+/* --- Secondary ------------------------------------------------------ */
+.sp-btn--secondary {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: var(--sp-border-strong);
+  color: var(--sp-text);
+}
+
+.sp-btn--secondary:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--sp-border-accent);
+}
+
+/* --- Text CTA ------------------------------------------------------- */
+.sp-btn--text {
+  min-height: 2.75rem;
+  padding-inline: 0;
+  background: none;
+  color: var(--sp-text);
+  font-weight: var(--sp-weight-semibold);
+  /* Underline, not colour, carries the affordance. */
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.35em;
+}
+
+.sp-btn--text:hover {
+  color: var(--sp-accent-text);
+  text-decoration-color: currentColor;
+}
+
+/* --- Sizes ---------------------------------------------------------- */
+.sp-btn--sm {
+  --sp-btn-height: 2.5rem;
+  padding-inline: var(--sp-space-4);
+  font-size: var(--sp-text-sm);
+}
+
+.sp-btn--lg {
+  --sp-btn-height: 3.5rem;
+  padding-inline: var(--sp-space-7);
+  font-size: var(--sp-text-lg);
+}
+
+.sp-btn--block { width: 100%; }
+
+/* Full-width CTAs below 380px keep labels on one line. */
+@media (max-width: 23.75em) {
+  .sp-btn { width: 100%; padding-inline: var(--sp-space-4); }
+  .sp-btn--text { width: auto; }
+}

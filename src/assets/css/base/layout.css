@@ -1,0 +1,73 @@
+/* =====================================================================
+   Containers, sections and grids
+   ================================================================== */
+
+.sp-container {
+  width: 100%;
+  max-width: var(--sp-container);
+  margin-inline: auto;
+  padding-inline: var(--sp-gutter);
+}
+
+.sp-container--wide { max-width: var(--sp-container-wide); }
+.sp-container--narrow { max-width: var(--sp-container-narrow); }
+.sp-container--prose { max-width: var(--sp-container-prose); }
+/* Edge-to-edge content (marquees, full-bleed media) keeps the gutter only
+   where the design needs it. */
+.sp-container--flush { max-width: none; padding-inline: 0; }
+
+.sp-section { padding-block: var(--sp-section-y); }
+.sp-section--tight { padding-block: var(--sp-section-y-tight); }
+.sp-section--flush-top { padding-block-start: 0; }
+.sp-section--flush-bottom { padding-block-end: 0; }
+
+.sp-section-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-3);
+  max-width: 44rem;
+  margin-bottom: var(--sp-space-8);
+}
+
+.sp-section-head--center {
+  margin-inline: auto;
+  text-align: center;
+  align-items: center;
+}
+
+/* --- Stack: consistent vertical rhythm ----------------------------- */
+.sp-stack { display: flex; flex-direction: column; gap: var(--sp-space-4); }
+.sp-stack--sm { gap: var(--sp-space-2); }
+.sp-stack--lg { gap: var(--sp-space-6); }
+
+/* --- Cluster: wrapping inline group (button rows, tag lists) -------- */
+.sp-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-space-3);
+}
+
+/* --- Auto grid: collapses without media queries --------------------- */
+.sp-grid {
+  display: grid;
+  gap: var(--sp-grid-gap);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--sp-grid-min, 17rem)), 1fr));
+}
+
+.sp-grid--2 { --sp-grid-min: 22rem; }
+.sp-grid--3 { --sp-grid-min: 17rem; }
+.sp-grid--4 { --sp-grid-min: 13rem; }
+
+/* --- Utilities ------------------------------------------------------ */
+.sp-hide { display: none !important; }
+.sp-text-center { text-align: center; }
+.sp-full-bleed { width: 100%; }
+
+@media (max-width: 47.9375em) {
+  .sp-hide-mobile { display: none !important; }
+}
+
+@media (min-width: 48em) {
+  .sp-hide-desktop { display: none !important; }
+}

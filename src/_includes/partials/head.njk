@@ -1,0 +1,40 @@
+{#
+  Every <head> tag comes from here. Page metadata is resolved centrally in
+  src/_data/eleventyComputed.js — templates never assemble their own SEO tags.
+#}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>{{ seo.title }}</title>
+{% if seo.description %}<meta name="description" content="{{ seo.description }}">{% endif %}
+<link rel="canonical" href="{{ seo.canonical }}">
+<meta name="robots" content="{{ seo.robots }}">
+
+<meta property="og:site_name" content="{{ site.name }}">
+<meta property="og:type" content="{{ seo.type }}">
+<meta property="og:title" content="{{ seo.bareTitle }}">
+{% if seo.description %}<meta property="og:description" content="{{ seo.description }}">{% endif %}
+<meta property="og:url" content="{{ seo.canonical }}">
+<meta property="og:locale" content="{{ seo.locale }}">
+{% if seo.image %}
+<meta property="og:image" content="{{ seo.image }}">
+<meta property="og:image:alt" content="{{ seo.imageAlt }}">
+{% endif %}
+
+<meta name="twitter:card" content="{{ seo.twitterCard }}">
+{% if seoDefaults.twitterSite %}<meta name="twitter:site" content="{{ seoDefaults.twitterSite }}">{% endif %}
+<meta name="twitter:title" content="{{ seo.bareTitle }}">
+{% if seo.description %}<meta name="twitter:description" content="{{ seo.description }}">{% endif %}
+{% if seo.image %}<meta name="twitter:image" content="{{ seo.image }}">{% endif %}
+
+<meta name="theme-color" content="{{ brand.themeColor }}">
+<meta name="color-scheme" content="dark">
+
+<link rel="icon" href="{{ brand.favicon.svg }}" type="image/svg+xml">
+{% if brand.favicon.appleTouch %}<link rel="apple-touch-icon" href="{{ brand.favicon.appleTouch }}">{% endif %}
+<link rel="manifest" href="{{ brand.favicon.manifest }}">
+
+<link rel="stylesheet" href="/assets/css/main.css?v={{ site.assetVersion }}">
+
+{% include "partials/schema.njk" %}
+{% include "partials/analytics-head.njk" %}

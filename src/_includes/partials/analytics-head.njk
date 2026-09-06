@@ -1,0 +1,22 @@
+{#
+  Tag injection — the ONLY place tracking scripts are written.
+  Nothing renders until an ID is set in src/_data/analytics.js.
+#}
+{% if analytics.gtmId %}
+<script>
+  window.{{ analytics.dataLayerName }} = window.{{ analytics.dataLayerName }} || [];
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+  var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+  j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','{{ analytics.dataLayerName }}','{{ analytics.gtmId }}');
+</script>
+{% elif analytics.ga4Id or analytics.googleAdsId %}
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ analytics.ga4Id or analytics.googleAdsId }}"></script>
+<script>
+  window.{{ analytics.dataLayerName }} = window.{{ analytics.dataLayerName }} || [];
+  function gtag(){ {{ analytics.dataLayerName }}.push(arguments); }
+  gtag('js', new Date());
+  {% if analytics.ga4Id %}gtag('config', '{{ analytics.ga4Id }}');{% endif %}
+  {% if analytics.googleAdsId %}gtag('config', '{{ analytics.googleAdsId }}');{% endif %}
+</script>
+{% endif %}

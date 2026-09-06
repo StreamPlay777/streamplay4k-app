@@ -1,0 +1,18 @@
+{% if breadcrumbs and breadcrumbs.length > 1 %}
+<nav class="sp-breadcrumbs" aria-label="Breadcrumb">
+  <div class="sp-container">
+    <ol class="sp-breadcrumbs__list">
+      {% for crumb in breadcrumbs %}
+      <li>
+        {% if crumb.current %}
+          <span aria-current="page">{{ crumb.label }}</span>
+        {% else %}
+          <a href="{{ crumb.url }}">{{ crumb.label }}</a>
+          <span class="sp-breadcrumbs__sep" aria-hidden="true">/</span>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</nav>
+{% endif %}

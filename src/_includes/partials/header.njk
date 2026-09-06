@@ -1,0 +1,64 @@
+{#
+  FOUNDATION SHELL — structure, responsiveness and accessibility only.
+  The finished header design is delivered by the header/hero prompt.
+  Links come from _data/navigation.js; nothing is hardcoded here.
+#}
+{# `with context` so the macro can read the brand/site data. #}
+{% from "components/logo.njk" import logo with context %}
+{% from "components/button.njk" import button %}
+
+<header class="sp-header sp-glass">
+  <div class="sp-container sp-header__inner">
+    <a class="sp-header__brand" href="/" aria-label="{{ site.name }} — home">
+      {{ logo("white", "sp-header__logo", true) }}
+    </a>
+
+    <nav class="sp-header__nav" aria-label="Primary">
+      <ul class="sp-header__list">
+        {% for item in navigation.primary %}
+        <li>
+          <a class="sp-header__link" href="{{ item.url }}"
+             {% if page.url == item.url %}aria-current="page"{% endif %}>{{ item.label }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <div class="sp-header__actions">
+      <div class="sp-hide-mobile">
+        {{ button(navigation.ctas.primary.label, navigation.ctas.primary.url, "primary", { size: "sm", event: "view_pricing", eventData: { location: "header" } }) }}
+      </div>
+      <button class="sp-header__toggle sp-hide-desktop" type="button"
+              data-sp-nav-toggle aria-expanded="false" aria-controls="sp-nav-panel" aria-label="Open menu">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+          <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="sp-header__panel sp-hide-desktop" id="sp-nav-panel" data-sp-nav-panel hidden>
+    <div class="sp-container">
+      <nav aria-label="Mobile">
+        <ul class="sp-header__panel-list">
+          {% for item in navigation.primary %}
+          <li>
+            <a href="{{ item.url }}" {% if page.url == item.url %}aria-current="page"{% endif %}>{{ item.label }}</a>
+            {% if item.children %}
+            <div class="sp-header__panel-sub">
+              {% for child in item.children %}
+              <a href="{{ child.url }}">{{ child.label }}</a>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </nav>
+      <div class="sp-header__panel-actions">
+        {{ button(navigation.ctas.primary.label, navigation.ctas.primary.url, "primary", { block: true, event: "view_pricing", eventData: { location: "mobile_nav" } }) }}
+        {{ button(navigation.ctas.secondary.label, navigation.ctas.secondary.url, "secondary", { block: true, event: "free_trial_click", eventData: { location: "mobile_nav" } }) }}
+      </div>
+    </div>
+  </div>
+</header>

@@ -1,0 +1,87 @@
+/* =====================================================================
+   Site footer — FOUNDATION SHELL
+   ================================================================== */
+
+.sp-footer {
+  border-top: 1px solid var(--sp-border);
+  background-color: var(--sp-surface-1);
+  padding-block: var(--sp-section-y-tight);
+}
+
+.sp-footer__top {
+  display: grid;
+  gap: var(--sp-space-8);
+  grid-template-columns: 1fr;
+}
+
+.sp-footer__brand { display: flex; flex-direction: column; gap: var(--sp-space-4); max-width: 26rem; }
+.sp-footer__brand > a { text-decoration: none; font-weight: var(--sp-weight-bold); }
+.sp-footer__logo { height: 2rem; width: auto; }
+
+.sp-footer__columns {
+  display: grid;
+  gap: var(--sp-space-6);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+}
+
+.sp-footer__heading {
+  font-size: var(--sp-text-xs);
+  font-weight: var(--sp-weight-semibold);
+  letter-spacing: var(--sp-tracking-wide);
+  text-transform: uppercase;
+  color: var(--sp-text-faint);
+  margin-bottom: var(--sp-space-3);
+}
+
+.sp-footer__list { display: flex; flex-direction: column; }
+
+.sp-footer__list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  font-size: var(--sp-text-sm);
+  color: var(--sp-text-muted);
+  text-decoration: none;
+  transition: color var(--sp-duration) var(--sp-ease);
+}
+
+.sp-footer__list a:hover { color: var(--sp-text); }
+
+.sp-footer__contact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-2);
+  font-size: var(--sp-text-sm);
+  color: var(--sp-text-muted);
+}
+
+.sp-footer__contact a { color: var(--sp-text); text-decoration: none; }
+.sp-footer__contact a:hover { text-decoration: underline; }
+
+.sp-footer__payments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-space-2);
+  margin-top: var(--sp-space-2);
+}
+
+.sp-footer__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-space-4);
+  margin-top: var(--sp-space-8);
+  padding-top: var(--sp-space-5);
+  border-top: 1px solid var(--sp-border);
+  font-size: var(--sp-text-sm);
+  color: var(--sp-text-faint);
+}
+
+.sp-footer__legal { display: flex; flex-wrap: wrap; gap: var(--sp-space-4); }
+.sp-footer__legal a { color: var(--sp-text-muted); text-decoration: none; }
+.sp-footer__legal a:hover { color: var(--sp-text); }
+
+@media (min-width: 64em) {
+  .sp-footer__top { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: var(--sp-space-10); }
+}

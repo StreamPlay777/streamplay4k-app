@@ -1,0 +1,87 @@
+/* Minimal modern reset — only what the design system relies on. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  /* Anchor targets clear the sticky header. */
+  scroll-padding-top: calc(var(--sp-header-height) + var(--sp-space-4));
+}
+
+body,
+h1, h2, h3, h4, h5, h6,
+p, figure, blockquote, dl, dd {
+  margin: 0;
+}
+
+ul[class],
+ol[class] {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+body {
+  min-height: 100svh;
+  background-color: var(--sp-bg);
+  color: var(--sp-text);
+  font-family: var(--sp-font-sans);
+  font-size: var(--sp-text-base);
+  line-height: var(--sp-leading-body);
+  font-weight: var(--sp-weight-regular);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Guards against any child forcing a horizontal scrollbar. */
+  overflow-x: clip;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.2em;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+:target {
+  scroll-margin-top: calc(var(--sp-header-height) + var(--sp-space-4));
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--sp-border);
+  margin: var(--sp-space-7) 0;
+}

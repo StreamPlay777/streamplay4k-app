@@ -1,0 +1,23 @@
+---
+layout: layouts/base.njk
+---
+{#
+  Standard interior page: breadcrumbs + a heading block + page content.
+  Set `hideBreadcrumbs: true` or `hidePageHeader: true` in front matter for
+  pages that supply their own opening section.
+#}
+{% if not hideBreadcrumbs %}{% include "partials/breadcrumbs.njk" %}{% endif %}
+
+{% if not hidePageHeader %}
+<section class="sp-section sp-section--tight sp-section--flush-bottom">
+  <div class="sp-container">
+    <div class="sp-section-head">
+      {% if eyebrow %}<p class="sp-eyebrow">{{ eyebrow }}</p>{% endif %}
+      <h1 class="sp-h1">{{ heroHeadline or title }}</h1>
+      {% if heroSubtext or lead %}<p class="sp-lead">{{ heroSubtext or lead }}</p>{% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{{ content | safe }}

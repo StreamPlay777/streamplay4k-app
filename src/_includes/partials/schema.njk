@@ -1,0 +1,62 @@
+{#
+  Structured data. Only emit what the page genuinely is.
+
+  - Organization + WebSite: homepage only
+  - BreadcrumbList: any page with a trail
+  - Article: supplied by the post layout via `schemaArticle`
+  - FAQPage / Product: opt in per page with `schemaExtra`
+#}
+{% if page.url == "/" %}
+<script type="application/ld+json">
+{{ {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": seoDefaults.organization.type,
+      "@id": site.url + "/#organization",
+      "name": site.name,
+      "url": site.url + "/",
+      "email": business.supportEmail,
+      "telephone": business.phone.e164,
+      "logo": site.url + seoDefaults.organization.logo,
+      "sameAs": [business.reviews.trustpilotUrl]
+    },
+    {
+      "@type": "WebSite",
+      "@id": site.url + "/#website",
+      "name": site.name,
+      "url": site.url + "/",
+      "inLanguage": site.lang,
+      "publisher": { "@id": site.url + "/#organization" }
+    }
+  ]
+} | jsonld | safe }}
+</script>
+{% endif %}
+
+{% if breadcrumbs and breadcrumbs.length > 1 %}
+{% set crumbItems = [] %}
+{% for crumb in breadcrumbs %}
+  {% set crumbItems = (crumbItems.push({
+    "@type": "ListItem",
+    "position": loop.index,
+    "name": crumb.label,
+    "item": site.url + crumb.url
+  }), crumbItems) %}
+{% endfor %}
+<script type="application/ld+json">
+{{ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": crumbItems
+} | jsonld | safe }}
+</script>
+{% endif %}
+
+{% if schemaArticle %}
+<script type="application/ld+json">{{ schemaArticle | jsonld | safe }}</script>
+{% endif %}
+
+{% if schemaExtra %}
+<script type="application/ld+json">{{ schemaExtra | jsonld | safe }}</script>
+{% endif %}

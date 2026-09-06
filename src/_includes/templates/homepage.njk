@@ -1,0 +1,37 @@
+{#
+  SOURCE TEMPLATE: homepage
+  ---------------------------------------------------------------------
+  FOUNDATION SHELL ONLY. The eleven homepage sections are built one at a
+  time from their own design references, each as its own include added to
+  the list below. Nothing here is final design or final copy.
+
+    01 Header + Hero              -> partials/header.njk + sections/hero.njk
+    02 Animated Channels + Search -> sections/channels.njk
+    03 Movies & Series            -> sections/content.njk
+    04 Cost Comparison            -> sections/comparison.njk
+    05 Pricing + Quick Order      -> sections/pricing.njk
+    06 How It Works               -> sections/how-it-works.njk
+    07 Reviews / Social Proof     -> sections/reviews.njk
+    08 Device Compatibility       -> sections/devices.njk
+    09 FAQ                        -> sections/faq.njk
+    10 Final CTA                  -> sections/final-cta.njk
+    11 Footer                     -> partials/footer.njk
+
+  Hero overrides (heroHeadline / heroSubtext) are read here so duplicate and
+  campaign pages can re-use this template with different opening copy.
+#}
+{% from "components/button.njk" import button %}
+
+<section class="sp-section">
+  <div class="sp-container">
+    <div class="sp-section-head">
+      <p class="sp-eyebrow">Foundation build</p>
+      <h1 class="sp-display">{{ heroHeadline or site.tagline }}</h1>
+      {% if heroSubtext %}<p class="sp-lead">{{ heroSubtext }}</p>{% endif %}
+      <div class="sp-cluster">
+        {{ button(navigation.ctas.primary.label, navigation.ctas.primary.url, "primary", { size: "lg", icon: true, event: "view_pricing", eventData: { location: "home_shell" } }) }}
+        {{ button(navigation.ctas.secondary.label, navigation.ctas.secondary.url, "secondary", { size: "lg", event: "free_trial_click", eventData: { location: "home_shell" } }) }}
+      </div>
+    </div>
+  </div>
+</section>

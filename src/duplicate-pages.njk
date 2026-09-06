@@ -1,0 +1,18 @@
+---
+pagination:
+  data: duplicatePagesToBuild
+  size: 1
+  alias: duplicate
+layout: layouts/template-page.njk
+hideBreadcrumbs: true
+---
+{#
+  DUPLICATE / CAMPAIGN PAGE RENDERER
+
+  Publishes every record in _data/duplicatePages.js at its own slug using an
+  existing source template — no template code is duplicated and no content
+  needs to be regenerated.
+
+  Field mapping and inheritance live in duplicate-pages.11tydata.js.
+  The record list is empty by design; the future central admin writes it.
+#}

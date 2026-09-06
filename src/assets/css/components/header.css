@@ -1,0 +1,121 @@
+/* =====================================================================
+   Site header — FOUNDATION SHELL
+   Deliberately plain. The finished header design arrives with the
+   header/hero prompt; only structure, responsiveness and accessibility
+   are settled here.
+   ================================================================== */
+
+.sp-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--sp-z-header);
+  border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-space-5);
+  min-height: var(--sp-header-height);
+}
+
+.sp-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-space-3);
+  font-weight: var(--sp-weight-bold);
+  letter-spacing: var(--sp-tracking-heading);
+  text-decoration: none;
+}
+
+.sp-header__logo { height: 1.75rem; width: auto; }
+
+.sp-header__nav { display: none; }
+
+.sp-header__list {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-space-5);
+}
+
+.sp-header__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: var(--sp-text-sm);
+  font-weight: var(--sp-weight-medium);
+  color: var(--sp-text-muted);
+  text-decoration: none;
+  transition: color var(--sp-duration) var(--sp-ease);
+}
+
+.sp-header__link:hover { color: var(--sp-text); }
+
+/* Current page is marked by aria-current, not by colour alone. */
+.sp-header__link[aria-current="page"] {
+  color: var(--sp-text);
+  font-weight: var(--sp-weight-semibold);
+}
+
+.sp-header__actions { display: flex; align-items: center; gap: var(--sp-space-3); }
+
+.sp-header__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--sp-border-strong);
+  border-radius: var(--sp-radius-sm);
+  color: var(--sp-text);
+}
+
+/* --- Mobile panel --------------------------------------------------- */
+.sp-header__panel {
+  border-top: 1px solid var(--sp-border);
+  padding-block: var(--sp-space-5);
+}
+
+.sp-header__panel[hidden] { display: none; }
+
+.sp-header__panel-list { display: flex; flex-direction: column; }
+
+.sp-header__panel-list a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  font-size: var(--sp-text-lg);
+  font-weight: var(--sp-weight-medium);
+  text-decoration: none;
+}
+
+.sp-header__panel-sub {
+  display: flex;
+  flex-direction: column;
+  padding-left: var(--sp-space-4);
+  border-left: 1px solid var(--sp-border);
+  margin-block: var(--sp-space-1);
+}
+
+.sp-header__panel-sub a {
+  min-height: 44px;
+  font-size: var(--sp-text-base);
+  color: var(--sp-text-muted);
+}
+
+.sp-header__panel-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-space-3);
+  margin-top: var(--sp-space-5);
+}
+
+@media (min-width: 64em) {
+  .sp-header__nav { display: block; }
+  .sp-header__toggle,
+  .sp-header__panel { display: none !important; }
+}
+
+/* Body scroll lock while the mobile panel is open. */
+body.sp-nav-open { overflow: hidden; }

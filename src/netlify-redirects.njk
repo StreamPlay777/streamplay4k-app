@@ -1,0 +1,9 @@
+---
+permalink: /_redirects
+eleventyExcludeFromCollections: true
+---
+# Generated at build time from src/_data/redirects.js — do not edit by hand.
+# Netlify / Cloudflare Pages format. Ignored by Apache hosts.
+{% for rule in redirects %}
+{{ rule.from }} {{ rule.to }} {{ rule.status or 301 }}
+{% endfor %}

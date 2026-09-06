@@ -1,0 +1,141 @@
+/* =====================================================================
+   StreamPlay4K — Design Tokens
+   The single source of truth for colour, type, space, radius, motion.
+   Components must consume these variables, never raw values.
+   ================================================================== */
+
+:root {
+  /* --- Surfaces ---------------------------------------------------- */
+  --sp-bg: #090a0c;
+  --sp-surface-1: #111216;
+  --sp-surface-2: #17181d;
+  --sp-surface-3: #1e1f25;          /* hover / raised state only */
+  --sp-surface-inverse: #f7f7f8;    /* rare light sections */
+
+  --sp-border: rgba(255, 255, 255, 0.08);
+  --sp-border-strong: rgba(255, 255, 255, 0.14);
+  --sp-border-accent: rgba(255, 122, 24, 0.38);
+
+  /* --- Text -------------------------------------------------------- */
+  --sp-text: #f7f7f8;               /* 8.4:1 on --sp-bg */
+  --sp-text-muted: #a7a7ad;         /* 8.4:1 on --sp-bg */
+  --sp-text-faint: #75767d;         /* decorative / meta only */
+  --sp-text-inverse: #090a0c;
+
+  /* --- Accent -----------------------------------------------------
+     Change these two values to re-tint the entire site.              */
+  --sp-red: #ff2b20;
+  --sp-orange: #ff7a18;
+
+  --sp-accent: var(--sp-red);
+  --sp-accent-hover: #ff4438;
+  --sp-accent-text: var(--sp-orange);   /* 7.6:1 on --sp-bg */
+  --sp-gradient: linear-gradient(100deg, var(--sp-red) 0%, var(--sp-orange) 100%);
+  --sp-gradient-soft: linear-gradient(
+    100deg,
+    rgba(255, 43, 32, 0.16) 0%,
+    rgba(255, 122, 24, 0.16) 100%
+  );
+
+  /* Ink used on top of the accent gradient.
+     #fff is the brand look but measures ~3.7:1 (WCAG AA Large only).
+     Switch to var(--sp-text-inverse) for full AA on normal-size labels. */
+  --sp-on-accent: #ffffff;
+
+  /* --- Feedback ---------------------------------------------------- */
+  --sp-success: #35d07f;
+  --sp-warning: #ffb020;
+  --sp-danger: #ff5a52;
+  --sp-focus: #ffffff;
+
+  /* --- Typography --------------------------------------------------
+     Self-hosted faces drop into /assets/fonts/ and are declared in
+     base/fonts.css. The stack degrades to system UI until then.       */
+  --sp-font-sans: "StreamPlaySans", "Inter", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sp-font-display: var(--sp-font-sans);
+  --sp-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  --sp-weight-regular: 400;
+  --sp-weight-medium: 500;
+  --sp-weight-semibold: 600;
+  --sp-weight-bold: 700;
+  --sp-weight-black: 800;
+
+  /* Fluid type scale — 320px to 1920px. Never hardcode font sizes. */
+  --sp-text-xs: clamp(0.75rem, 0.73rem + 0.10vw, 0.8125rem);
+  --sp-text-sm: clamp(0.875rem, 0.85rem + 0.12vw, 0.9375rem);
+  --sp-text-base: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --sp-text-lg: clamp(1.0625rem, 1rem + 0.30vw, 1.1875rem);
+  --sp-text-xl: clamp(1.1875rem, 1.09rem + 0.45vw, 1.375rem);
+  --sp-text-2xl: clamp(1.375rem, 1.2rem + 0.85vw, 1.75rem);
+  --sp-text-3xl: clamp(1.625rem, 1.35rem + 1.35vw, 2.25rem);
+  --sp-text-4xl: clamp(1.9375rem, 1.5rem + 2.15vw, 3rem);
+  --sp-text-5xl: clamp(2.25rem, 1.6rem + 3.20vw, 3.875rem);
+  --sp-text-display: clamp(2.5rem, 1.55rem + 4.70vw, 5.25rem);
+
+  --sp-leading-tight: 1.04;
+  --sp-leading-heading: 1.12;
+  --sp-leading-snug: 1.35;
+  --sp-leading-body: 1.65;
+
+  --sp-tracking-display: -0.03em;
+  --sp-tracking-heading: -0.02em;
+  --sp-tracking-normal: 0;
+  --sp-tracking-wide: 0.08em;
+
+  /* --- Spacing (4px rhythm) ---------------------------------------- */
+  --sp-space-1: 0.25rem;
+  --sp-space-2: 0.5rem;
+  --sp-space-3: 0.75rem;
+  --sp-space-4: 1rem;
+  --sp-space-5: 1.5rem;
+  --sp-space-6: 2rem;
+  --sp-space-7: 2.5rem;
+  --sp-space-8: 3rem;
+  --sp-space-9: 4rem;
+  --sp-space-10: 5rem;
+  --sp-space-11: 6.5rem;
+  --sp-space-12: 8rem;
+
+  /* --- Layout ------------------------------------------------------ */
+  --sp-container: 1280px;
+  --sp-container-wide: 1400px;
+  --sp-container-narrow: 960px;
+  --sp-container-prose: 720px;
+  --sp-gutter: clamp(1rem, 0.55rem + 2.2vw, 2.5rem);
+  --sp-section-y: clamp(3.5rem, 2.1rem + 6vw, 7.5rem);
+  --sp-section-y-tight: clamp(2.5rem, 1.6rem + 4vw, 4.5rem);
+  --sp-grid-gap: clamp(1rem, 0.7rem + 1.4vw, 1.75rem);
+  --sp-header-height: 4.5rem;
+
+  /* --- Radius ------------------------------------------------------ */
+  --sp-radius-xs: 6px;
+  --sp-radius-sm: 10px;
+  --sp-radius-md: 14px;
+  --sp-radius-lg: 20px;
+  --sp-radius-xl: 28px;
+  --sp-radius-pill: 999px;
+
+  /* --- Elevation (restrained) -------------------------------------- */
+  --sp-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sp-shadow-md: 0 8px 24px -12px rgba(0, 0, 0, 0.7);
+  --sp-shadow-lg: 0 24px 60px -28px rgba(0, 0, 0, 0.85);
+  --sp-shadow-accent: 0 16px 40px -20px rgba(255, 65, 25, 0.55);
+
+  /* --- Motion ------------------------------------------------------ */
+  --sp-duration-fast: 140ms;
+  --sp-duration: 220ms;
+  --sp-duration-slow: 420ms;
+  --sp-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --sp-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Layers ------------------------------------------------------ */
+  --sp-z-base: 1;
+  --sp-z-raised: 10;
+  --sp-z-sticky: 100;
+  --sp-z-header: 200;
+  --sp-z-overlay: 300;
+  --sp-z-modal: 400;
+  --sp-z-toast: 500;
+}

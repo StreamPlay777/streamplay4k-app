@@ -1,0 +1,28 @@
+---
+layout: layouts/page.njk
+permalink: /blog/index.html
+title: Blog
+seoTitle: "Blog"
+metaDescription: "Guides, setup walkthroughs and streaming explainers from StreamPlay4K."
+lead: "Guides, setup walkthroughs and streaming explainers."
+---
+<section class="sp-section">
+  <div class="sp-container">
+    {% if collections.blog.length %}
+    <div class="sp-grid sp-grid--3">
+      {% for post in collections.blog %}
+      <article class="sp-card sp-card--interactive">
+        {% if post.data.category %}<p class="sp-eyebrow">{{ post.data.category }}</p>{% endif %}
+        <h2 class="sp-h4"><a class="sp-card__link" href="{{ post.url }}">{{ post.data.title }}</a></h2>
+        {% if post.data.description %}<p class="sp-small sp-muted">{{ post.data.description }}</p>{% endif %}
+        <p class="sp-small sp-faint">
+          <time datetime="{{ post.date | isoDate }}">{{ post.date | readableDate }}</time>
+        </p>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="sp-muted">No articles published yet.</p>
+    {% endif %}
+  </div>
+</section>

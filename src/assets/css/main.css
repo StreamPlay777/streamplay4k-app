@@ -1,0 +1,19 @@
+/* =====================================================================
+   StreamPlay4K — CSS entry point
+   Lightning CSS bundles these @imports into a single dist/assets/css/main.css.
+   Add new component files here; never link a second stylesheet in the head.
+   ================================================================== */
+
+@import "base/tokens.css";
+@import "base/fonts.css";
+@import "base/reset.css";
+@import "base/typography.css";
+@import "base/layout.css";
+@import "base/a11y.css";
+@import "base/motion.css";
+
+@import "components/button.css";
+@import "components/card.css";
+@import "components/breadcrumbs.css";
+@import "components/header.css";
+@import "components/footer.css";

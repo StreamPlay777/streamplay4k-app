@@ -1,0 +1,80 @@
+---
+layout: layouts/base.njk
+hideBreadcrumbs: false
+---
+{#
+  Blog article. Semantic hierarchy, breadcrumbs, author/date, updated date,
+  featured image, optional table of contents, related posts, Article schema.
+#}
+{% include "partials/breadcrumbs.njk" %}
+
+<article class="sp-section sp-section--tight">
+  <div class="sp-container sp-container--prose">
+    <header class="sp-stack">
+      {% if category %}<p class="sp-eyebrow">{{ category }}</p>{% endif %}
+      <h1 class="sp-h1">{{ title }}</h1>
+      {% if description %}<p class="sp-lead">{{ description }}</p>{% endif %}
+
+      <p class="sp-small sp-faint">
+        {% if author %}By {{ author }} &middot; {% endif %}
+        <time datetime="{{ (date) | isoDate }}">{{ date | readableDate }}</time>
+        {% if updated %} &middot; Updated <time datetime="{{ updated | isoDate }}">{{ updated | readableDate }}</time>{% endif %}
+        &middot; {{ content | readingTime }} min read
+      </p>
+    </header>
+
+    {% if featuredImage %}
+    <figure style="margin-top: var(--sp-space-6)">
+      <img src="{{ featuredImage }}" alt="{{ featuredImageAlt or title }}"
+           width="1200" height="630" loading="eager" decoding="async">
+    </figure>
+    {% endif %}
+
+    {% set toc = content | tableOfContents %}
+    {% if toc.length >= 3 %}
+    <nav class="sp-card sp-card--compact" aria-labelledby="toc-heading" style="margin-top: var(--sp-space-7)">
+      <h2 class="sp-h4" id="toc-heading">On this page</h2>
+      <ul class="sp-stack sp-stack--sm">
+        {% for entry in toc %}
+        <li style="padding-left: {{ 0 if entry.level == 2 else 16 }}px">
+          <a class="sp-btn--text" href="#{{ entry.id }}">{{ entry.text }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+    {% endif %}
+
+    <div class="sp-prose" style="margin-top: var(--sp-space-7)">
+      {{ content | safe }}
+    </div>
+
+    {% if tags and tags.length %}
+    <ul class="sp-cluster" style="margin-top: var(--sp-space-7)">
+      {% for tag in tags %}<li class="sp-badge">{{ tag }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</article>
+
+{% set related = [] %}
+{% for post in collections.blog %}
+  {% if post.url != page.url and post.data.category == category and related.length < 3 %}
+    {% set related = (related.push(post), related) %}
+  {% endif %}
+{% endfor %}
+
+{% if related.length %}
+<section class="sp-section sp-section--tight" aria-labelledby="related-heading">
+  <div class="sp-container">
+    <h2 class="sp-h3" id="related-heading">Related articles</h2>
+    <div class="sp-grid sp-grid--3" style="margin-top: var(--sp-space-6)">
+      {% for post in related %}
+      <article class="sp-card sp-card--interactive">
+        <h3 class="sp-h4"><a class="sp-card__link" href="{{ post.url }}">{{ post.data.title }}</a></h3>
+        <p class="sp-small sp-muted">{{ post.data.description }}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}

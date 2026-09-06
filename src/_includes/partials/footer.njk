@@ -1,0 +1,57 @@
+{#
+  FOUNDATION SHELL — real links and real business data, plain presentation.
+  Final footer design is delivered by the footer prompt.
+#}
+{# `with context` so the macro can read the brand/site data. #}
+{% from "components/logo.njk" import logo with context %}
+
+<footer class="sp-footer">
+  <div class="sp-container">
+    <div class="sp-footer__top">
+      <div class="sp-footer__brand">
+        <a href="/" aria-label="{{ site.name }} — home">{{ logo("white", "sp-footer__logo") }}</a>
+        <p class="sp-muted sp-small">{{ site.tagline }}</p>
+
+        <div class="sp-footer__contact">
+          <a href="mailto:{{ business.supportEmail }}">{{ business.supportEmail }}</a>
+          <a href="{{ business.phone.whatsappUrl }}" rel="noopener"
+             data-sp-event="whatsapp_click" data-sp-event-location="footer">
+            WhatsApp {{ business.phone.display }}
+          </a>
+          <a href="{{ business.reviews.trustpilotUrl }}" rel="noopener nofollow">Trustpilot reviews</a>
+        </div>
+
+        <div>
+          <p class="sp-eyebrow">Invoice payment methods</p>
+          <ul class="sp-footer__payments">
+            {% for method in business.paymentMethods %}
+            <li class="sp-badge">{{ method.label }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <div class="sp-footer__columns">
+        {% for column in navigation.footer %}
+        <div>
+          <h2 class="sp-footer__heading">{{ column.heading }}</h2>
+          <ul class="sp-footer__list">
+            {% for link in column.links %}
+            <li><a href="{{ link.url }}">{{ link.label }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="sp-footer__bottom">
+      <p>&copy; {{ site.year }} {{ site.name }}. All rights reserved.</p>
+      <ul class="sp-footer__legal">
+        {% for link in navigation.legal %}
+        <li><a href="{{ link.url }}">{{ link.label }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</footer>

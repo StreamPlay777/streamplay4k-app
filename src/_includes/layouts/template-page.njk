@@ -1,0 +1,13 @@
+---
+layout: layouts/base.njk
+---
+{#
+  Renders a SOURCE TEMPLATE body (see _data/templates.js).
+
+  Used by the canonical page for that template AND by every duplicate /
+  campaign page that points at it, so the template markup exists once.
+  `sourceTemplate` in front matter (or from a duplicate record) selects the
+  body; hero overrides flow through `heroHeadline` / `heroSubtext`.
+#}
+{% set templateBody = templates[sourceTemplate].body %}
+{% include templateBody %}

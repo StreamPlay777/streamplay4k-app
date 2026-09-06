@@ -1,0 +1,20 @@
+/* Breadcrumb trail — matched by BreadcrumbList structured data. */
+
+.sp-breadcrumbs { padding-block: var(--sp-space-5); }
+
+.sp-breadcrumbs__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-space-2);
+  font-size: var(--sp-text-sm);
+  color: var(--sp-text-faint);
+}
+
+.sp-breadcrumbs__list li { display: flex; align-items: center; gap: var(--sp-space-2); }
+
+.sp-breadcrumbs__list a { color: var(--sp-text-muted); text-decoration: none; }
+.sp-breadcrumbs__list a:hover { color: var(--sp-text); text-decoration: underline; }
+
+.sp-breadcrumbs__sep { color: var(--sp-text-faint); }
+.sp-breadcrumbs [aria-current="page"] { color: var(--sp-text); }

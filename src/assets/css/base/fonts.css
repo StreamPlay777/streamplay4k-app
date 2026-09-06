@@ -1,0 +1,20 @@
+/* =====================================================================
+   Font loading
+   ---------------------------------------------------------------------
+   No web font is requested yet — the stack in tokens.css falls back to
+   system UI so the foundation ships with zero blocking font requests.
+
+   To activate the brand face: drop the woff2 files into
+   src/assets/fonts/ and uncomment the declarations below. Keep
+   `font-display: swap` and self-host (no third-party font CDN).
+   ================================================================== */
+
+/*
+@font-face {
+  font-family: "StreamPlaySans";
+  src: url("/assets/fonts/streamplay-sans-variable.woff2") format("woff2-variations");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+*/

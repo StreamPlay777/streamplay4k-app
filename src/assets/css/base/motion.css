@@ -1,0 +1,85 @@
+/* =====================================================================
+   Motion system — alive but calm.
+   Every decorative animation must be reachable by the reduced-motion
+   block at the bottom of this file.
+   ================================================================== */
+
+/* Scroll reveal. JS adds .is-visible; without JS content stays visible. */
+.sp-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity var(--sp-duration-slow) var(--sp-ease-out),
+    transform var(--sp-duration-slow) var(--sp-ease-out);
+  will-change: opacity, transform;
+}
+
+.sp-reveal.is-visible,
+.no-js .sp-reveal {
+  opacity: 1;
+  transform: none;
+}
+
+/* Staggering is opt-in per item: style="--sp-reveal-delay: 80ms" */
+.sp-reveal { transition-delay: var(--sp-reveal-delay, 0ms); }
+
+/* Continuous horizontal marquee (channel/logo rails). */
+@keyframes sp-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.sp-marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.sp-marquee__track {
+  display: flex;
+  width: max-content;
+  gap: var(--sp-space-5);
+  animation: sp-marquee var(--sp-marquee-duration, 48s) linear infinite;
+}
+
+.sp-marquee:hover .sp-marquee__track { animation-play-state: paused; }
+
+/* Slow atmospheric drift for decorative lighting only. */
+@keyframes sp-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -12px, 0); }
+}
+
+.sp-float { animation: sp-float 9s var(--sp-ease) infinite; }
+
+/* Restrained accent lighting. Decorative: always aria-hidden. */
+.sp-glow {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.22;
+  background: var(--sp-gradient);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .sp-reveal { opacity: 1; transform: none; }
+  .sp-marquee__track { animation: none; transform: none; }
+  .sp-float { animation: none; }
+}
+
+/* Smaller screens carry less decorative motion. */
+@media (max-width: 47.9375em) {
+  .sp-float { animation: none; }
+  .sp-glow { opacity: 0.14; filter: blur(60px); }
+}

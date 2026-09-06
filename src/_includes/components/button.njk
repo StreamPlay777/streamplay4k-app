@@ -1,0 +1,19 @@
+{#
+  Button macro — the one place button markup is defined.
+
+  {% from "components/button.njk" import button %}
+  {{ button("View Plans", "/pricing/", "primary", { size: "lg", icon: true, event: "view_pricing" }) }}
+
+  opts: size ("sm"|"lg"), icon (bool), block (bool), event (analytics event),
+        eventData (object of extra params), attrs (raw attribute string).
+#}
+{% macro button(label, url="#", variant="primary", opts={}) %}
+<a class="sp-btn sp-btn--{{ variant }}{% if opts.size %} sp-btn--{{ opts.size }}{% endif %}{% if opts.block %} sp-btn--block{% endif %}"
+   href="{{ url }}"
+   {%- if opts.event %} data-sp-event="{{ opts.event }}"{% endif %}
+   {%- for key, value in (opts.eventData or {}) %} data-sp-event-{{ key }}="{{ value }}"{% endfor %}
+   {%- if opts.attrs %} {{ opts.attrs | safe }}{% endif %}>
+  <span>{{ label }}</span>
+  {%- if opts.icon %}<span class="sp-btn__icon" aria-hidden="true">&rarr;</span>{% endif %}
+</a>
+{% endmacro %}
