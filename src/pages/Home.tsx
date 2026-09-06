@@ -6,30 +6,32 @@ import { whySwitch, deviceTiles, coverageChecklist } from '../data/marquees';
 import { logoRows, networkLogos } from '../data/logos';
 import PosterWall from '../components/PosterWall';
 import ShowcaseRow from '../components/ShowcaseRow';
-import LiveGuideMock from '../components/LiveGuideMock';
+import TrustpilotBadge from '../components/TrustpilotBadge';
+import ReviewWall from '../components/ReviewWall';
+import TrustCards from '../components/TrustCards';
+import { trustpilot } from '../data/trustpilot';
 import Check from '../components/pricing/Check';
 import { basketMonthly, basketYearly, paymentsPerYear, smallPrint } from '../data/receipt';
-import { reviews } from '../data/reviews';
-import { SectionHeading, Placeholder, LogoMarquee, Tick, Stars } from '../components/ui';
+import { SectionHeading, Placeholder, LogoMarquee, Tick } from '../components/ui';
 import DeviceCard from '../components/DeviceCard';
 import Receipt from '../components/Receipt';
 import PricingOrder from '../components/pricing/PricingOrder';
 import Faq from '../components/Faq';
-import ReviewCard from '../components/ReviewCard';
 
 export default function Home() {
   return (
     <>
+      {/* Home page order — see the brief. Keep these in this sequence. */}
       <Hero />
       <StatBar />
-      <NetworkWall />
-      <CostComparison />
-      <OnDemand />
-      <PricingOrder />
-      <DeviceCoverage />
-      <WhySwitch />
-      <ThreeSteps />
-      <Reviews />
+      <NetworkWall />        {/* Animated channels */}
+      <OnDemand />           {/* Movies & series / premium content */}
+      <CostComparison />     {/* Savings */}
+      <PricingOrder />       {/* Pricing + quick order flow */}
+      <ThreeSteps />         {/* How it works */}
+      <Reviews />            {/* Social proof */}
+      <DeviceCoverage />     {/* Device compatibility */}
+      <WhySwitch />          {/* Not in the brief's list — flagged for a decision */}
       <FaqSection />
       <ClosingCta />
     </>
@@ -40,7 +42,7 @@ export default function Home() {
 function Hero() {
   return (
     <section
-      className="relative isolate overflow-hidden px-7"
+      className="relative isolate overflow-hidden px-5 pb-20 sm:px-7 sm:pb-24"
       // Pulled up behind the floating nav so the artwork runs to the very top
       // of the window, with the padding put back so the copy sits where it did.
       style={{
@@ -111,14 +113,9 @@ function Hero() {
           No hidden fees · Money-back guarantee · 24/7 live chat
         </p>
 
-        {/* Browser-chrome frame around the app screenshot slot */}
-        <div className="mx-auto mt-14 max-w-[940px] overflow-hidden rounded-t-2xl border border-white/[.09] border-b-0 bg-surface-2">
-          <div className="flex items-center gap-2 border-b border-white/[.07] px-4 py-3">
-            {[0, 1, 2].map((i) => (
-              <span key={i} className="h-[9px] w-[9px] rounded-full bg-[#2A3350]" />
-            ))}
-          </div>
-          <LiveGuideMock />
+        {/* Social proof sits with the CTAs rather than in a separate strip */}
+        <div className="mt-9 flex justify-center">
+          <TrustpilotBadge />
         </div>
       </div>
     </section>
@@ -192,17 +189,17 @@ function CostComparison() {
     label: string; monthly: string; yearly: string; accent?: boolean; bold?: boolean;
   }) => (
     <div
-      className={`grid grid-cols-[1fr_100px_110px] gap-2 py-4 sm:grid-cols-[1fr_140px_150px] ${
+      className={`grid grid-cols-[minmax(0,1fr)_64px_74px] gap-2 py-4 min-[400px]:grid-cols-[minmax(0,1fr)_100px_110px] sm:grid-cols-[minmax(0,1fr)_140px_150px] ${
         accent ? 'border-t-2 border-accent' : 'border-t border-white/[.12]'
       }`}
     >
-      <span className={`text-[15px] ${accent ? 'font-bold text-accent' : bold ? 'font-bold text-ink' : 'text-ink-2'}`}>
+      <span className={`min-w-0 text-[13.5px] sm:text-[15px] ${accent ? 'font-bold text-accent' : bold ? 'font-bold text-ink' : 'text-ink-2'}`}>
         {label}
       </span>
-      <span className={`text-right text-[15px] ${accent ? 'font-bold text-accent' : bold ? 'font-bold text-ink' : 'text-ink-2'}`}>
+      <span className={`nums text-right text-[13px] sm:text-[15px] ${accent ? 'font-bold text-accent' : bold ? 'font-bold text-ink' : 'text-ink-2'}`}>
         {monthly}
       </span>
-      <span className={`text-right text-[15px] ${accent ? 'font-bold text-accent' : bold ? 'font-bold text-ink' : 'text-ink-2'}`}>
+      <span className={`nums text-right text-[13px] sm:text-[15px] ${accent ? 'font-bold text-accent' : bold ? 'font-bold text-ink' : 'text-ink-2'}`}>
         {y}
       </span>
     </div>
@@ -210,11 +207,14 @@ function CostComparison() {
 
   return (
     <section
-      className="px-7 py-[110px]"
+      className="px-5 py-20 sm:px-7 sm:py-[110px]"
       style={{ background: 'linear-gradient(180deg, #06080F, #080B16)' }}
     >
       <div className="mx-auto grid max-w-shell items-start gap-16 lg:grid-cols-[400px_1fr] lg:gap-[88px]">
-        <div className="mx-auto w-full max-w-[400px]">
+        {/* min-w-0: a grid item defaults to min-width:auto, so the receipt's
+            content could force the column wider than a 320px screen and push
+            the whole page sideways. */}
+        <div className="mx-auto w-full min-w-0 max-w-[400px]">
           <Receipt />
         </div>
 
@@ -235,7 +235,7 @@ function CostComparison() {
           </p>
 
           <div className="mt-9">
-            <div className="grid grid-cols-[1fr_100px_110px] gap-2 pb-3 sm:grid-cols-[1fr_140px_150px]">
+            <div className="grid grid-cols-[minmax(0,1fr)_64px_74px] gap-2 pb-3 min-[400px]:grid-cols-[minmax(0,1fr)_100px_110px] sm:grid-cols-[minmax(0,1fr)_140px_150px]">
               <span />
               <span className="text-right text-[11px] font-bold uppercase tracking-[.16em] text-ink-4">Monthly</span>
               <span className="text-right text-[11px] font-bold uppercase tracking-[.16em] text-ink-4">Yearly</span>
@@ -516,35 +516,86 @@ function ThreeSteps() {
   );
 }
 
-/* ── 1.10 Reviews ──────────────────────────────────────────────────────────── */
+/* ── Reviews / social proof ────────────────────────────────────────────────── */
 function Reviews() {
+  const stats = [
+    { value: String(trustpilot.rating), label: 'Average rating out of 5' },
+    { value: trustpilot.reviewCount.toLocaleString('en-US'), label: 'Reviews on Trustpilot' },
+    { value: 'Minutes', label: 'Typical reply time, 24/7' },
+    { value: 'Up to 5', label: 'Screens on one subscription' },
+  ];
+
   return (
-    <section className="bg-bg-alt px-7 py-[110px]">
-      <div className="mx-auto max-w-shell">
-        <div className="flex flex-wrap items-end justify-between gap-8">
-          <h2 className="font-display font-extrabold leading-[1.02] text-ink" style={{ fontSize: 'clamp(32px, 5vw, 52px)' }}>
-            Reviews from
+    <section className="relative isolate overflow-hidden bg-bg-alt px-5 py-20 sm:px-7 sm:py-[110px]">
+      <ReviewWall />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, #080B16 0%, rgba(8,11,22,.62) 20%, rgba(8,11,22,.62) 80%, #080B16 100%)',
+        }}
+      />
+
+      <div className="relative mx-auto max-w-shell">
+        {/* Header */}
+        <div className="mx-auto max-w-[760px] text-center">
+          <p className="text-[12px] font-bold uppercase tracking-[.18em] text-accent">
+            From the community, to Streamplay4k
+          </p>
+          <h2
+            className="mt-5 font-display font-extrabold leading-[1.04] text-ink"
+            style={{ fontSize: 'clamp(30px, 4.8vw, 52px)' }}
+          >
+            We're not the only ones.
             <br />
-            real subscribers
+            <span className="text-accent">We're just the best.</span>
           </h2>
-          <div className="md:text-right">
-            <div className="font-display text-[40px] font-extrabold leading-none text-ink">
-              {site.rating} <span className="text-[22px] text-ink-4">/ 5</span>
-            </div>
-            <div className="mt-1.5 text-[14px] text-ink-3">{site.reviewCount} verified reviews</div>
-            <div className="mt-3 inline-flex items-center gap-2.5 rounded-full border border-white/[.12] px-4 py-2">
-              <Stars size={13} />
-              <span className="text-[13px] text-ink-3">{site.rating} on our public review profile</span>
-            </div>
+          <p className="mx-auto mt-5 max-w-[520px] text-[16px] leading-relaxed text-ink-3">
+            Real subscribers, real setups, real support tickets. Our public profile is open —
+            read every word of it.
+          </p>
+          <div className="mt-7 flex justify-center">
+            <TrustpilotBadge />
           </div>
         </div>
 
-        <div className="mt-12 grid gap-[18px] md:grid-cols-2 lg:grid-cols-3">
-          {reviews.slice(0, 6).map((r) => <ReviewCard key={r.title} review={r} />)}
+        {/* Raised cards */}
+        <div className="mt-14">
+          <TrustCards />
         </div>
 
-        <div className="mt-10 text-center">
-          <Link to="/reviews" className="btn-outline">Read all reviews</Link>
+        {/* Stat row */}
+        <dl className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-white/[.1] bg-white/[.06] sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label} className="bg-[#0A0E1B] px-5 py-6 sm:px-6 sm:py-7">
+              <dt className="font-display text-[30px] font-extrabold leading-none text-ink sm:text-[34px]">
+                {s.value}
+              </dt>
+              <dd className="mt-2 text-[11px] font-bold uppercase tracking-[.14em] text-ink-4">
+                {s.label}
+              </dd>
+            </div>
+          ))}
+        </dl>
+
+        {/* Actions */}
+        <div className="mt-10 flex flex-col items-center justify-between gap-5 lg:flex-row">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <Link to="/pricing" className="btn-accent w-full sm:w-auto">
+              I'm in — get my sub →
+            </Link>
+            <a
+              href={trustpilot.profileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-outline w-full sm:w-auto"
+            >
+              See what everyone else said
+            </a>
+          </div>
+          <p className="text-center text-[11.5px] font-bold uppercase tracking-[.13em] text-ink-4 lg:text-right">
+            Money-back guarantee · Cancel in one message · No contracts
+          </p>
         </div>
       </div>
     </section>

@@ -30,8 +30,12 @@ export default function Receipt() {
         <span className="text-[12.5px] font-extrabold uppercase tracking-[.2em] text-accent">
           Without Streamplay4k
         </span>
-        <span className="flex items-center gap-1.5 whitespace-nowrap text-accent">
-          <span className="text-[19px] font-bold italic sm:text-[21px]">Every. Single. Month.</span>
+        {/* Allowed to wrap on the narrowest phones: held on one line it is
+            wider than a 320px screen and pushes the whole page sideways. */}
+        <span className="flex items-center gap-1.5 text-accent sm:whitespace-nowrap">
+          <span className="text-[17px] font-bold italic min-[360px]:text-[19px] sm:text-[21px]">
+            Every. Single. Month.
+          </span>
           <span className="text-[18px]" style={{ transform: 'rotate(28deg)' }} aria-hidden="true">
             ↙
           </span>
