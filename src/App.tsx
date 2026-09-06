@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Newsletter from './components/Newsletter';
-import { PlanProvider } from './hooks/usePlan';
 import { useScrollTop } from './hooks/useScrollTop';
 import Home from './pages/Home';
 import Pricing from './pages/Pricing';
@@ -10,6 +9,7 @@ import Setup from './pages/Setup';
 import Channels from './pages/Channels';
 import Reviews from './pages/Reviews';
 import Contact from './pages/Contact';
+import ThankYou from './pages/ThankYou';
 
 function NotFound() {
   return (
@@ -37,6 +37,8 @@ function Shell() {
           <Route path="/channels" element={<Channels />} />
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/contact" element={<Contact />} />
+          {/* noindex, excluded from sitemap — see ThankYou.tsx */}
+          <Route path="/thank-you" element={<ThankYou />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
@@ -49,9 +51,7 @@ function Shell() {
 export default function App() {
   return (
     <BrowserRouter>
-      <PlanProvider>
-        <Shell />
-      </PlanProvider>
+      <Shell />
     </BrowserRouter>
   );
 }

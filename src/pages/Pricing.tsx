@@ -1,13 +1,11 @@
 import { site } from '../data/site';
-import { usePlan } from '../hooks/usePlan';
-import { PlanCard, FeaturesCard } from '../components/PlanCard';
+import PricingOrder from '../components/pricing/PricingOrder';
 import { SectionHeading } from '../components/ui';
 import Faq from '../components/Faq';
 import Receipt from '../components/Receipt';
 import { basketMonthly, basketYearly, smallPrint } from '../data/receipt';
 
 export default function Pricing() {
-  const { monthly, term } = usePlan();
 
   return (
     <>
@@ -28,19 +26,13 @@ export default function Pricing() {
             series and international entertainment in HD and 4K.
           </p>
           <p className="mt-5 text-[14px] text-ink-4">
-            From <strong className="font-semibold text-ink">${monthly}</strong>/month over {term.label.toLowerCase()}
-            {' '}· No hidden fees · Fast activation · 24/7 support
+            No hidden fees · Fast activation · 24/7 support
           </p>
         </div>
       </section>
 
-      {/* Plan + features */}
-      <section className="px-7 pb-[100px]">
-        <div className="mx-auto grid max-w-shell gap-6 lg:grid-cols-2">
-          <PlanCard ctaTo="/contact" />
-          <FeaturesCard />
-        </div>
-      </section>
+      {/* Section 05 — the one pricing + order experience, shared with the homepage */}
+      <PricingOrder />
 
       {/* The receipt argument, repeated for visitors landing straight on Pricing */}
       <section className="px-7 py-[100px]" style={{ background: 'linear-gradient(180deg, #06080F, #080B16)' }}>

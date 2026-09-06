@@ -1,7 +1,7 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { site, heroStats, paymentMethods } from '../data/site';
-import { terms } from '../data/plans';
-import { usePlan } from '../hooks/usePlan';
+import { TERMS, quote, money, DEFAULT_TERM_ID } from '../data/pricing';
 import { whySwitch, deviceTiles, coverageChecklist } from '../data/marquees';
 import { logoRows, networkLogos } from '../data/logos';
 import { railA, railB, featured } from '../data/vod';
@@ -11,7 +11,7 @@ import { SectionHeading, Placeholder, LogoMarquee, TitleMarquee, Tick, Stars } f
 import Poster from '../components/Poster';
 import DeviceCard from '../components/DeviceCard';
 import Receipt from '../components/Receipt';
-import { PlanCard, FeaturesCard } from '../components/PlanCard';
+import PricingOrder from '../components/pricing/PricingOrder';
 import Faq from '../components/Faq';
 import ReviewCard from '../components/ReviewCard';
 
@@ -23,7 +23,7 @@ export default function Home() {
       <NetworkWall />
       <CostComparison />
       <OnDemand />
-      <PricingSection />
+      <PricingOrder />
       <DeviceCoverage />
       <WhySwitch />
       <ThreeSteps />
@@ -279,24 +279,8 @@ function OnDemand() {
   );
 }
 
-/* ── 1.6 Pricing card ──────────────────────────────────────────────────────── */
-function PricingSection() {
-  return (
-    <section id="pricing" className="bg-bg-alt px-7 py-[110px]">
-      <div className="mx-auto max-w-[1120px]">
-        <SectionHeading
-          label="Pricing"
-          title={<>One plan. <span className="text-accent">Pick your term.</span></>}
-          sub="The longer you stay, the less you pay. Everything is included on every term."
-        />
-        <div className="mt-14 grid gap-7 lg:grid-cols-2">
-          <PlanCard ctaTo="/pricing" />
-          <FeaturesCard />
-        </div>
-      </div>
-    </section>
-  );
-}
+/* ── 1.6 Pricing + order (Section 05) ──────────────────────────────────────── */
+// Lives in components/pricing/PricingOrder.tsx — see spec section 05.
 
 /* ── 1.7 Device coverage ───────────────────────────────────────────────────── */
 function DeviceCoverage() {
@@ -358,7 +342,9 @@ function WhySwitch() {
 
 /* ── 1.9 Three-step setup ──────────────────────────────────────────────────── */
 function ThreeSteps() {
-  const { term, setTerm, screens, total } = usePlan();
+  // Step 01 mirrors the locked pricing; the live selector is Section 05.
+  const [termId, setTermId] = useState(DEFAULT_TERM_ID);
+  const q = quote(termId, 1);
 
   const steps = [
     {
@@ -366,23 +352,18 @@ function ThreeSteps() {
       body: 'Choose how long you want to stay. The longer the term, the lower the monthly cost — everything else is identical.',
       widget: (
         <div className="flex flex-col gap-2">
-          {terms.map((t) => {
-            const on = t.months === term.months;
+          {TERMS.map((t) => {
+            const on = t.id === termId;
             return (
               <button
-                key={t.months}
-                onClick={() => setTerm(t)}
+                key={t.id}
+                onClick={() => setTermId(t.id)}
                 className={`flex items-center gap-3 rounded-[10px] border px-4 py-3.5 text-left transition-colors ${
                   on ? 'border-accent bg-accent/[.14]' : 'border-white/10 bg-white/[.02] hover:border-white/20'
                 }`}
               >
                 <span className="flex-1 font-display text-[15px] font-bold text-ink">{t.label}</span>
-                {t.popular && (
-                  <span className="rounded bg-accent-gradient px-2 py-0.5 font-display text-[10px] font-extrabold uppercase text-white">
-                    Popular
-                  </span>
-                )}
-                <span className="font-display text-[18px] font-extrabold text-ink">${t.total}</span>
+                <span className="nums font-display text-[18px] font-extrabold text-ink">{money(t.baseCents)}</span>
               </button>
             );
           })}
@@ -396,18 +377,18 @@ function ThreeSteps() {
         <div className="rounded-2xl border border-white/[.09] bg-white/[.025] p-5">
           <div className="flex justify-between text-[14px]">
             <span className="text-ink-3">{site.name}</span>
-            <span className="font-medium text-ink">{term.label}</span>
+            <span className="font-medium text-ink">{q.term.label}</span>
           </div>
           <div className="mt-2 flex justify-between text-[14px]">
-            <span className="text-ink-3">{screens} screen{screens > 1 ? 's' : ''} at a time</span>
-            <span className="font-medium text-ink">${total}</span>
+            <span className="text-ink-3">1 device included</span>
+            <span className="nums font-medium text-ink">{money(q.totalCents)}</span>
           </div>
           <div className="my-4 border-t border-white/[.09]" />
           <div className="flex items-end justify-between">
             <span className="text-[11px] font-bold uppercase tracking-[.16em] text-ink-4">To pay</span>
-            <span className="font-display text-[28px] font-extrabold leading-none text-ink">${total}</span>
+            <span className="nums font-display text-[28px] font-extrabold leading-none text-ink">{money(q.totalCents)}</span>
           </div>
-          <button className="btn-accent mt-5 w-full !py-3 !text-[14px]">Checkout</button>
+          <Link to="/#pricing" className="btn-accent mt-5 w-full !py-3 !text-[14px]">Choose this plan</Link>
           <div className="mt-4 flex flex-wrap gap-1.5">
             {paymentMethods.map((p) => (
               <span key={p} className="rounded-[5px] border border-white/10 px-2 py-1 nums text-[9.5px] text-ink-4">
