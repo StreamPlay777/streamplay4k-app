@@ -1,45 +1,43 @@
-import { wallSnippets } from '../data/trustpilot';
-import { reviews } from '../data/reviews';
+import { moreReviews, featuredReviews, trustpilot } from '../data/reviews';
 
 /**
- * Blurred wall of review snippets, sitting behind the reviews section.
+ * Subdued wall of real reviews behind the section.
  *
- * Purely atmospheric and hidden from screen readers — the cards in front carry
- * the real content. Built as drifting columns for the same reason as the poster
- * wall: a still backdrop behind moving foreground reads as a printed sheet.
+ * Every card is a real reviewer. The text is a paraphrase of what they said,
+ * not a quote, because we hold their sentiment rather than their exact words —
+ * so nothing appears in quote marks and no reviewer is invented to fill space.
+ *
+ * Where more cards are wanted than there are real reviewers, the same people
+ * repeat down the columns rather than new identities being made up.
+ *
+ * Decorative, so hidden from screen readers; the cards in front carry the real
+ * content. Hidden entirely on phones, where it costs readability and paint
+ * time for no gain.
  */
 
-const COLUMNS = 5;
-const VISIBLE_SM = 2;
-const VISIBLE_MD = 3;
-const DURATIONS = [64, 78, 58, 84, 70];
+const COLUMNS = 4;
+const PER_COLUMN = 6;
+const DURATIONS = [76, 92, 68, 100];
 
-/** Longer lines mixed in so the wall does not read as one uniform texture. */
 const POOL = [
-  ...wallSnippets,
-  ...reviews.map((r) => r.body.slice(0, 96) + '…'),
+  ...moreReviews.map((r) => ({ name: r.name, date: r.date, text: r.summary })),
+  ...featuredReviews.map((r) => ({ name: r.name, date: r.date, text: r.quote })),
 ];
 
 export default function ReviewWall() {
-  const per = 6;
   const columns = Array.from({ length: COLUMNS }, (_, c) =>
-    Array.from({ length: per }, (_, r) => POOL[(c * per + r) % POOL.length]),
+    Array.from({ length: PER_COLUMN }, (_, r) => POOL[(c * PER_COLUMN + r) % POOL.length]),
   );
 
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 select-none overflow-hidden"
-      style={{ filter: 'blur(2.5px)', opacity: 0.75 }}
+      className="pointer-events-none absolute inset-0 hidden select-none overflow-hidden sm:block"
+      style={{ filter: 'blur(2.5px)', opacity: 0.7 }}
     >
-      <div className="absolute left-1/2 top-1/2 flex h-[190%] w-[118%] -translate-x-1/2 -translate-y-1/2 gap-3">
+      <div className="absolute left-1/2 top-1/2 flex h-[190%] w-[116%] -translate-x-1/2 -translate-y-1/2 gap-3">
         {columns.map((col, c) => (
-          <div
-            key={c}
-            className={`h-full min-w-0 flex-1 overflow-hidden ${
-              c >= VISIBLE_MD ? 'hidden lg:block' : c >= VISIBLE_SM ? 'hidden sm:block' : ''
-            }`}
-          >
+          <div key={c} className={`h-full min-w-0 flex-1 overflow-hidden ${c >= 3 ? 'hidden lg:block' : ''}`}>
             <div
               className="marquee-track flex flex-col gap-3"
               style={{
@@ -50,13 +48,16 @@ export default function ReviewWall() {
               }}
             >
               {[0, 1].map((pass) =>
-                col.map((text, r) => (
+                col.map((r, i) => (
                   <div
-                    key={`${pass}-${r}`}
+                    key={`${pass}-${i}`}
                     className="rounded-xl border border-white/[.07] bg-white/[.035] px-4 py-4"
                   >
-                    <div className="text-[11px] tracking-[.2em]" style={{ color: '#00B67A' }}>★★★★★</div>
-                    <p className="mt-2 text-[12.5px] leading-snug text-ink-3">“{text}”</p>
+                    <div className="text-[11px] tracking-[.2em]" style={{ color: trustpilot.green }}>
+                      ★★★★★
+                    </div>
+                    <p className="mt-2 text-[12.5px] leading-snug text-ink-3">{r.text}</p>
+                    <p className="mt-2 text-[11px] text-ink-5">{r.name} · {r.date}</p>
                   </div>
                 )),
               )}

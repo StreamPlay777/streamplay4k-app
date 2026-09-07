@@ -18,8 +18,7 @@ export const site = {
   countries: 73,
   uhdChannels: '8,308',
   catchUpHours: 24,
-  rating: 4.8,
-  reviewCount: '2,412',
+  // Rating and review count live in src/data/reviews.ts — the Trustpilot data.
 
   // Support
   email: 'support@streamplay4k.com',

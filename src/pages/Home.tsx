@@ -9,7 +9,7 @@ import ShowcaseRow from '../components/ShowcaseRow';
 import TrustpilotBadge from '../components/TrustpilotBadge';
 import ReviewWall from '../components/ReviewWall';
 import TrustCards from '../components/TrustCards';
-import { trustpilot } from '../data/trustpilot';
+import { trustpilot } from '../data/reviews';
 import Check from '../components/pricing/Check';
 import { basketMonthly, basketYearly, paymentsPerYear, smallPrint } from '../data/receipt';
 import { SectionHeading, Placeholder, LogoMarquee, Tick } from '../components/ui';
@@ -518,11 +518,14 @@ function ThreeSteps() {
 
 /* ── Reviews / social proof ────────────────────────────────────────────────── */
 function Reviews() {
+  // Every figure here comes from src/data/reviews.ts. The activation time is
+  // our own locked delivery figure, not a Trustpilot support metric, so it is
+  // labelled as activation rather than reply time.
   const stats = [
     { value: String(trustpilot.rating), label: 'Average rating out of 5' },
-    { value: trustpilot.reviewCount.toLocaleString('en-US'), label: 'Reviews on Trustpilot' },
-    { value: 'Minutes', label: 'Typical reply time, 24/7' },
-    { value: 'Up to 5', label: 'Screens on one subscription' },
+    { value: String(trustpilot.reviewCount), label: 'Reviews on Trustpilot' },
+    { value: '5–15 min', label: 'Typical activation time' },
+    { value: 'Up to 5', label: 'Devices on one subscription' },
   ];
 
   return (
@@ -539,39 +542,55 @@ function Reviews() {
       <div className="relative mx-auto max-w-shell">
         {/* Header */}
         <div className="mx-auto max-w-[760px] text-center">
-          <p className="text-[12px] font-bold uppercase tracking-[.18em] text-accent">
-            From the community, to Streamplay4k
+          <p
+            className="text-[11.5px] font-bold uppercase tracking-[.18em] sm:text-[12px]"
+            style={{
+              background: 'linear-gradient(90deg, #FF2B20, #FF7A18)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              color: 'transparent',
+            }}
+          >
+            From our customers, to Streamplay
           </p>
           <h2
             className="mt-5 font-display font-extrabold leading-[1.04] text-ink"
             style={{ fontSize: 'clamp(30px, 4.8vw, 52px)' }}
           >
-            We're not the only ones.
+            Our customers
             <br />
-            <span className="text-accent">We're just the best.</span>
+            <span
+              style={{
+                background: 'linear-gradient(90deg, #FF2B20, #FF7A18)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+              }}
+            >
+              say it best.
+            </span>
           </h2>
-          <p className="mx-auto mt-5 max-w-[520px] text-[16px] leading-relaxed text-ink-3">
-            Real subscribers, real setups, real support tickets. Our public profile is open —
-            read every word of it.
+          <p className="mx-auto mt-5 max-w-[520px] text-[15.5px] leading-relaxed text-ink-3 sm:text-[16px]">
+            See what customers are saying about their experience with Streamplay4k on Trustpilot.
           </p>
           <div className="mt-7 flex justify-center">
             <TrustpilotBadge />
           </div>
         </div>
 
-        {/* Raised cards */}
-        <div className="mt-14">
+        {/* Featured reviews */}
+        <div className="mt-12 sm:mt-14">
           <TrustCards />
         </div>
 
-        {/* Stat row */}
-        <dl className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-white/[.1] bg-white/[.06] sm:grid-cols-2 lg:grid-cols-4">
+        {/* Metrics — 2x2 on phones, four across from tablet up */}
+        <dl className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/[.1] bg-white/[.06] lg:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className="bg-[#0A0E1B] px-5 py-6 sm:px-6 sm:py-7">
-              <dt className="font-display text-[30px] font-extrabold leading-none text-ink sm:text-[34px]">
+            <div key={s.label} className="bg-[#0A0E1B] px-4 py-5 sm:px-6 sm:py-7">
+              <dt className="font-display text-[24px] font-extrabold leading-none text-ink sm:text-[30px] lg:text-[34px]">
                 {s.value}
               </dt>
-              <dd className="mt-2 text-[11px] font-bold uppercase tracking-[.14em] text-ink-4">
+              <dd className="mt-2 text-[10.5px] font-bold uppercase tracking-[.13em] text-ink-4 sm:text-[11px]">
                 {s.label}
               </dd>
             </div>
@@ -581,20 +600,19 @@ function Reviews() {
         {/* Actions */}
         <div className="mt-10 flex flex-col items-center justify-between gap-5 lg:flex-row">
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <Link to="/pricing" className="btn-accent w-full sm:w-auto">
-              I'm in — get my sub →
-            </Link>
+            <Link to="/pricing" className="btn-accent w-full sm:w-auto">View plans →</Link>
             <a
-              href={trustpilot.profileUrl}
+              href={trustpilot.url}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Read all Streamplay4k reviews on Trustpilot. Opens in a new tab."
               className="btn-outline w-full sm:w-auto"
             >
-              See what everyone else said
+              Read all reviews
             </a>
           </div>
           <p className="text-center text-[11.5px] font-bold uppercase tracking-[.13em] text-ink-4 lg:text-right">
-            Money-back guarantee · Cancel in one message · No contracts
+            7-day money-back guarantee · 24/7 support
           </p>
         </div>
       </div>

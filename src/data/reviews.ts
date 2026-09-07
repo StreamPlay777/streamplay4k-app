@@ -1,70 +1,102 @@
 /**
- * PLACEHOLDER REVIEWS — names, cities and dates are invented and must be replaced
- * with the client's real verified reviews before launch. Publishing fabricated
- * testimonials as genuine is both misleading and, in the US, an FTC problem.
+ * StreamPlay4K Trustpilot data — the single source for every review figure and
+ * quote on the site. Nothing here is invented.
+ *
+ * SNAPSHOT, NOT A LIVE FEED. Trustpilot ratings and counts move; these were
+ * supplied by the owner from the profile below. Update `rating` and
+ * `reviewCount` here when they change — they must never be typed into a
+ * template. Nothing scrapes Trustpilot at runtime.
+ *
+ * TRUTHFULNESS RULES BAKED IN:
+ *  - No review carries a "Verified" badge. Trustpilot shows these as
+ *    "Unprompted review", which is not the same claim, so the badge reads
+ *    "On Trustpilot".
+ *  - Copy never states that every review is verified, or that all reviewers
+ *    are paying customers.
+ *  - The wall behind the section paraphrases real reviews rather than
+ *    quoting words nobody wrote. Only the three featured cards quote
+ *    directly, and only text supplied from the real profile.
+ *  - The overall 4.7 is shown as-is. The profile also holds one 1-star
+ *    review; the homepage does not break the score down, so nothing is
+ *    hidden or re-weighted.
  */
 
-export interface Review {
-  title: string;
-  body: string;
+export const trustpilot = {
+  url: 'https://www.trustpilot.com/review/streamplay4k.com',
+  rating: 4.7,
+  reviewCount: 51,
+  claimedSince: 'January 2026',
+  /** Real distribution. Not shown on the homepage; available for /reviews. */
+  distribution: {
+    fiveStar: 92,
+    fourStar: 6,
+    threeStar: 0,
+    twoStar: 0,
+    oneStar: 2,
+  },
+  /** Trustpilot brand green, for the badge tile and stars. */
+  green: '#00B67A',
+} as const;
+
+export interface FeaturedReview {
   name: string;
-  location: string;
+  country: string;
   date: string;
+  stars: number;
+  /** Verbatim excerpt from the real review. Do not embellish. */
+  quote: string;
 }
 
-export const reviews: Review[] = [
+/** Three real 5-star reviews, quoted exactly as supplied. */
+export const featuredReviews: FeaturedReview[] = [
   {
-    title: 'Sunday football finally works',
-    body: 'Three seasons of buffering on my old box and I had given up on watching live. Every game this year has run clean in 4K, even at kickoff when everyone is on at once.',
-    name: 'Marcus D.', location: 'Columbus, OH', date: 'August 2026',
+    name: 'Albert Gutierrez',
+    country: 'US',
+    date: 'July 2026',
+    stars: 5,
+    quote: 'Customer service is awesome. Very responsive and helpful.',
   },
   {
-    title: 'Set up on the Firestick in five minutes',
-    body: 'I am not technical at all. The Downloader code was on the site, the steps matched exactly what my TV showed, and I was watching before the coffee went cold.',
-    name: 'Rhonda P.', location: 'Tucson, AZ', date: 'July 2026',
+    name: 'Steve Murry',
+    country: 'US',
+    date: 'June 2026',
+    stars: 5,
+    quote: 'Great service! Great customer support!',
   },
   {
-    title: 'Replaced four subscriptions',
-    body: 'We were paying for cable plus three streaming apps. Cancelled all of them. The kids have their shows, my wife has her series, I have the games — one login.',
-    name: 'Tomás R.', location: 'San Antonio, TX', date: 'August 2026',
-  },
-  {
-    title: 'The guide is actually accurate',
-    body: 'Every other service I tried had an EPG that was wrong or empty half the time. This one lines up with what is really on, and catch-up goes back a full week.',
-    name: 'Angela W.', location: 'Portland, OR', date: 'June 2026',
-  },
-  {
-    title: 'Support answered at 2am',
-    body: 'Stream dropped in the middle of a fight night. Opened chat expecting a bot and got a person who had me back up in about four minutes. That is worth the money on its own.',
-    name: 'Devin K.', location: 'Newark, NJ', date: 'August 2026',
-  },
-  {
-    title: 'International channels my parents wanted',
-    body: 'My folks wanted Arabic news and I wanted US sport. Same subscription covers both, and it works on their tablet and my TV at the same time.',
-    name: 'Sami H.', location: 'Dearborn, MI', date: 'July 2026',
-  },
-  {
-    title: 'No contract was the selling point',
-    body: 'I signed up for one month fully expecting to cancel. Six months later I am on the annual plan. Nothing has gone wrong long enough for me to complain about.',
-    name: 'Bethany L.', location: 'Raleigh, NC', date: 'May 2026',
-  },
-  {
-    title: 'Works on everything in the house',
-    body: 'Smart TV in the lounge, Firestick in the bedroom, phone on the train. Installed on all three, and the two-screen option covers what we actually use at once.',
-    name: 'Greg M.', location: 'Denver, CO', date: 'August 2026',
-  },
-  {
-    title: 'Picture quality is the real difference',
-    body: 'I had cheaper IPTV before and the difference is obvious the moment you put them side by side. Proper 4K on the channels that carry it, and no pixel mush on motion.',
-    name: 'Priya N.', location: 'Sunnyvale, CA', date: 'July 2026',
+    name: 'Jackie Napier',
+    country: 'US',
+    date: 'April 2026',
+    stars: 5,
+    quote: 'Excellent customer support! Super fast to respond.',
   },
 ];
 
-/** Rating distribution bars on the Reviews page. */
-export const distribution = [
-  { stars: 5, percent: 78 },
-  { stars: 4, percent: 15 },
-  { stars: 3, percent: 4 },
-  { stars: 2, percent: 2 },
-  { stars: 1, percent: 1 },
+export interface ReviewSummary {
+  name: string;
+  date: string;
+  stars: number;
+  /** Paraphrase of the real review. Deliberately not presented as a quote. */
+  summary: string;
+}
+
+/**
+ * Further real reviewers, summarised rather than quoted — we have their
+ * sentiment, not their exact words, so nothing here is wrapped in quote marks.
+ */
+export const moreReviews: ReviewSummary[] = [
+  { name: 'Derek', date: 'February 2026', stars: 5, summary: 'Praised the correspondence and quick changes to the channel list.' },
+  { name: 'Stan', date: 'March 2026', stars: 5, summary: 'Praised the customer support.' },
+  { name: 'Oscar Alfonso', date: 'February 2026', stars: 5, summary: 'Praised the service, the support and the lack of interruptions.' },
+  { name: 'Robert Baker', date: 'May 2026', stars: 5, summary: 'Praised the amount of content, how easy it is to use, and the price.' },
+  { name: 'Bench', date: 'April 2026', stars: 5, summary: 'Praised the professional support and the reliability.' },
+  { name: 'MABstr', date: 'April 2026', stars: 5, summary: 'Praised the channel availability and help resolving a technical issue.' },
+  { name: 'Peter Ogundolani', date: 'April 2026', stars: 5, summary: 'Left a short positive review.' },
+  { name: 'Ricardo Rodríguez', date: 'April 2026', stars: 5, summary: 'Reported that his problem was solved quickly.' },
+  { name: 'Jay', date: 'April 2026', stars: 5, summary: 'Reported no buffering or freezing, and recommended the service.' },
+  { name: 'Xavier', date: 'April 2026', stars: 5, summary: 'Praised the product quality, the support and the response speed.' },
+  { name: 'Altug', date: 'April 2026', stars: 5, summary: 'Praised the stream quality and the support response times.' },
 ];
+
+/** Badge text. Never "Verified" — see the truthfulness note above. */
+export const REVIEW_BADGE = 'On Trustpilot';
