@@ -124,19 +124,48 @@ function Hero() {
 }
 
 /* ── 1.2 Stat bar ──────────────────────────────────────────────────────────── */
+/**
+ * Proof strip under the hero.
+ *
+ * Was a solid red slab, which was the only flat-colour block on an otherwise
+ * dark, layered page — it read as a template banner and fought the hero rather
+ * than continuing it. Now the band stays dark and the brand colour lives in the
+ * numbers themselves, where the eye goes anyway.
+ *
+ * `dt` must precede `dd` in a definition list, so the label is first in the DOM
+ * and flex-col-reverse puts the number on top visually. Screen readers get
+ * "Live channels: 60,000+"; sighted readers get the number leading.
+ */
 function StatBar() {
   return (
-    <section className="bg-accent px-7 py-[26px]">
-      <div className="mx-auto grid max-w-shell grid-cols-2 md:grid-cols-4">
-        {heroStats.map((s, i) => (
-          <div key={s.label} className={i > 0 ? 'border-l border-white/20 px-4 md:px-6' : 'px-4 md:px-6'}>
-            <div className="font-display text-[28px] font-extrabold text-white md:text-[34px]">{s.value}</div>
-            <div className="mt-0.5 font-display text-[11px] font-bold uppercase tracking-[.16em] text-white/[.72] md:text-[12px]">
+    <section className="relative border-y border-white/[.07] bg-bg px-5 py-11 sm:px-7 sm:py-14">
+      {/* Carries the hero's warmth down over the seam so the two sections read
+          as one movement rather than two stacked blocks. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+        style={{ background: 'radial-gradient(ellipse 760px 120px at 50% 0%, rgba(255,70,32,.13), transparent 72%)' }}
+      />
+      <dl
+        className="relative mx-auto grid max-w-shell grid-cols-2 gap-y-10 [&>*:nth-child(even)]:border-l
+                   [&>*]:border-white/[.09] md:grid-cols-4 md:gap-y-0 md:[&>*:nth-child(n+2)]:border-l"
+      >
+        {heroStats.map((s) => (
+          <div key={s.label} className="flex flex-col-reverse items-center px-3 text-center sm:px-6">
+            {/* ink-3, not ink-4: measured on the rendered pixels, ink-4 came out
+                at 4.36:1 over the warm glow — just under the 4.5:1 minimum. */}
+            <dt className="mt-2.5 font-display text-[11px] font-bold uppercase tracking-[.18em] text-ink-3 sm:text-[11.5px]">
               {s.label}
-            </div>
+            </dt>
+            <dd
+              className="nums text-grad font-display font-extrabold leading-[.95]"
+              style={{ fontSize: 'clamp(28px, 4.4vw, 42px)' }}
+            >
+              {s.value}
+            </dd>
           </div>
         ))}
-      </div>
+      </dl>
     </section>
   );
 }
