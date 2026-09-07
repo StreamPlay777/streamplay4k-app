@@ -1,7 +1,7 @@
 /**
  * Channel guide data.
  *
- * SCALE NOTE — the real line-up is 60,000+ channels across 73 countries. That cannot
+ * SCALE NOTE — the headline line-up figure lives in data/site.ts. That cannot
  * ship as a static bundle (it would be hundreds of MB), so this file carries the
  * headline counts plus a browsable sample per country, exactly as the live Primo
  * guide does ("Showing 300 of 10,887"). `count` is the real figure shown to visitors;

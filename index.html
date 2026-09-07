@@ -5,14 +5,14 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#06080F" />
-    <meta
-      name="description"
-      content="StreamPlay4K — premium IPTV for the United States. 60,000+ live channels and 180,000+ films and series in HD and 4K, on every screen. No contract, activated in minutes."
-    />
-    <title>StreamPlay4K — US IPTV | 60,000+ Live Channels in HD & 4K</title>
+    <!-- Set before first paint. Scroll-reveal hides content only when scripting
+         is available, so pre-rendered HTML stays readable without JavaScript
+         and there is no flash between paint and hydration. -->
+    <script>document.documentElement.classList.add('js')</script>
+    <!--app-head-->
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><!--app-html--></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

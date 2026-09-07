@@ -74,8 +74,17 @@
   /* Buttons */
   .btn {
     @apply inline-flex items-center justify-center gap-2 font-display font-bold
-           transition-colors duration-150 cursor-pointer select-none;
+           cursor-pointer select-none;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease,
+                transform .18s cubic-bezier(.22, .61, .36, 1), box-shadow .18s ease;
   }
+  /* Restrained: 1.5% up on hover, 2% down on press. Pointer devices only, so a
+     touch tap does not leave a button stuck in its hover state. */
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover { transform: translateY(-1px) scale(1.015); }
+  }
+  .btn:active { transform: scale(.98); }
+  .btn:focus-visible { outline: 2px solid theme('colors.accent.bright'); outline-offset: 3px; }
   /* Primary CTA stays SOLID, deliberately. White type measures 3.74:1 on the
      red and only 2.61:1 on the orange end, so a gradient button would be
      measurably harder to read than the one it replaced. The gradient earns its
@@ -97,7 +106,12 @@
     @apply rounded-2xl border border-white/[.08] bg-white/[.02];
   }
   .card-hover {
-    @apply card transition-colors duration-150 hover:border-accent/[.35];
+    @apply card hover:border-accent/[.35];
+    transition: border-color .2s ease, transform .28s cubic-bezier(.22, .61, .36, 1),
+                background-color .2s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .card-hover:hover { transform: translateY(-2px); }
   }
 
   /* Form fields */
@@ -244,4 +258,86 @@
     radial-gradient(ellipse 760px 440px at 88% 76%,  rgba(255, 128, 28, .11), transparent 68%),
     radial-gradient(ellipse 1150px 720px at 50% 48%, rgba(46, 76, 180, .085), transparent 72%);
 }
+
+/* ── Scroll reveal ─────────────────────────────────────────────────────────
+   One IntersectionObserver drives every reveal on the site (hooks/useReveal).
+   No animation library: opacity and transform only, both composited.
+
+   The hidden state is scoped to `html.js`, and that class is set by an inline
+   script in index.html before first paint. Two reasons:
+     1. Pre-rendered HTML stays visible if JavaScript never runs or fails.
+     2. Setting it inline rather than on mount avoids a flash of visible content
+        that would otherwise appear between paint and hydration.
+
+   `--reveal-delay` carries the stagger, so a group shares one observer and one
+   transition rather than each item animating independently. */
+.reveal {
+  transition:
+    opacity .62s cubic-bezier(.22, .61, .36, 1),
+    transform .62s cubic-bezier(.22, .61, .36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.js .reveal:not(.is-in) {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-shift, 22px), 0);
+}
+
+.reveal.is-in { opacity: 1; transform: none; }
+
+/* Once revealed there is nothing left to composite. */
+.reveal.is-in { will-change: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal:not(.is-in) { opacity: 1; transform: none; }
+  .reveal { transition: none; transition-delay: 0ms; }
+}
+
+/* ── Article prose ─────────────────────────────────────────────────────────
+   Styles for markdown rendered by lib/markdown.ts. Scoped to .prose-sp so it
+   cannot leak into the rest of the site. Raw HTML is disabled in the renderer,
+   so the element set here is closed and known. */
+.prose-sp { color: theme('colors.ink.3'); font-size: 16.5px; line-height: 1.78; }
+.prose-sp > * + * { margin-top: 1.25em; }
+.prose-sp h2 {
+  @apply font-display font-extrabold text-ink;
+  font-size: clamp(21px, 2.7vw, 27px);
+  line-height: 1.25;
+  margin-top: 2.2em;
+  scroll-margin-top: 7rem;
+}
+.prose-sp h3 {
+  @apply font-display font-bold text-ink;
+  font-size: 18.5px;
+  line-height: 1.35;
+  margin-top: 1.8em;
+  scroll-margin-top: 7rem;
+}
+.prose-sp strong { @apply font-bold text-ink-2; }
+.prose-sp a { @apply text-accent-link; text-underline-offset: 3px; }
+.prose-sp a:hover { text-decoration: underline; }
+.prose-sp ul, .prose-sp ol { padding-left: 1.35em; }
+.prose-sp ul { list-style: disc; }
+.prose-sp ol { list-style: decimal; }
+.prose-sp li + li { margin-top: .55em; }
+.prose-sp li::marker { color: theme('colors.accent.DEFAULT'); }
+.prose-sp blockquote {
+  @apply border-l-2 border-accent/50 text-ink-2;
+  padding-left: 1.1em;
+  font-style: italic;
+}
+.prose-sp code {
+  @apply rounded bg-white/[.06] text-ink-2;
+  padding: .15em .4em;
+  font-size: .92em;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+.prose-sp pre {
+  @apply overflow-x-auto rounded-xl border border-white/[.08] bg-white/[.03];
+  padding: 1.1em 1.2em;
+}
+.prose-sp pre code { @apply bg-transparent p-0; }
+.prose-sp img { @apply rounded-xl border border-white/[.08]; }
+.prose-sp hr { @apply border-white/[.09]; margin-top: 2.4em; margin-bottom: 2.4em; }
 

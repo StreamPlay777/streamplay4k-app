@@ -175,7 +175,10 @@ export function LogoMarquee({ logos, direction, duration }: {
                      loading only bought a visible pop-in. Low priority keeps
                      them from competing with above-the-fold work. */
                   decoding="async"
-                  fetchPriority="low"
+                  /* Lowercase: React 18 does not recognise the camelCase form
+                     and warns during server rendering. The DOM attribute is
+                     `fetchpriority` either way. */
+                  {...{ fetchpriority: 'low' }}
                   className="max-h-[20px] max-w-[104px] object-contain sm:max-h-[24px] sm:max-w-[124px] lg:max-h-[28px] lg:max-w-[140px]"
                   style={logo.invert ? { filter: 'invert(1)' } : undefined}
                 />

@@ -1,10 +1,17 @@
 import { useState } from 'react';
+import Seo from '../components/Seo';
+import { pageSeo } from '../data/seo';
 import { Link } from 'react-router-dom';
-import { site, heroStats } from '../data/site';
+import { site, heroStats, routes } from '../data/site';
+import { track } from '../lib/analytics';
+import Reveal from '../components/Reveal';
 import { TERMS, quote, money, savingsPerMonth, DEFAULT_TERM_ID, INVOICE_PAYMENT_METHODS } from '../data/pricing';
 import EmailMock from '../components/EmailMock';
 import PaymentMarks from '../components/PaymentMarks';
-import { whySwitch, deviceTiles, coverageChecklist } from '../data/marquees';
+import { whySwitch, coverageChecklist } from '../data/marquees';
+import { platforms, platformRowA, platformRowB } from '../data/platforms';
+import PlatformTile from '../components/PlatformMarks';
+import { MAX_DEVICES } from '../data/pricing';
 import { logoRows, networkLogos } from '../data/logos';
 import PosterWall from '../components/PosterWall';
 import SavingsSection from '../components/SavingsSection';
@@ -14,14 +21,14 @@ import ReviewWall from '../components/ReviewWall';
 import TrustCards from '../components/TrustCards';
 import { trustpilot } from '../data/reviews';
 import Check from '../components/pricing/Check';
-import { SectionHeading, LogoMarquee, Tick } from '../components/ui';
-import DeviceCard from '../components/DeviceCard';
+import { SectionHeading, LogoMarquee, Marquee, Tick } from '../components/ui';
 import PricingOrder from '../components/pricing/PricingOrder';
 import Faq from '../components/Faq';
 
 export default function Home() {
   return (
     <>
+      <Seo seo={pageSeo[routes.home]} />
       {/* Home page order — see the brief. Keep these in this sequence. */}
       <Hero />
       <StatBar />
@@ -77,7 +84,7 @@ function Hero() {
         <div className="inline-flex items-center gap-2.5 rounded-full border border-accent/[.32] bg-accent/[.09] px-4 py-2">
           <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent" />
           <span className="font-display text-[12px] font-bold uppercase tracking-[.14em] text-accent-soft">
-            US live TV · 4K · no contract
+            Premium TV • Sports • Movies • 4K
           </span>
         </div>
 
@@ -85,23 +92,35 @@ function Hero() {
           className="mt-7 font-display font-extrabold leading-[0.96] text-ink text-balance"
           style={{ fontSize: 'clamp(40px, 7.5vw, 82px)' }}
         >
-          All Your Entertainment.
+          Everything You Love.
           <br />
-          <span className="text-grad">One Powerful Platform.</span>
+          <span className="text-grad">One Simple Subscription.</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-[620px] text-[18.5px] leading-relaxed text-ink-2">
-          {site.channels} live channels and {site.vod} films and series across every screen in the house.
-          Live sports, news, kids and international TV in HD and 4K — activated the minute you pay.
+          Live TV, sports, movies and series in HD &amp; 4K — available across your favorite devices,
+          with fast activation and 24/7 support.
         </p>
 
         <div className="mt-9 flex flex-wrap justify-center gap-3">
-          <Link to="/pricing" className="btn-accent">See pricing →</Link>
-          <Link to="/contact" className="btn-outline">Start 24h free trial</Link>
+          <Link
+            to={routes.pricing}
+            onClick={() => track('view_pricing', { from: 'hero' })}
+            className="btn-accent"
+          >
+            View plans →
+          </Link>
+          <Link
+            to={routes.contact}
+            onClick={() => track('start_free_trial', { from: 'hero' })}
+            className="btn-outline"
+          >
+            Start free trial
+          </Link>
         </div>
 
         <p className="mt-5 text-[13px] text-ink-3">
-          No hidden fees · Money-back guarantee · 24/7 live chat
+          {site.refundLabel} · Fast Activation · 24/7 Support
         </p>
 
         {/* Social proof sits with the CTAs rather than in a separate strip */}
@@ -181,9 +200,18 @@ function NetworkWall() {
         }}
       />
       <div className="relative">
-        <p className="mb-7 px-6 text-center text-[11px] font-bold uppercase tracking-[.18em] text-ink-4 sm:mb-8 sm:text-[12px]">
-          Every network you are already paying for
-        </p>
+        <div className="mx-auto mb-10 max-w-[680px] px-6 text-center sm:mb-12">
+          <p className="eyebrow">Channels for every interest</p>
+          <h2
+            className="mt-4 font-display font-extrabold leading-[1.06] text-ink"
+            style={{ fontSize: 'clamp(27px, 4vw, 42px)' }}
+          >
+            Find What You <span className="text-grad">Love to Watch</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-[520px] text-[16px] leading-relaxed text-ink-3">
+            Explore entertainment across sports, news, movies, international channels and more.
+          </p>
+        </div>
 
         <div className="flex flex-col gap-2 sm:gap-2.5">
           {rows.map((row, i) => (
@@ -191,9 +219,30 @@ function NetworkWall() {
           ))}
         </div>
 
-        <p className="mt-7 px-6 text-center text-[12px] text-ink-5 sm:mt-8">
-          {networkLogos.length} of the networks included — and thousands more besides.
-        </p>
+        {/* Channel search panel (§4). Sends people to the real, bundled
+            channel dataset on /channels/ — nothing here fakes a result. */}
+        <div className="mx-auto mt-11 max-w-[640px] px-6 sm:mt-14">
+          <div className="rounded-2xl border border-white/[.09] bg-white/[.025] p-7 text-center backdrop-blur-[2px] sm:p-9">
+            <p className="label">Channel search</p>
+            <h3 className="mt-3.5 font-display text-[21px] font-extrabold leading-snug text-ink sm:text-[25px]">
+              Looking for something specific?
+            </h3>
+            <p className="mx-auto mt-3 max-w-[420px] text-[15px] leading-relaxed text-ink-3">
+              Search our available channel lineup by name, category or country.
+            </p>
+            <Link
+              to={routes.channels}
+              onClick={() => track('channel_search', { from: 'home' })}
+              className="btn-accent mt-6"
+            >
+              Search channels →
+            </Link>
+          </div>
+          <p className="mt-6 text-center text-[12px] leading-relaxed text-ink-5">
+            Showing {networkLogos.length} of the networks a subscription can reach. Network names and
+            logos belong to their owners and are shown for identification only.
+          </p>
+        </div>
       </div>
     </section>
   );
@@ -204,10 +253,10 @@ function NetworkWall() {
 /* ── 1.5 On-demand library ─────────────────────────────────────────────────── */
 function OnDemand() {
   const points = [
-    `${site.vod} films and series on demand`,
-    'New releases added every week',
-    '4K and HD where the studio provides it',
-    'Box sets, kids, documentaries and world cinema',
+    'Movies & series on demand',
+    'New content added regularly',
+    'HD & 4K where available',
+    'Entertainment from around the world',
   ];
 
   return (
@@ -228,19 +277,20 @@ function OnDemand() {
         <div className="mx-auto max-w-[760px] text-center">
           <p className="flex items-center justify-center gap-3 text-[12px] font-bold uppercase tracking-[.18em] text-accent">
             <span className="h-px w-8 bg-accent/50" aria-hidden="true" />
-            And there's more
+            Movies &amp; series
             <span className="h-px w-8 bg-accent/50" aria-hidden="true" />
           </p>
           <h2
             className="mt-5 font-display font-extrabold leading-[1.04] text-ink"
             style={{ fontSize: 'clamp(30px, 4.6vw, 50px)' }}
           >
-            Enjoy thousands of hours of{' '}
-            <span className="text-grad">premium content</span>
+            Movies, Series &amp; More.
+            <br />
+            <span className="text-grad">Ready When You Are.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-[560px] text-[16.5px] leading-relaxed text-ink-3">
-            The channels are up top. This is everything else — films, series and box sets
-            on demand, in 4K where it exists.
+            Explore movies, series, box sets and on-demand entertainment, with HD and 4K quality
+            where available.
           </p>
         </div>
 
@@ -251,18 +301,18 @@ function OnDemand() {
 
         {/* The copy that actually sells, kept from the previous version */}
         <ul className="mx-auto mt-14 grid max-w-[840px] gap-3 sm:grid-cols-2 sm:gap-x-10">
-          {points.map((t) => (
-            <li key={t} className="flex items-start gap-3">
+          {points.map((t, i) => (
+            <Reveal as="li" key={t} delay={i} shift={12} className="flex items-start gap-3">
               <span className="mt-[3px] grid h-[18px] w-[18px] flex-none place-items-center rounded-full bg-accent text-white">
                 <Check />
               </span>
               <span className="text-[15px] leading-snug text-ink-2">{t}</span>
-            </li>
+            </Reveal>
           ))}
         </ul>
 
         <div className="mt-10 text-center">
-          <Link to="/pricing" className="btn-accent">See what's included</Link>
+          <Link to={routes.pricing} className="btn-accent">Explore what&apos;s included →</Link>
         </div>
       </div>
     </section>
@@ -273,38 +323,87 @@ function OnDemand() {
 // Lives in components/pricing/PricingOrder.tsx — see spec section 05.
 
 /* ── 1.7 Device coverage ───────────────────────────────────────────────────── */
+/**
+ * Device ecosystem (brief §10) — the one homepage section approved for a
+ * visual redesign.
+ *
+ * Replaces four generic category cards with the actual platform list from
+ * data/platforms.ts, which is derived from the setup guides we publish. Nothing
+ * is shown that we cannot walk a customer through.
+ *
+ * Two slow counter-rotating rows on wide screens, one swipeable row on phones.
+ * Both use the existing Marquee — no new animation code, and the shared
+ * reduced-motion rule in index.css already stops them.
+ *
+ * The old headline "Every screen in the house. One login." is gone: it
+ * contradicted the selected-device model. The approved line is the device cap.
+ */
 function DeviceCoverage() {
   return (
-    <section className="section bg-bg">
+    <section className="section relative overflow-hidden bg-bg">
       <div className="mx-auto max-w-shell">
         <SectionHeading
-          label="What is on"
-          title={
-            <>
-              Every screen in the house.
-              <br />
-              <span className="font-semibold italic text-ink-3">One login.</span>
-            </>
-          }
-          sub="Install it everywhere you watch. Pick how many screens play at the same time — the rest is the same subscription."
+          label="Watch your way"
+          title={<><span className="text-grad">{site.name}</span> on Any Device</>}
+          sub="Set up StreamPlay4K on the devices you already use at home or on the go."
         />
+        <p className="mx-auto mt-5 max-w-[520px] text-center text-[14.5px] font-semibold text-ink-2">
+          Choose up to {MAX_DEVICES} devices with your plan.
+        </p>
 
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {deviceTiles.map((tile) => (
-            <DeviceCard key={tile.name} tile={tile} />
-          ))}
+        {/* Phones: one swipeable row, full-size tiles, no clipped logos. */}
+        <div className="mt-12 sm:hidden">
+          <div className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {platforms.map((pf) => (
+              <div key={pf.name} className="snap-start">
+                <PlatformTile platform={pf} />
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-center text-[12px] text-ink-5">Swipe to see them all</p>
+        </div>
+
+        {/* Tablet and up: two rows drifting in opposite directions. */}
+        <div className="mt-14 hidden flex-col gap-3 sm:flex">
+          <PlatformMarquee row={platformRowA} direction="left" duration={62} />
+          <PlatformMarquee row={platformRowB} direction="right" duration={74} />
         </div>
 
         <div className="mx-auto mt-12 grid max-w-[900px] gap-3 sm:grid-cols-2 sm:gap-x-8">
-          {coverageChecklist.map((line) => (
-            <div key={line} className="flex items-start gap-3">
+          {coverageChecklist.map((line, i) => (
+            <Reveal key={line} delay={i} shift={12} className="flex items-start gap-3">
               <Tick />
               <span className="text-[15px] leading-snug text-ink-2">{line}</span>
-            </div>
+            </Reveal>
           ))}
+        </div>
+
+        <div className="mt-11 text-center">
+          <Link to={routes.setup} className="btn-outline">See the setup guides →</Link>
         </div>
       </div>
     </section>
+  );
+}
+
+/** One drifting row of platform tiles, edge-faded by the shared mask. */
+function PlatformMarquee({
+  row, direction, duration,
+}: {
+  row: typeof platforms;
+  direction: 'left' | 'right';
+  duration: number;
+}) {
+  return (
+    <Marquee
+      items={row.map((p) => p.name)}
+      direction={direction}
+      duration={duration}
+      renderItem={(name: string, key: string) => {
+        const pf = row.find((p) => p.name === name)!;
+        return <PlatformTile key={key} platform={pf} />;
+      }}
+    />
   );
 }
 
@@ -316,13 +415,13 @@ function WhySwitch() {
         <SectionHeading title={<>Why people switch to <span className="text-grad">{site.name}</span></>} />
         <div className="mt-14 grid gap-[18px] md:grid-cols-2 lg:grid-cols-3">
           {whySwitch.map((card, i) => (
-            <div key={card.title} className="card-hover px-[26px] pb-[30px] pt-7">
+            <Reveal key={card.title} delay={i} shift={16} className="card-hover px-[26px] pb-[30px] pt-7">
               <div className="nums text-[13px] font-bold text-accent">
                 {String(i + 1).padStart(2, '0')}
               </div>
               <h3 className="mt-4 font-display text-[21px] font-bold text-ink">{card.title}</h3>
               <p className="mt-2.5 text-[15px] leading-relaxed text-ink-3">{card.body}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -357,7 +456,7 @@ function ThreeSteps() {
     {
       n: '01',
       title: 'Choose Your Plan',
-      body: 'Choose term and number of devices.',
+      body: 'Select your subscription length and the number of devices you need.',
       widget: (
         <div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-2.5" role="group" aria-label="Choose a plan">
           <div className="flex flex-col gap-2">
@@ -401,7 +500,7 @@ function ThreeSteps() {
       // No payment is taken on this site — the invoice follows by email and
       // WhatsApp — so this step is honest about that rather than echoing the
       // reference's "pay now".
-      body: 'Enter phone/WhatsApp, then email and submit the order.',
+      body: 'Enter your contact details and confirm your order. No payment is taken on the order form.',
       widget: (
         <div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-5">
           <div className="flex items-start gap-3">
@@ -436,8 +535,8 @@ function ThreeSteps() {
     },
     {
       n: '03',
-      title: 'Receive Your Invoice',
-      body: 'We send invoice/payment instructions by email and WhatsApp. After payment, activation is usually completed within 5\u201315 minutes.',
+      title: 'Get Activated',
+      body: `We\u2019ll send your invoice and payment instructions by email and WhatsApp. Once payment is confirmed, your access is usually ready within ${site.activationWindow}.`,
       extra: <Link to="/setup" className="btn-outline mt-6 !py-3 !text-[14px]">See the setup guides</Link>,
       widget: <EmailMock />,
     },
@@ -448,17 +547,17 @@ function ThreeSteps() {
       <div className="mx-auto max-w-shell">
         {/* Header */}
         <div className="mx-auto max-w-[720px] text-center">
-          <p className="eyebrow">Getting started</p>
+          <p className="eyebrow">Three simple steps</p>
           <h2
             className="mt-4 font-display font-extrabold leading-[1.02] text-ink"
             style={{ fontSize: 'clamp(32px, 5vw, 54px)' }}
           >
-            Three steps.
+            Choose. Order.
             <br />
-            <span className="text-grad">Watching in minutes.</span>
+            <span className="text-grad">Start Watching.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-[460px] text-[16px] leading-relaxed text-ink-3">
-            No hardware, no contract, no waiting around. Pick, order, watch.
+            No hardware, no contract, no waiting around.
           </p>
         </div>
 
@@ -500,7 +599,7 @@ function ThreeSteps() {
             <Link to="/setup" className="btn-outline w-full sm:w-auto">See the setup guides</Link>
           </div>
           <p className="text-center text-[11.5px] font-bold uppercase tracking-[.13em] text-ink-4">
-            7-day money-back guarantee · 24/7 support
+            {site.refundLabel} · 24/7 support
           </p>
         </div>
       </div>
@@ -516,8 +615,8 @@ function Reviews() {
   const stats = [
     { value: String(trustpilot.rating), label: 'Average rating out of 5' },
     { value: String(trustpilot.reviewCount), label: 'Reviews on Trustpilot' },
-    { value: '5–15 min', label: 'Typical activation time' },
-    { value: 'Up to 5', label: 'Devices on one subscription' },
+    { value: site.activationWindow, label: 'Typical activation time' },
+    { value: `Up to ${MAX_DEVICES}`, label: 'Devices you can choose' },
   ];
 
   return (
@@ -527,24 +626,24 @@ function Reviews() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'linear-gradient(180deg, #080B16 0%, rgba(8,11,22,.62) 20%, rgba(8,11,22,.62) 80%, #080B16 100%)',
+            'linear-gradient(180deg, #06080F 0%, rgba(6,8,15,.62) 20%, rgba(6,8,15,.62) 80%, #06080F 100%)',
         }}
       />
 
       <div className="relative mx-auto max-w-shell">
         {/* Header */}
         <div className="mx-auto max-w-[760px] text-center">
-          <p className="eyebrow">From our customers, to Streamplay</p>
+          <p className="eyebrow">What our customers say</p>
           <h2
             className="mt-5 font-display font-extrabold leading-[1.04] text-ink"
             style={{ fontSize: 'clamp(30px, 4.8vw, 52px)' }}
           >
-            Our customers
+            Our Customers
             <br />
-            <span className="text-grad">say it best.</span>
+            <span className="text-grad">Say It Best.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-[520px] text-[15.5px] leading-relaxed text-ink-3 sm:text-[16px]">
-            See what customers are saying about their experience with Streamplay4k on Trustpilot.
+            See what customers are saying about their experience with {site.name} on Trustpilot.
           </p>
           <div className="mt-7 flex justify-center">
             <TrustpilotBadge />
@@ -578,7 +677,7 @@ function Reviews() {
               href={trustpilot.url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Read all Streamplay4k reviews on Trustpilot. Opens in a new tab."
+              aria-label={`Read all ${site.name} reviews on Trustpilot. Opens in a new tab.`}
               className="btn-outline w-full sm:w-auto"
             >
               Read all reviews
@@ -599,14 +698,20 @@ function FaqSection() {
     <section id="faq" className="section bg-bg">
       <div className="mx-auto max-w-narrow">
         <SectionHeading
-          label="Questions"
-          title={<>US IPTV <span className="text-grad">FAQs</span></>}
-          sub="Support is on live chat 24/7 for anything not covered here."
+          label={`${site.name} FAQ`}
+          title={<>Questions? <span className="text-grad">We&apos;ve Got You.</span></>}
+          sub="Devices, activation, payment, trials and refunds — the things people ask before ordering."
           size={50}
         />
         <div className="mt-12">
           <Faq />
         </div>
+        <p className="mt-9 text-center text-[14.5px] text-ink-4">
+          Still unsure?{' '}
+          <Link to={routes.faq} className="text-accent-link hover:underline">Read the full FAQ</Link>
+          {' '}or{' '}
+          <Link to={routes.contact} className="text-accent-link hover:underline">talk to support</Link>.
+        </p>
       </div>
     </section>
   );
@@ -622,17 +727,32 @@ function ClosingCta() {
       />
       <div className="relative mx-auto max-w-[720px]">
         <h2 className="font-display font-extrabold leading-[1.02] text-ink" style={{ fontSize: 'clamp(34px, 5.5vw, 60px)' }}>
-          Ready to cancel
+          Ready for a Simpler
           <br />
-          the other six?
+          Way to Watch?
         </h2>
-        <p className="mx-auto mt-6 max-w-[520px] text-[18px] leading-relaxed text-ink-3">
-          One subscription, every screen, activated in minutes. Money-back guarantee if it is not for you.
+        <p className="mx-auto mt-6 max-w-[540px] text-[18px] leading-relaxed text-ink-3">
+          One subscription. Your favorite devices. Fast activation and support whenever you need it.
         </p>
         <div className="mt-9 flex flex-wrap justify-center gap-3">
-          <Link to="/pricing" className="btn-accent">Get {site.name}</Link>
-          <Link to="/contact" className="btn-outline">Talk to support</Link>
+          <Link
+            to={routes.pricing}
+            onClick={() => track('view_pricing', { from: 'closing-cta' })}
+            className="btn-accent"
+          >
+            View plans →
+          </Link>
+          <Link
+            to={routes.contact}
+            onClick={() => track('start_free_trial', { from: 'closing-cta' })}
+            className="btn-outline"
+          >
+            Start free trial
+          </Link>
         </div>
+        <p className="mx-auto mt-7 max-w-[520px] text-[13px] leading-relaxed text-ink-4">
+          {site.refundLabel} · Usually Ready in {site.activationWindow} · 24/7 Support
+        </p>
       </div>
     </section>
   );

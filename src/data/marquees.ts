@@ -1,3 +1,6 @@
+import { site } from './site';
+import { MAX_DEVICES } from './pricing';
+
 /**
  * Marquee content — the network wall and the poster rails.
  *
@@ -22,14 +25,21 @@ export const networksRowB = [
 export const postersA = Array.from({ length: 10 }, (_, i) => `poster ${String(i + 1).padStart(2, '0')}`);
 export const postersB = Array.from({ length: 10 }, (_, i) => `poster ${String(i + 11).padStart(2, '0')}`);
 
-/** Six "why switch" cards. */
+/**
+ * Six benefit cards (brief §11).
+ *
+ * Unprovable performance claims were removed in the final content pass:
+ * "anti-freeze on game day", "servers sized for the Sunday spike", "median
+ * first reply under two minutes", guaranteed no-buffering, and "one login,
+ * every screen" (which contradicted the selected-device model).
+ */
 export const whySwitch = [
-  { title: 'Anti-freeze on game day', body: 'Servers sized for the Sunday spike, so the picture holds when everyone in the country is watching the same kickoff.' },
-  { title: 'Activated in minutes', body: 'No engineer, no install window, no box in the post. Your login is emailed the moment the payment clears.' },
-  { title: 'One login, every screen', body: 'Install it on the TV, the tablet, the phone and the laptop. Pick how many play at once; install on as many as you like.' },
-  { title: 'A guide that is actually right', body: 'A full seven-day EPG that matches what is really on, with catch-up so a late finish does not mean a missed game.' },
-  { title: 'International, not an add-on', body: 'Arabic, Spanish, French, German, Italian and South Asian networks sit in the same subscription at no extra cost.' },
-  { title: 'Humans on chat, 24/7', body: 'Live chat staffed around the clock by people who know the devices. Median first reply is under two minutes.' },
+  { title: 'Ready in Minutes', body: `Usually activated within ${site.activationWindow} after payment confirmation.` },
+  { title: 'One Simple Subscription', body: 'Live TV, movies and series without juggling multiple entertainment subscriptions.' },
+  { title: 'Made for Your Devices', body: 'Works across popular Smart TVs, streaming devices, phones, tablets and computers.' },
+  { title: 'TV Guide Included', body: 'EPG support makes it easier to see what\u2019s on now and what\u2019s coming next.' },
+  { title: 'Entertainment Worldwide', body: 'Explore international entertainment across countries, categories and languages.' },
+  { title: 'Support When You Need It', body: 'Get help with setup and troubleshooting, 24/7.' },
 ];
 
 /**
@@ -82,8 +92,8 @@ export const deviceTiles: DeviceTile[] = [
 ];
 
 export const coverageChecklist = [
-  'Install on all your devices, one to four streams at a time',
+  `Choose up to ${MAX_DEVICES} devices with your plan`,
   'Firestick, Android TV, smart TV, Apple TV, phone and computer',
-  'Catch-up and a full seven-day guide on every device',
-  'Set up in minutes — your login arrives by email',
+  'EPG / TV guide support on compatible players',
+  `Login details arrive by email and WhatsApp, ${site.activation}`,
 ];

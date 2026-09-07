@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import Seo from '../components/Seo';
+import { pageSeo } from '../data/seo';
 import { Link } from 'react-router-dom';
-import { site } from '../data/site';
+import { site, routes } from '../data/site';
 import { deviceGuides, loginFormats } from '../data/setup';
 
 export default function Setup() {
@@ -22,6 +24,7 @@ export default function Setup() {
 
   return (
     <>
+      <Seo seo={pageSeo[routes.setup]} />
       {/* Header */}
       <section className="px-7 pb-[46px] pt-[74px]">
         <div className="mx-auto max-w-shell">
@@ -50,8 +53,9 @@ export default function Setup() {
             </div>
           </div>
           <div className="card px-6 py-6">
-            <div className="label">Typical time</div>
-            <div className="mt-3 font-display text-[26px] font-extrabold text-ink">{site.setupTime}</div>
+            <div className="label">Activation</div>
+            <div className="mt-3 font-display text-[26px] font-extrabold text-ink">{site.activationWindow}</div>
+            <p className="mt-2 text-[12.5px] text-ink-4">After payment confirmation.</p>
           </div>
           <div className="card px-6 py-6">
             <div className="label">Need help?</div>

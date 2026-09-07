@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { site } from '../data/site';
+import { site, routes } from '../data/site';
+import Seo from '../components/Seo';
+import { pageSeo } from '../data/seo';
 import { readOrder } from '../lib/orderService';
 import Check from '../components/pricing/Check';
 
@@ -11,34 +12,23 @@ import Check from '../components/pricing/Check';
  * invoice follows separately. Details come from sessionStorage rather than the
  * URL so the customer's phone and email stay out of history and referrers.
  *
- * noindex,follow is set at runtime and the route is excluded from the sitemap.
+ * noindex,nofollow comes from data/seo.ts, which also keeps the route out of
+ * sitemap.xml — one declaration rather than a hand-rolled meta tag here.
  */
 export default function ThankYou() {
   const order = readOrder();
-
-  useEffect(() => {
-    const meta = document.createElement('meta');
-    meta.name = 'robots';
-    meta.content = 'noindex,follow';
-    document.head.appendChild(meta);
-    const prevTitle = document.title;
-    document.title = 'Order confirmed — Streamplay4k';
-    return () => {
-      document.head.removeChild(meta);
-      document.title = prevTitle;
-    };
-  }, []);
-
-  const whatsapp = `https://wa.me/${site.whatsapp.replace(/[^\d]/g, '')}`;
+  const whatsapp = site.whatsappUrl;
 
   const steps = [
     'We review your order.',
     'Your invoice and payment instructions are sent shortly by email and WhatsApp.',
-    'After payment, your account details are usually delivered within 5–15 minutes.',
+    `After payment, your account details are usually delivered within ${site.activationWindow}.`,
   ];
 
   return (
-    <section className="px-5 py-20 sm:px-7 sm:py-[100px]">
+    <>
+      <Seo seo={pageSeo[routes.thankYou]} />
+      <section className="section bg-bg">
       <div className="mx-auto max-w-[720px]">
         <p className="text-[12px] font-bold uppercase tracking-[.18em] text-accent-bright">Order confirmed</p>
         <h1
@@ -102,7 +92,7 @@ export default function ThankYou() {
         </div>
 
         <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/[.09] pt-6">
-          {['7-Day Money-Back Guarantee', 'Secure invoice payment', 'Support available 24/7'].map((t) => (
+          {[site.refundLabel, 'Secure invoice payment', 'Support available 24/7'].map((t) => (
             <li key={t} className="flex items-center gap-2 text-[13px] text-ink-4">
               <span className="text-accent"><Check /></span>
               {t}
@@ -110,6 +100,7 @@ export default function ThankYou() {
           ))}
         </ul>
       </div>
-    </section>
+      </section>
+    </>
   );
 }

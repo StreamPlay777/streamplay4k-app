@@ -1,4 +1,5 @@
 import { basket, basketMonthlyCents, basketYearlyCents, paymentsPerYear, receiptMeta } from '../data/competitors';
+import { site } from '../data/site';
 
 const money = (c: number) => (c / 100).toFixed(2);
 const withCommas = (c: number) =>
@@ -38,7 +39,7 @@ export default function Receipt() {
       {/* Annotation above the paper */}
       <div className="relative mb-3 flex items-start justify-between gap-3">
         <span className="pt-1 font-display text-[12px] font-extrabold uppercase tracking-[.18em] text-accent sm:text-[13px]">
-          Without Streamplay4k
+          Without {site.name}
         </span>
         <span className="relative flex-none text-right">
           <span

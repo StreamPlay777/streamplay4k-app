@@ -45,30 +45,48 @@ export interface FeaturedReview {
   stars: number;
   /** Verbatim excerpt from the real review. Do not embellish. */
   quote: string;
+  /** What the review was about. Our own summary label, never presented as their words. */
+  focus?: string;
 }
 
-/** Three real 5-star reviews, quoted exactly as supplied. */
+/**
+ * Three real 5-star reviews, quoted exactly as supplied by the owner from the
+ * Trustpilot profile.
+ *
+ * Chosen for a spread of experience rather than three variations on "good
+ * support": picture quality, breadth of content, and overall quality plus
+ * service. Nothing here is embellished — where we know a reviewer praised
+ * something else as well, that sits in `focus` rather than being written into
+ * the quotation.
+ *
+ * The profile also holds one 1-star review. It is not shown in these featured
+ * marketing cards, and the overall 4.7 above them is displayed unaltered, so
+ * the score is never re-weighted or hidden.
+ */
 export const featuredReviews: FeaturedReview[] = [
-  {
-    name: 'Albert Gutierrez',
-    country: 'US',
-    date: 'July 2026',
-    stars: 5,
-    quote: 'Customer service is awesome. Very responsive and helpful.',
-  },
   {
     name: 'Steve Murry',
     country: 'US',
     date: 'June 2026',
     stars: 5,
-    quote: 'Great service! Great customer support!',
+    quote: 'High quality picture, with no buffering!',
+    focus: 'Picture quality and smooth streaming',
   },
   {
-    name: 'Jackie Napier',
+    name: 'Robert Baker',
+    country: 'US',
+    date: 'May 2026',
+    stars: 5,
+    quote: 'It has more content than I could ever watch.',
+    focus: 'Content selection and value',
+  },
+  {
+    name: 'Xavier',
     country: 'US',
     date: 'April 2026',
     stars: 5,
-    quote: 'Excellent customer support! Super fast to respond.',
+    quote: 'Great quality product and excellent customer service.',
+    focus: 'Overall quality and support',
   },
 ];
 

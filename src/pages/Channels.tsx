@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
+import Seo from '../components/Seo';
+import { pageSeo } from '../data/seo';
 import { Link } from 'react-router-dom';
-import { site } from '../data/site';
+import { site, routes } from '../data/site';
 import { countries, getChannels, categoryCounts, channelInitials, type Category } from '../data/channels';
 import { logoFor } from '../data/logos';
 
@@ -26,14 +28,17 @@ export default function Channels() {
     c.name.toLowerCase().includes(countryQuery.trim().toLowerCase()),
   );
 
+  // Counted from the real dataset rather than asserted. The old figures
+  // (73 regions, 8,308 in 4K/8K) were unverified carry-overs and are gone.
   const stats = [
     { value: site.channels, label: 'Live channels' },
-    { value: String(site.countries), label: 'Countries & regions' },
-    { value: site.uhdChannels, label: 'In 4K & 8K' },
+    { value: String(countries.length), label: 'Countries & regions' },
+    { value: site.vod, label: 'Movies & series' },
   ];
 
   return (
     <>
+      <Seo seo={pageSeo[routes.channels]} />
       {/* Header */}
       <section className="px-7 pb-[46px] pt-[74px]">
         <div className="mx-auto max-w-shell">
@@ -236,7 +241,7 @@ export default function Channels() {
         </div>
 
         <p className="mx-auto mt-5 max-w-shell nums text-[10.5px] text-ink-6">
-          Showing a browsable sample of the {site.channels} line-up across {site.countries} countries and regions.
+          Showing a browsable sample of the {site.channels} line-up across {countries.length} countries and regions.
         </p>
       </section>
     </>

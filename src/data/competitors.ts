@@ -1,4 +1,5 @@
 import { TERMS, quote } from './pricing';
+import { site } from './site';
 
 /**
  * The cost-comparison basket — the stack a US household typically pays for.
@@ -61,5 +62,5 @@ export const receiptMeta = {
 
 export const smallPrint =
   `Based on published US list prices for these services, ${AS_OF}. ` +
-  `Compared against a Streamplay4k ${bestTerm.label.toLowerCase()} plan at one device. ` +
+  `Compared against a ${site.name} ${bestTerm.label.toLowerCase()} plan at one device. ` +
   `Prices change — figures are illustrative.`;

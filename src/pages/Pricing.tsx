@@ -1,4 +1,6 @@
-import { site } from '../data/site';
+import { site, routes } from '../data/site';
+import Seo from '../components/Seo';
+import { pageSeo } from '../data/seo';
 import PricingOrder from '../components/pricing/PricingOrder';
 import SavingsSection from '../components/SavingsSection';
 import { SectionHeading } from '../components/ui';
@@ -8,6 +10,7 @@ export default function Pricing() {
 
   return (
     <>
+      <Seo seo={pageSeo[routes.pricing]} />
       {/* Page header */}
       <section className="px-7 pb-[46px] pt-[74px]">
         <div className="mx-auto max-w-shell">

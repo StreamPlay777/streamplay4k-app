@@ -1,35 +1,56 @@
-/** Home + Pricing FAQ accordion. Single-open; clicking the open row closes it. */
+import { site } from './site';
+import { MAX_DEVICES } from './pricing';
+
+/**
+ * FAQ content, shared by the homepage accordion, /pricing and /faq.
+ *
+ * Every answer here is also the source for FAQPage structured data, so the
+ * visible text and the schema can never drift apart — see data/seo.ts.
+ *
+ * Claims removed in the final content pass: "instantly", "three to six
+ * minutes", "one to four" simultaneous screens, American Express, and
+ * "payment is taken over a secure connection" (no payment is taken on this
+ * site at all).
+ */
 export const faqs = [
   {
     q: 'What is IPTV and how does it work?',
-    a: 'IPTV streams television over your internet connection instead of a satellite dish or cable line. You receive a subscription line, load it into any compatible player on your TV, phone or computer, and thousands of live channels plus on-demand titles appear instantly.',
-  },
-  {
-    q: 'Is Streamplay4k available throughout the United States?',
-    a: 'Yes. The service works anywhere in the US with a stable broadband connection, and our servers are placed for low latency on live sport across every time zone.',
+    a: 'IPTV delivers television over an internet connection rather than traditional cable or satellite. After activation, you receive login details that you can use with a compatible app or device.',
   },
   {
     q: 'Which devices are supported?',
-    a: 'Amazon Firestick and Fire TV, Android TV and Google TV boxes, Samsung and LG smart TVs, Apple TV, iPhone, iPad, Android phones and tablets, plus Windows PC and Mac.',
-  },
-  {
-    q: 'What internet speed do I need?',
-    a: 'Around 15 Mbps for HD and 25 Mbps or more for 4K. A wired connection is steadier than Wi-Fi for live sport, but most home connections handle it comfortably.',
+    a: `StreamPlay4K works with Amazon Fire TV and Firestick, Android TV and Google TV, Apple TV, Samsung and LG smart TVs, Android phones and tablets, iPhone and iPad, Windows and macOS, and Android boxes. You can choose up to ${MAX_DEVICES} devices when you select your plan.`,
   },
   {
     q: 'How quickly will my account be activated?',
-    a: 'Your login is emailed within minutes of checkout. Setup takes three to six minutes on most devices, so you are usually watching inside ten minutes of paying.',
+    a: `Access is usually ready within ${site.activationWindow} after payment confirmation.`,
   },
   {
-    q: 'Can I use my subscription on more than one device?',
-    a: 'You can install the app on every device you own. How many can play at the same time depends on the number of simultaneous screens you choose — one to four.',
+    q: `Can I use ${site.name} on more than one device?`,
+    a: `Yes. Choose the number of devices you need when selecting your plan, up to ${MAX_DEVICES} devices.`,
   },
   {
-    q: 'Which payment methods do you accept?',
-    a: 'Visa, Mastercard, American Express and PayPal, plus Apple Pay and Google Pay at checkout. Payment is taken over a secure connection.',
+    q: 'How does payment work?',
+    a: 'No payment is taken directly on the order form. After you place your order, we send your invoice and payment instructions by email and WhatsApp.',
+  },
+  {
+    q: 'What happens after I pay?',
+    a: `Once payment is confirmed, your login details are usually delivered within ${site.activationWindow}.`,
+  },
+  {
+    q: `Can I try ${site.name} before ordering?`,
+    a: `Yes. Contact us on WhatsApp or at ${site.email} to request a trial, and we will set one up for you. No payment details are needed to ask.`,
   },
   {
     q: 'What is the refund policy?',
-    a: 'There is a money-back guarantee. If the service is not right for you, contact live chat and we will refund you — no lengthy questions.',
+    a: `${site.name} offers a ${site.refundDays}-day money-back guarantee, subject to the conditions in the Refund Policy.`,
+  },
+  {
+    q: 'How can I contact support?',
+    a: `Support is available through WhatsApp on ${site.whatsapp} and by email at ${site.email}.`,
+  },
+  {
+    q: 'What internet speed do I need?',
+    a: 'Around 15 Mbps is comfortable for HD and 25 Mbps or more for 4K. A wired connection is steadier than Wi-Fi for live sport, but most home broadband handles it without trouble.',
   },
 ];

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   TERMS, MAX_DEVICES, DEFAULT_TERM_ID, DEFAULT_DEVICES,
   quote, money, savingsPerMonth,
@@ -20,6 +20,17 @@ export default function PricingOrder() {
   const [termId, setTermId] = useState(DEFAULT_TERM_ID);
   const [devices, setDevices] = useState(DEFAULT_DEVICES);
   const [ordering, setOrdering] = useState(false);
+
+  /**
+   * Flag the document while the order form is on screen, so the global
+   * WhatsApp button hides rather than sitting over the form's controls.
+   * Additive only — nothing about the order flow itself changes.
+   */
+  useEffect(() => {
+    if (!ordering) return;
+    document.documentElement.dataset.orderOpen = 'true';
+    return () => { delete document.documentElement.dataset.orderOpen; };
+  }, [ordering]);
 
   const q = useMemo(() => quote(termId, devices), [termId, devices]);
 

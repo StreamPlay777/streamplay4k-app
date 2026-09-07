@@ -129,7 +129,7 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
             onChange={(e) => { setPhone(e.target.value); setPhoneErr(null); }}
             aria-invalid={!!phoneErr}
             aria-describedby={phoneErr ? 'order-phone-err' : 'order-phone-hint'}
-            placeholder="+1 305 555 0148"
+            placeholder="+1 555 000 0000"
             className={`field min-h-[48px] pr-10 ${phoneErr ? '!border-accent' : ''}`}
           />
           {isValidPhone(phone) && !phoneErr && (

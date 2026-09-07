@@ -1,4 +1,7 @@
 import { Link } from 'react-router-dom';
+import Seo from '../components/Seo';
+import { site, routes } from '../data/site';
+import { pageSeo } from '../data/seo';
 import {
   trustpilot, featuredReviews, moreReviews, REVIEW_BADGE,
 } from '../data/reviews';
@@ -23,6 +26,7 @@ export default function Reviews() {
 
   return (
     <>
+      <Seo seo={pageSeo[routes.reviews]} />
       <section className="px-5 pb-[46px] pt-[74px] sm:px-7">
         <div className="mx-auto max-w-shell">
           <div className="eyebrow">Customer reviews</div>
@@ -35,7 +39,7 @@ export default function Reviews() {
             <span className="text-grad">say it best.</span>
           </h1>
           <p className="mt-6 max-w-[620px] text-[17px] leading-relaxed text-ink-3 sm:text-[18px]">
-            See what customers are saying about their experience with Streamplay4k on Trustpilot.
+            See what customers are saying about their experience with {site.name} on Trustpilot.
             Our profile has been claimed since {trustpilot.claimedSince}.
           </p>
           <div className="mt-7">
@@ -123,7 +127,7 @@ export default function Reviews() {
               href={trustpilot.url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Read all Streamplay4k reviews on Trustpilot. Opens in a new tab."
+              aria-label={`Read all ${site.name} reviews on Trustpilot. Opens in a new tab.`}
               className="btn-outline w-full sm:w-auto"
             >
               Read all reviews

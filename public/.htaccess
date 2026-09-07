@@ -1,4 +1,38 @@
+# StreamPlay4K — Apache configuration.
+#
+# ORDER MATTERS. The previous version rewrote every non-file request to
+# index.html, which would now serve the HOMEPAGE for /pricing/, /terms/ and
+# every other pre-rendered page — silently undoing the whole static build. The
+# `!-d` condition on the fallback is what prevents that.
+
 Options -MultiViews
 RewriteEngine On
+
+# ── Permanent redirect for the renamed setup route ────────────────────────────
+RewriteRule ^setup/?$ /setup-guide/ [R=301,L]
+
+# ── Canonical trailing slash ──────────────────────────────────────────────────
+# /pricing -> /pricing/ where a pre-rendered directory exists. mod_dir would do
+# this itself, but stating it keeps the canonical form explicit and stops the
+# SPA fallback below from claiming the slashless form first.
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteCond %{REQUEST_URI} !/$
+RewriteRule ^(.*)$ /$1/ [R=301,L]
+
+# ── SPA fallback ──────────────────────────────────────────────────────────────
+# Only for URLs with nothing on disk: campaign routes not yet pre-rendered,
+# /blog/<slug>/ for a post added after deploy, and client-side navigation.
 RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.html [QSA,L]
+
+# ── Caching ───────────────────────────────────────────────────────────────────
+# Hashed assets are immutable; HTML must revalidate so a deploy is picked up.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css|woff2|webp|png|svg)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>

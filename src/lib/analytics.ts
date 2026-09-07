@@ -11,12 +11,19 @@
  */
 
 export type OrderEvent =
+  // Order flow (spec §20) — unchanged vocabulary.
   | 'select_plan'
   | 'select_devices'
   | 'begin_order'
   | 'phone_validated'
   | 'submit_order'
-  | 'order_submit_success';
+  | 'order_submit_success'
+  // Conversion support. Deliberately coarse: no hover, scroll or animation
+  // events — they add noise and tell you nothing you can act on.
+  | 'whatsapp_click'
+  | 'view_pricing'
+  | 'start_free_trial'
+  | 'channel_search';
 
 declare global {
   interface Window {

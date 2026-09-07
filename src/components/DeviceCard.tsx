@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { DeviceTile } from '../data/marquees';
+import { site } from '../data/site';
 
 // Vite resolves every device photo at build time; missing files simply stay
 // undefined and the card falls back to its placeholder.
@@ -36,7 +37,7 @@ export default function DeviceCard({ tile }: { tile: DeviceTile }) {
         {showArt ? (
           <img
             src={src}
-            alt={`${tile.name} running Streamplay4k`}
+            alt={`${tile.name} running ${site.name}`}
             loading="lazy"
             onError={() => setFailed(true)}
             className="relative h-full w-full object-contain object-bottom

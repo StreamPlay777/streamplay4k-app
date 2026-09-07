@@ -10,6 +10,8 @@
  * half-up rounding on the extra-device amount exact.
  */
 
+import { site } from './site';
+
 export interface Term {
   id: string;
   months: number;
@@ -80,28 +82,27 @@ export function savingsPerMonth(term: Term): number {
 /**
  * Feature list for the "Included with every plan" panel (spec §9).
  *
- * NOTE — the two catalogue figures below come from spec §9, which states
- * 120,000+ for both. They disagree with src/data/site.ts (60,000+ channels /
- * 180,000+ titles) used by the hero and stat bar, and spec §26 forbids
- * changing catalogue figures. Flagged for a decision; whichever is correct
- * should end up in one place, not two.
+ * Catalogue figures, the refund label and the activation window all read from
+ * data/site.ts. The earlier conflict (120,000+ here vs 60,000+/180,000+ there)
+ * is resolved: 120,000+ for both is the approved figure and it now lives in
+ * exactly one place.
  */
 export const PLAN_FEATURES = [
-  '120,000+ Live Channels',
-  '120,000+ Movies & Series',
+  `${site.channels} Live Channels`,
+  `${site.vod} Movies & Series`,
   'HD / FHD / 4K where available',
   'Sports, news, kids & international content',
   'Multi-device compatibility',
   'EPG / TV guide',
   'Fast activation',
   '24/7 support',
-  '7-Day Money-Back Guarantee',
+  site.refundLabel,
 ];
 
 /** Trust points shown beside the order CTA (spec §10). */
 export const TRUST_POINTS = [
-  'Usually activated within 5–15 minutes',
-  '7-Day Money-Back Guarantee',
+  `Usually activated within ${site.activationWindow}`,
+  site.refundLabel,
   'Support available 24/7',
 ];
 
@@ -112,5 +113,5 @@ export const TRUST_POINTS = [
 export const INVOICE_PAYMENT_METHODS = [
   // Card schemes first, then wallets. Names must match the keys in
   // components/PaymentMarks.tsx — an unknown name renders nothing.
-  'Visa', 'Mastercard', 'Amex', 'Discover', 'Apple Pay', 'Google Pay', 'PayPal',
+  'Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'Link', 'PayPal',
 ] as const;

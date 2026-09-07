@@ -1,0 +1,6 @@
+# Netlify equivalent of the rules in .htaccess, in case the site is hosted there.
+# Netlify serves pre-rendered files before consulting this file, so the SPA
+# fallback here only catches URLs with nothing on disk.
+/setup     /setup-guide/     301!
+/setup/    /setup-guide/     301!
+/*         /index.html       200

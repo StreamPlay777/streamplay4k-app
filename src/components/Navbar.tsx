@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Sun, Moon, ChevronDown } from 'lucide-react';
-import { navLinks, setupMenu } from '../data/site';
+import { Menu, X, ChevronDown } from 'lucide-react';
+import { navLinks, mobileNavLinks, setupMenu, routes, site } from '../data/site';
+import { track } from '../lib/analytics';
 import logo from '../assets/logo-light.png';
 
 /**
@@ -18,7 +19,6 @@ import logo from '../assets/logo-light.png';
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);   // setup dropdown
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [light, setLight] = useState(false);          // appearance toggle, icon only
   const [scrolled, setScrolled] = useState(false);
   const { pathname, hash } = useLocation();
   const navigate = useNavigate();
@@ -47,7 +47,10 @@ export default function Navbar() {
 
   useEffect(() => { setMobileOpen(false); setMenuOpen(false); }, [pathname, hash]);
 
-  const goSetup = () => { setMenuOpen(false); navigate('/setup'); };
+  const goSetup = (hash?: string) => {
+    setMenuOpen(false);
+    navigate(hash ? `${routes.setup}#${hash}` : routes.setup);
+  };
   const isActive = (to: string) =>
     to.startsWith('/#') ? pathname === '/' && hash === to.slice(1) : pathname === to;
 
@@ -71,19 +74,20 @@ export default function Navbar() {
           <Link
             to="/"
             className="flex flex-none items-center gap-1.5 rounded-lg transition-opacity duration-200 hover:opacity-80"
-            aria-label="Streamplay4k home"
+            aria-label={`${site.name} home`}
           >
-            <img src={logo} alt="Streamplay" className="h-[28px] w-auto sm:h-[30px]" />
+            <img src={logo} alt={site.name} className="h-[28px] w-auto sm:h-[30px]" />
             <span className="font-display text-[16px] font-extrabold text-accent sm:text-[17px]">4K</span>
           </Link>
 
           {/* Controls sit here on mobile, where there is no centre column */}
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2 lg:hidden">
-            <span className="hidden min-[360px]:block">
-              <ThemeToggle light={light} onToggle={() => setLight((v) => !v)} />
-            </span>
-            <Link to="/pricing" className="btn-accent !rounded-xl !px-3.5 !py-2.5 !text-[13px] !shadow-cta-sm sm:!px-4 sm:!text-[13.5px]">
-              Get started
+            <Link
+              to={routes.pricing}
+              onClick={() => track('view_pricing', { from: 'navbar-mobile' })}
+              className="btn-accent !rounded-xl !px-3.5 !py-2.5 !text-[13px] !shadow-cta-sm sm:!px-4 sm:!text-[13.5px]"
+            >
+              View plans
             </Link>
             <button
               onClick={() => setMobileOpen((o) => !o)}
@@ -133,7 +137,7 @@ export default function Navbar() {
                       {setupMenu.map((row) => (
                         <button
                           key={row.code}
-                          onClick={goSetup}
+                          onClick={() => goSetup(row.hash)}
                           className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left
                                      transition-colors duration-150 hover:bg-white/[.055]"
                         >
@@ -170,26 +174,25 @@ export default function Navbar() {
         </div>
 
         {/* Right — controls */}
-        <div className="hidden items-center justify-end gap-2 lg:flex">
-          <ThemeToggle light={light} onToggle={() => setLight((v) => !v)} />
+        {/* Right — one primary CTA, visually separated from the links (brief §15).
+            The appearance toggle and the "Free trial" pill were removed: the
+            toggle was never wired to a light theme, and the pill competed with
+            the CTA beside it. Free trial still lives in the mobile drawer and
+            the footer. */}
+        <div className="hidden items-center justify-end lg:flex">
           <Link
-            to="/contact"
-            className="flex items-center gap-2 rounded-xl border border-white/[.12] px-4 py-2.5
-                       font-display text-[13.5px] font-semibold text-ink transition-all duration-200
-                       hover:border-white/25 hover:bg-white/[.04]"
+            to={routes.pricing}
+            onClick={() => track('view_pricing', { from: 'navbar' })}
+            className="btn-accent !rounded-xl !px-5 !py-2.5 !text-[13.5px] !shadow-cta-sm"
           >
-            <span className="h-[7px] w-[7px] rounded-full bg-success" aria-hidden="true" />
-            Free trial
-          </Link>
-          <Link to="/pricing" className="btn-accent !rounded-xl !px-5 !py-2.5 !text-[13.5px] !shadow-cta-sm">
-            Get started
+            View plans
           </Link>
         </div>
 
         {/* Mobile drawer */}
         {mobileOpen && (
           <div className="col-span-full border-t border-white/[.08] pt-2 lg:hidden">
-            {navLinks.map((link) => (
+            {mobileNavLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
@@ -202,32 +205,26 @@ export default function Navbar() {
               </Link>
             ))}
             <Link
-              to="/contact"
+              to={routes.contact}
+              onClick={() => track('start_free_trial', { from: 'nav-drawer' })}
               className="mt-1 flex items-center gap-2 rounded-xl px-3 py-3 font-display text-[15px] font-semibold text-ink-2"
             >
               <span className="h-[7px] w-[7px] rounded-full bg-success" aria-hidden="true" />
               Free trial
             </Link>
-            <div className="mt-2 px-3 pb-1 min-[360px]:hidden">
-              <ThemeToggle light={light} onToggle={() => setLight((v) => !v)} />
-            </div>
+            <a
+              href={site.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track('whatsapp_click', { from: 'nav-drawer' })}
+              className="flex items-center gap-2 rounded-xl px-3 py-3 font-display text-[15px] font-semibold text-ink-2"
+            >
+              <span className="h-[7px] w-[7px] rounded-full bg-[#25D366]" aria-hidden="true" />
+              WhatsApp support
+            </a>
           </div>
         )}
       </nav>
     </div>
-  );
-}
-
-function ThemeToggle({ light, onToggle }: { light: boolean; onToggle: () => void }) {
-  return (
-    <button
-      onClick={onToggle}
-      aria-label="Toggle appearance"
-      title="Appearance toggle — not yet wired to a light theme"
-      className="grid h-[38px] w-[38px] flex-none place-items-center rounded-xl border border-white/[.1]
-                 text-accent-bright transition-all duration-200 hover:border-accent hover:bg-accent/[.08]"
-    >
-      {light ? <Sun size={16} /> : <Moon size={16} />}
-    </button>
   );
 }
