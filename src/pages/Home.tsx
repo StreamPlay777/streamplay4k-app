@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { site, heroStats, paymentMethods } from '../data/site';
-import { TERMS, quote, money, DEFAULT_TERM_ID } from '../data/pricing';
+import { site, heroStats } from '../data/site';
+import { TERMS, quote, money, savingsPerMonth, DEFAULT_TERM_ID, INVOICE_PAYMENT_METHODS } from '../data/pricing';
+import EmailMock from '../components/EmailMock';
 import { whySwitch, deviceTiles, coverageChecklist } from '../data/marquees';
 import { logoRows, networkLogos } from '../data/logos';
 import PosterWall from '../components/PosterWall';
@@ -12,7 +13,7 @@ import TrustCards from '../components/TrustCards';
 import { trustpilot } from '../data/reviews';
 import Check from '../components/pricing/Check';
 import { basketMonthly, basketYearly, paymentsPerYear, smallPrint } from '../data/receipt';
-import { SectionHeading, Placeholder, LogoMarquee, Tick } from '../components/ui';
+import { SectionHeading, LogoMarquee, Tick } from '../components/ui';
 import DeviceCard from '../components/DeviceCard';
 import Receipt from '../components/Receipt';
 import PricingOrder from '../components/pricing/PricingOrder';
@@ -402,114 +403,170 @@ function WhySwitch() {
   );
 }
 
-/* ── 1.9 Three-step setup ──────────────────────────────────────────────────── */
+/* ── How it works / three steps ────────────────────────────────────────────── */
 function ThreeSteps() {
-  // Step 01 mirrors the locked pricing; the live selector is Section 05.
+  // Mirrors the locked pricing; the live selector with device count is Section 05.
   const [termId, setTermId] = useState(DEFAULT_TERM_ID);
   const q = quote(termId, 1);
 
+  // "Best value" is computed, not asserted: the term with the lowest cost per
+  // month. With the locked ladder that is 12 months, but it is derived so the
+  // label can never drift out of step with the prices.
+  const bestValueId = TERMS.reduce((best, t) =>
+    t.baseCents / t.months < best.baseCents / best.months ? t : best, TERMS[0]).id;
+
   const steps = [
     {
-      headline: <>Pick your <span className="font-semibold text-ink-3">plan.</span></>,
-      body: 'Choose how long you want to stay. The longer the term, the lower the monthly cost — everything else is identical.',
+      n: '01',
+      title: 'Pick your plan.',
+      body: `Every plan gets all ${site.channels} channels. Longer just costs less.`,
       widget: (
-        <div className="flex flex-col gap-2">
-          {TERMS.map((t) => {
-            const on = t.id === termId;
-            return (
-              <button
-                key={t.id}
-                onClick={() => setTermId(t.id)}
-                className={`flex items-center gap-3 rounded-[10px] border px-4 py-3.5 text-left transition-colors ${
-                  on ? 'border-accent bg-accent/[.14]' : 'border-white/10 bg-white/[.02] hover:border-white/20'
-                }`}
-              >
-                <span className="flex-1 font-display text-[15px] font-bold text-ink">{t.label}</span>
-                <span className="nums font-display text-[18px] font-extrabold text-ink">{money(t.baseCents)}</span>
-              </button>
-            );
-          })}
+        <div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-2.5" role="group" aria-label="Choose a plan">
+          <div className="flex flex-col gap-2">
+            {TERMS.map((t) => {
+              const on = t.id === termId;
+              const save = savingsPerMonth(t);
+              const best = t.id === bestValueId;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTermId(t.id)}
+                  aria-pressed={on}
+                  className={`flex min-h-[54px] items-center gap-3 rounded-xl px-4 text-left transition-colors ${
+                    on ? 'bg-accent text-white shadow-cta' : 'bg-white/[.04] text-ink hover:bg-white/[.07]'
+                  }`}
+                >
+                  <span className="flex-1 font-display text-[15px] font-bold">{t.label}</span>
+                  {best ? (
+                    <span className={`rounded px-1.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wide ${
+                      on ? 'bg-white text-accent' : 'bg-accent/[.14] text-accent-bright'
+                    }`}>
+                      Best value
+                    </span>
+                  ) : (
+                    <span className={`text-[11.5px] ${on ? 'text-white/80' : 'text-ink-4'}`}>
+                      {save > 0 ? `Save ${money(save)}/mo` : 'Try it out'}
+                    </span>
+                  )}
+                  <span className="nums font-display text-[19px] font-extrabold">{money(t.baseCents)}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       ),
     },
     {
-      headline: <>Pay <span className="font-semibold text-ink-3">securely.</span></>,
-      body: 'Card, PayPal or a wallet — checkout takes under a minute and your login is emailed the moment it clears.',
+      n: '02',
+      title: 'Place your order.',
+      // No payment is taken on this site — the invoice follows by email and
+      // WhatsApp — so this step is honest about that rather than echoing the
+      // reference's "pay now".
+      body: 'Phone and email, that\'s all we ask. Your invoice arrives by email and WhatsApp, and you pay it however suits you.',
       widget: (
-        <div className="rounded-2xl border border-white/[.09] bg-white/[.025] p-5">
-          <div className="flex justify-between text-[14px]">
-            <span className="text-ink-3">{site.name}</span>
-            <span className="font-medium text-ink">{q.term.label}</span>
-          </div>
-          <div className="mt-2 flex justify-between text-[14px]">
-            <span className="text-ink-3">1 device included</span>
-            <span className="nums font-medium text-ink">{money(q.totalCents)}</span>
+        <div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-5">
+          <div className="flex items-start gap-3">
+            <span
+              className="grid h-10 w-10 flex-none place-items-center rounded-lg font-display text-[17px] font-extrabold text-white"
+              style={{ background: 'linear-gradient(135deg, #FF2B20, #FF7A18)' }}
+              aria-hidden="true"
+            >
+              S
+            </span>
+            <span className="min-w-0">
+              <span className="block font-display text-[15.5px] font-bold text-ink">{site.name}, {q.term.label.toLowerCase()}</span>
+              <span className="block text-[12.5px] text-ink-4">1 device · 4K where available · Login by email</span>
+            </span>
           </div>
           <div className="my-4 border-t border-white/[.09]" />
           <div className="flex items-end justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-[.16em] text-ink-4">To pay</span>
+            <span className="text-[14px] text-ink-3">Total on your invoice</span>
             <span className="nums font-display text-[28px] font-extrabold leading-none text-ink">{money(q.totalCents)}</span>
           </div>
-          <Link to="/#pricing" className="btn-accent mt-5 w-full !py-3 !text-[14px]">Choose this plan</Link>
-          <div className="mt-4 flex flex-wrap gap-1.5">
-            {paymentMethods.map((p) => (
-              <span key={p} className="rounded-[5px] border border-white/10 px-2 py-1 nums text-[9.5px] text-ink-4">
-                {p}
-              </span>
+          <Link to="/#pricing" className="btn-accent mt-5 w-full !py-3.5 !text-[14.5px]">
+            Order now →
+          </Link>
+          <p className="mt-3 text-center text-[11.5px] text-ink-4">
+            No payment is taken on this page.
+          </p>
+          <p className="mt-4 text-[10px] font-bold uppercase tracking-[.14em] text-ink-5">Pay your invoice with</p>
+          <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+            {INVOICE_PAYMENT_METHODS.map((m) => (
+              <li key={m} className="text-[12px] font-semibold text-ink-3">{m}</li>
             ))}
-          </div>
+          </ul>
         </div>
       ),
     },
     {
-      headline: <>Press <span className="font-semibold text-ink-3">play.</span></>,
-      body: 'Install the player, paste the login we sent, and the full channel list plus the guide loads in seconds.',
-      extra: <Link to="/setup" className="btn-outline mt-6 !py-3 !text-[14px]">Open the setup guide</Link>,
-      widget: (
-        <div className="overflow-hidden rounded-2xl border border-white/[.09]">
-          <Placeholder label="[ phone casting to the TV ]" height={196} />
-          <div className="bg-surface-2 px-4 py-3.5 text-[13.5px] text-ink-3">
-            Login emailed in minutes · works on every device
-          </div>
-        </div>
-      ),
+      n: '03',
+      title: 'Open the email. Start watching.',
+      body: 'Once your invoice is paid, your login lands in your inbox — usually within 5–15 minutes. Paste it into the app on your TV, phone or laptop and watch.',
+      extra: <Link to="/setup" className="btn-outline mt-6 !py-3 !text-[14px]">See the setup guides</Link>,
+      widget: <EmailMock />,
     },
   ];
 
   return (
-    <section id="setup" className="bg-bg px-7 pb-[110px] pt-[100px]">
+    <section id="setup" className="bg-bg px-5 py-20 sm:px-7 sm:py-[110px]">
       <div className="mx-auto max-w-shell">
-        <div className="max-w-[680px]">
-          <div className="label mb-4">Set up in minutes</div>
-          <h2 className="font-display font-extrabold leading-[1.02] text-ink" style={{ fontSize: 'clamp(34px, 5vw, 54px)' }}>
+        {/* Header */}
+        <div className="mx-auto max-w-[720px] text-center">
+          <p className="text-[12px] font-bold uppercase tracking-[.18em] text-accent">Getting started</p>
+          <h2
+            className="mt-4 font-display font-extrabold leading-[1.02] text-ink"
+            style={{ fontSize: 'clamp(32px, 5vw, 54px)' }}
+          >
             Three steps.
             <br />
-            <span className="font-semibold text-ink-3">Six minutes.</span>
+            <span className="text-accent">Watching in minutes.</span>
           </h2>
+          <p className="mx-auto mt-5 max-w-[460px] text-[16px] leading-relaxed text-ink-3">
+            No hardware, no contract, no waiting around. Pick, order, watch.
+          </p>
         </div>
 
-        <div className="mt-14 border-t border-white/[.09]">
+        {/* Rules-only table: giant numeral, copy, live widget */}
+        <div className="mt-12 border-t border-white/[.09] sm:mt-16">
           {steps.map((step, i) => (
             <div
-              key={i}
-              className={`grid items-center gap-8 py-12 lg:grid-cols-[220px_1fr_340px] lg:gap-12 lg:py-14 ${
+              key={step.n}
+              className={`grid items-center gap-8 py-12 sm:py-14 lg:grid-cols-[180px_minmax(0,1fr)_380px] lg:gap-12 lg:py-16 ${
                 i < steps.length - 1 ? 'border-b border-white/[.09]' : ''
               }`}
             >
-              <div
-                className="font-display font-extrabold leading-[.8] tracking-[-.06em] text-accent"
-                style={{ fontSize: 'clamp(72px, 10vw, 128px)' }}
-              >
-                {String(i + 1).padStart(2, '0')}
+              {/* Phone: numeral and copy share a row; desktop: three columns */}
+              <div className="flex items-center gap-5 lg:contents">
+                <div
+                  className="flex-none font-display font-extrabold leading-[.8] tracking-[-.06em] text-accent"
+                  style={{ fontSize: 'clamp(64px, 10vw, 120px)' }}
+                  aria-hidden="true"
+                >
+                  {step.n}
+                </div>
+                <div className="min-w-0 max-w-[440px]">
+                  <h3 className="font-display text-[24px] font-extrabold leading-tight text-ink sm:text-[28px] lg:text-[30px]">
+                    <span className="sr-only">Step {step.n}: </span>{step.title}
+                  </h3>
+                  <p className="mt-2.5 text-[15.5px] leading-relaxed text-ink-3 sm:text-[16px]">{step.body}</p>
+                  {step.extra}
+                </div>
               </div>
-              <div className="max-w-[400px]">
-                <h3 className="font-display text-[28px] font-extrabold text-ink lg:text-[34px]">{step.headline}</h3>
-                <p className="mt-3 text-[16.5px] leading-relaxed text-ink-3">{step.body}</p>
-                {step.extra}
-              </div>
-              <div>{step.widget}</div>
+              <div className="min-w-0">{step.widget}</div>
             </div>
           ))}
+        </div>
+
+        {/* Close */}
+        <div className="mt-10 flex flex-col items-center gap-4 border-t border-white/[.09] pt-10 sm:mt-12">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <Link to="/#pricing" className="btn-accent w-full sm:w-auto">I'm in — get my sub →</Link>
+            <Link to="/setup" className="btn-outline w-full sm:w-auto">See the setup guides</Link>
+          </div>
+          <p className="text-center text-[11.5px] font-bold uppercase tracking-[.13em] text-ink-4">
+            7-day money-back guarantee · 24/7 support
+          </p>
         </div>
       </div>
     </section>
