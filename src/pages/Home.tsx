@@ -397,8 +397,10 @@ function ThreeSteps() {
           <p className="mt-3 text-center text-[11.5px] text-ink-4">
             No payment is taken on this page.
           </p>
-          <p className="mt-4 text-[10px] font-bold uppercase tracking-[.14em] text-ink-5">Pay your invoice with</p>
-          <PaymentMarks methods={INVOICE_PAYMENT_METHODS} className="mt-2" />
+          <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[.14em] text-ink-5">
+            Pay your invoice with
+          </p>
+          <PaymentMarks methods={INVOICE_PAYMENT_METHODS} align="center" className="mx-auto mt-2.5 max-w-[226px] sm:max-w-[248px]" />
         </div>
       ),
     },

@@ -187,7 +187,7 @@ export default function PricingOrder() {
               <p className="mt-5 text-[11px] font-bold uppercase tracking-[.14em] text-ink-5">
                 Payment methods available on your invoice
               </p>
-              <PaymentMarks methods={INVOICE_PAYMENT_METHODS} className="mt-2.5" />
+              <PaymentMarks methods={INVOICE_PAYMENT_METHODS} className="mt-3" />
             </div>
           </div>
 
