@@ -8,7 +8,6 @@ import { track } from '../../lib/analytics';
 import OrderFlow from './OrderFlow';
 import Check from './Check';
 import PaymentMarks from '../PaymentMarks';
-import GlowBorder from '../GlowBorder';
 
 /**
  * Section 05 — pricing and quick order flow.
@@ -58,10 +57,7 @@ export default function PricingOrder() {
 
         <div className="mt-12 grid gap-5 lg:grid-cols-[1.15fr_1fr] lg:gap-6">
           {/* ── Left: selection + price ─────────────────────────────── */}
-          {/* The one animated rim on the site — it marks the element we most
-              want people to look at. Adding a second would kill the effect. */}
-          <GlowBorder>
-            <div className="p-5 sm:p-7">
+          <div className="rounded-2xl border border-white/[.1] bg-white/[.02] p-5 sm:p-7">
             {/* Term */}
             <fieldset>
               <legend className="text-[11px] font-bold uppercase tracking-[.16em] text-ink-4">
@@ -193,8 +189,7 @@ export default function PricingOrder() {
               </p>
               <PaymentMarks methods={INVOICE_PAYMENT_METHODS} className="mt-3" />
             </div>
-            </div>
-          </GlowBorder>
+          </div>
 
           {/* ── Right: features, or the order flow once opened ───────── */}
           <div>
