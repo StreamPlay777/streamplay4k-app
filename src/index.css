@@ -35,12 +35,36 @@
 }
 
 @layer components {
-  /* Section eyebrow — 11-12px uppercase, wide tracking */
+  /*
+   * BRAND GRADIENT — #FF2B20 red into #FF7A18 orange.
+   *
+   * Where it goes: display type on dark ground — section eyebrows, the
+   * highlighted half of a heading, the giant step numerals, gradient badges.
+   *
+   * Where it must NOT go: any light surface. Measured on white, the orange end
+   * lands at 2.61:1, below the 3:1 floor even for large text, so the Trustpilot
+   * cards, logo chips and the receipt keep solid ink. Buttons keep solid fill
+   * too: white on the orange end is 2.61:1, worse than the 3.74:1 of the red
+   * it would replace. Small UI — borders, ticks, icons, active pills — stays
+   * solid: a fade across a 16px tick reads as a rendering fault.
+   */
+  .text-grad {
+    background-image: theme('backgroundImage.accent-gradient');
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* Safari paints a transparent box shadow-side without this. */
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Field label — grey. Names an input, not a section. */
   .label {
     @apply font-display text-[12px] font-bold uppercase tracking-[.18em] text-ink-4;
   }
-  .label-accent {
-    @apply font-display text-[12px] font-extrabold uppercase tracking-[.2em] text-accent;
+  /* Section eyebrow — the small announcement above a heading. */
+  .label-accent,
+  .eyebrow {
+    @apply text-grad font-display text-[11.5px] font-extrabold uppercase tracking-[.18em] sm:text-[12px];
   }
 
   /* Buttons */
@@ -48,6 +72,10 @@
     @apply inline-flex items-center justify-center gap-2 font-display font-bold
            transition-colors duration-150 cursor-pointer select-none;
   }
+  /* Primary CTA stays SOLID, deliberately. White type measures 3.74:1 on the
+     red and only 2.61:1 on the orange end, so a gradient button would be
+     measurably harder to read than the one it replaced. The gradient earns its
+     place on display type, where it lands at 5.35-7.67:1. */
   .btn-accent {
     @apply btn bg-accent text-white rounded-xl px-7 py-[15px] text-[15.5px]
            shadow-cta hover:bg-accent-hover;

@@ -6,12 +6,14 @@ export default {
       colors: {
         // Brand pair — sampled from the client logo
         accent: {
-          DEFAULT: '#FF2B2A',
+          // Single brand red. The old #FF2B2A differed by one hex digit and was
+          // indistinguishable; unified so there is one value, not two.
+          DEFAULT: '#FF2B20',
           hover: '#FF5347',
           bright: '#FF6A5A',
           soft: '#FF7A63',
           link: '#FF8A72',
-          2: '#FF9A3E',
+          2: '#FF7A18',
           print: '#E0201C',
         },
         // Dark navy ground
@@ -56,11 +58,14 @@ export default {
         narrow: '820px',
       },
       backgroundImage: {
-        'accent-gradient': 'linear-gradient(100deg, #FF2B2A, #FF9A3E)',
+        // The brand gradient. Horizontal for type, diagonal for small tiles and
+        // buttons where a sideways fade has too little room to read.
+        'accent-gradient': 'linear-gradient(90deg, #FF2B20, #FF7A18)',
+        'accent-gradient-diag': 'linear-gradient(135deg, #FF2B20, #FF7A18)',
       },
       boxShadow: {
-        'cta-sm': '0 6px 22px rgba(255,43,42,.35)',
-        cta: '0 10px 32px rgba(255,43,42,.33)',
+        'cta-sm': '0 6px 22px rgba(255,43,32,.35)',
+        cta: '0 10px 32px rgba(255,60,26,.34)',
         pill: '0 12px 40px rgba(0,0,0,.45)',
         dropdown: '0 24px 60px rgba(0,0,0,.6)',
       },

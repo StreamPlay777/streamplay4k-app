@@ -97,7 +97,7 @@ function Hero() {
         >
           All Your Entertainment.
           <br />
-          <span className="text-accent">One Powerful Platform.</span>
+          <span className="text-grad">One Powerful Platform.</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-[620px] text-[18.5px] leading-relaxed text-ink-2">
@@ -309,7 +309,7 @@ function OnDemand() {
             style={{ fontSize: 'clamp(30px, 4.6vw, 50px)' }}
           >
             Enjoy thousands of hours of{' '}
-            <span className="text-accent">premium content</span>
+            <span className="text-grad">premium content</span>
           </h2>
           <p className="mx-auto mt-5 max-w-[560px] text-[16.5px] leading-relaxed text-ink-3">
             The channels are up top. This is everything else — films, series and box sets
@@ -386,7 +386,7 @@ function WhySwitch() {
   return (
     <section className="px-7 py-[110px]" style={{ background: 'linear-gradient(180deg, #080B16, #06080F)' }}>
       <div className="mx-auto max-w-shell">
-        <SectionHeading title={<>Why people switch to <span className="text-accent">{site.name}</span></>} />
+        <SectionHeading title={<>Why people switch to <span className="text-grad">{site.name}</span></>} />
         <div className="mt-14 grid gap-[18px] md:grid-cols-2 lg:grid-cols-3">
           {whySwitch.map((card, i) => (
             <div key={card.title} className="card-hover px-[26px] pb-[30px] pt-7">
@@ -468,8 +468,7 @@ function ThreeSteps() {
         <div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-5">
           <div className="flex items-start gap-3">
             <span
-              className="grid h-10 w-10 flex-none place-items-center rounded-lg font-display text-[17px] font-extrabold text-white"
-              style={{ background: 'linear-gradient(135deg, #FF2B20, #FF7A18)' }}
+              className="grid h-10 w-10 flex-none place-items-center rounded-lg bg-accent-gradient-diag font-display text-[17px] font-extrabold text-white"
               aria-hidden="true"
             >
               S
@@ -513,14 +512,14 @@ function ThreeSteps() {
       <div className="mx-auto max-w-shell">
         {/* Header */}
         <div className="mx-auto max-w-[720px] text-center">
-          <p className="text-[12px] font-bold uppercase tracking-[.18em] text-accent">Getting started</p>
+          <p className="eyebrow">Getting started</p>
           <h2
             className="mt-4 font-display font-extrabold leading-[1.02] text-ink"
             style={{ fontSize: 'clamp(32px, 5vw, 54px)' }}
           >
             Three steps.
             <br />
-            <span className="text-accent">Watching in minutes.</span>
+            <span className="text-grad">Watching in minutes.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-[460px] text-[16px] leading-relaxed text-ink-3">
             No hardware, no contract, no waiting around. Pick, order, watch.
@@ -539,7 +538,7 @@ function ThreeSteps() {
               {/* Phone: numeral and copy share a row; desktop: three columns */}
               <div className="flex items-center gap-5 lg:contents">
                 <div
-                  className="flex-none font-display font-extrabold leading-[.8] tracking-[-.06em] text-accent"
+                  className="text-grad flex-none font-display font-extrabold leading-[.8] tracking-[-.06em]"
                   style={{ fontSize: 'clamp(64px, 10vw, 120px)' }}
                   aria-hidden="true"
                 >
@@ -599,33 +598,14 @@ function Reviews() {
       <div className="relative mx-auto max-w-shell">
         {/* Header */}
         <div className="mx-auto max-w-[760px] text-center">
-          <p
-            className="text-[11.5px] font-bold uppercase tracking-[.18em] sm:text-[12px]"
-            style={{
-              background: 'linear-gradient(90deg, #FF2B20, #FF7A18)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              color: 'transparent',
-            }}
-          >
-            From our customers, to Streamplay
-          </p>
+          <p className="eyebrow">From our customers, to Streamplay</p>
           <h2
             className="mt-5 font-display font-extrabold leading-[1.04] text-ink"
             style={{ fontSize: 'clamp(30px, 4.8vw, 52px)' }}
           >
             Our customers
             <br />
-            <span
-              style={{
-                background: 'linear-gradient(90deg, #FF2B20, #FF7A18)',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                color: 'transparent',
-              }}
-            >
-              say it best.
-            </span>
+            <span className="text-grad">say it best.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-[520px] text-[15.5px] leading-relaxed text-ink-3 sm:text-[16px]">
             See what customers are saying about their experience with Streamplay4k on Trustpilot.
@@ -684,7 +664,7 @@ function FaqSection() {
       <div className="mx-auto max-w-narrow">
         <SectionHeading
           label="Questions"
-          title={<>US IPTV <span className="text-accent">FAQs</span></>}
+          title={<>US IPTV <span className="text-grad">FAQs</span></>}
           sub="Support is on live chat 24/7 for anything not covered here."
           size={50}
         />

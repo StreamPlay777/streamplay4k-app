@@ -28,9 +28,8 @@ export default function EmailMock() {
       >
         <div className="flex items-start gap-3">
           <span
-            className="grid h-9 w-9 flex-none place-items-center rounded-lg font-display text-[15px] font-extrabold text-white"
-            style={{ background: 'linear-gradient(135deg, #FF2B20, #FF7A18)' }}
-          >
+            className="grid h-9 w-9 flex-none place-items-center rounded-lg bg-accent-gradient-diag font-display text-[15px] font-extrabold text-white"
+            >
             S
           </span>
           <span className="min-w-0 flex-1">

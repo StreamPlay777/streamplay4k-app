@@ -25,14 +25,14 @@ export default function Reviews() {
     <>
       <section className="px-5 pb-[46px] pt-[74px] sm:px-7">
         <div className="mx-auto max-w-shell">
-          <div className="label-accent">Customer reviews</div>
+          <div className="eyebrow">Customer reviews</div>
           <h1
             className="mt-4 font-display font-extrabold leading-none text-ink"
             style={{ fontSize: 'clamp(34px, 6.5vw, 66px)' }}
           >
             Our customers
             <br />
-            <span className="text-accent">say it best.</span>
+            <span className="text-grad">say it best.</span>
           </h1>
           <p className="mt-6 max-w-[620px] text-[17px] leading-relaxed text-ink-3 sm:text-[18px]">
             See what customers are saying about their experience with Streamplay4k on Trustpilot.

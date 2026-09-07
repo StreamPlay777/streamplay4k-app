@@ -12,14 +12,14 @@ export default function Pricing() {
       {/* Page header */}
       <section className="px-7 pb-[46px] pt-[74px]">
         <div className="mx-auto max-w-shell">
-          <div className="label-accent">US IPTV pricing</div>
+          <div className="eyebrow">US IPTV pricing</div>
           <h1
             className="mt-4 font-display font-extrabold leading-none text-ink"
             style={{ fontSize: 'clamp(38px, 6.5vw, 66px)' }}
           >
             One plan.
             <br />
-            <span className="text-accent">Pick your term.</span>
+            <span className="text-grad">Pick your term.</span>
           </h1>
           <p className="mt-6 max-w-[620px] text-[18px] leading-relaxed text-ink-3">
             Choose the term that suits you and how many devices stream at once. Live TV, sport, films,

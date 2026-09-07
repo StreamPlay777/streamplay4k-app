@@ -41,8 +41,7 @@ function Card({ r, i }: { r: FeaturedReview; i: number }) {
 
       <div className="mt-5 flex items-center gap-3 border-t border-black/10 pt-4">
         <span
-          className="grid h-9 w-9 flex-none place-items-center rounded-md text-[12px] font-bold text-white"
-          style={{ background: 'linear-gradient(135deg, #FF2B20, #FF7A18)' }}
+          className="grid h-9 w-9 flex-none place-items-center rounded-md bg-accent-gradient-diag text-[12px] font-bold text-white"
           aria-hidden="true"
         >
           {initials(r.name)}

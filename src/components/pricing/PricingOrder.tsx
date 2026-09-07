@@ -40,14 +40,14 @@ export default function PricingOrder() {
       <div className="mx-auto max-w-shell">
         {/* Header (spec §3) */}
         <div className="mx-auto max-w-[720px] text-center">
-          <p className="text-[12px] font-bold uppercase tracking-[.18em] text-ink-4">Simple pricing</p>
+          <p className="eyebrow">Simple pricing</p>
           <h2
             className="mt-4 font-display font-extrabold leading-[1.02] text-ink"
             style={{ fontSize: 'clamp(32px, 5vw, 52px)' }}
           >
             One plan.
             <br />
-            <span className="text-accent">Pick your term.</span>
+            <span className="text-grad">Pick your term.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-[560px] text-[16.5px] leading-relaxed text-ink-3">
             Choose your subscription length and the number of devices you want to use.

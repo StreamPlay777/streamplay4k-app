@@ -37,11 +37,11 @@ export default function Channels() {
       {/* Header */}
       <section className="px-7 pb-[46px] pt-[74px]">
         <div className="mx-auto max-w-shell">
-          <div className="label-accent">Channel guide</div>
+          <div className="eyebrow">Channel guide</div>
           <h1 className="mt-4 font-display font-extrabold leading-none text-ink" style={{ fontSize: 'clamp(38px, 6.5vw, 66px)' }}>
             Every channel.
             <br />
-            <span className="text-accent">Every country.</span>
+            <span className="text-grad">Every country.</span>
           </h1>
           <p className="mt-6 max-w-[620px] text-[18px] leading-relaxed text-ink-3">
             The US, the UK, Europe, the Arab world and South Asia — in HD, 4K and 8K.

@@ -46,11 +46,11 @@ export default function Contact() {
     <>
       <section className="px-7 pb-[46px] pt-[74px]">
         <div className="mx-auto max-w-shell">
-          <div className="label-accent">Contact</div>
+          <div className="eyebrow">Contact</div>
           <h1 className="mt-4 font-display font-extrabold leading-none text-ink" style={{ fontSize: 'clamp(38px, 6.5vw, 66px)' }}>
             Need help with
             <br />
-            <span className="text-accent">your subscription?</span>
+            <span className="text-grad">your subscription?</span>
           </h1>
           <p className="mt-6 max-w-[620px] text-[18px] leading-relaxed text-ink-3">
             Live chat is staffed around the clock. For anything that needs a longer answer, send a message

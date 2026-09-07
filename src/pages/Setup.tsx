@@ -25,9 +25,9 @@ export default function Setup() {
       {/* Header */}
       <section className="px-7 pb-[46px] pt-[74px]">
         <div className="mx-auto max-w-shell">
-          <div className="label-accent">Set up in minutes</div>
+          <div className="eyebrow">Set up in minutes</div>
           <h1 className="mt-4 font-display font-extrabold leading-none text-ink" style={{ fontSize: 'clamp(38px, 6.5vw, 66px)' }}>
-            Installation <span className="text-accent">guide</span>
+            Installation <span className="text-grad">guide</span>
           </h1>
           <p className="mt-6 max-w-[620px] text-[18px] leading-relaxed text-ink-3">
             Pick your device below and follow the exact steps. On sticks and boxes we install the player
