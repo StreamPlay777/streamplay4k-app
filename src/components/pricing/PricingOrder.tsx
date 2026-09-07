@@ -7,6 +7,7 @@ import {
 import { track } from '../../lib/analytics';
 import OrderFlow from './OrderFlow';
 import Check from './Check';
+import PaymentMarks from '../PaymentMarks';
 
 /**
  * Section 05 — pricing and quick order flow.
@@ -186,13 +187,7 @@ export default function PricingOrder() {
               <p className="mt-5 text-[11px] font-bold uppercase tracking-[.14em] text-ink-5">
                 Payment methods available on your invoice
               </p>
-              <div className="mt-2.5 flex flex-wrap gap-1.5">
-                {INVOICE_PAYMENT_METHODS.map((m) => (
-                  <span key={m} className="rounded-md border border-white/[.12] px-2.5 py-1 text-[11.5px] text-ink-4">
-                    {m}
-                  </span>
-                ))}
-              </div>
+              <PaymentMarks methods={INVOICE_PAYMENT_METHODS} className="mt-2.5" />
             </div>
           </div>
 

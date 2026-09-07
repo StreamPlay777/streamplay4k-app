@@ -4,6 +4,10 @@
    than silently falling back to a system sans, and keeps EU visitors' IPs off
    a US font endpoint. One file covers the whole 300-900 weight range. */
 @import '@fontsource-variable/outfit';
+/* Caveat, for the handwritten notes around the receipt only. Outfit italic
+   reads as emphasis, not handwriting, and the scribbled margin note is what
+   makes that section land. One small self-hosted file. */
+@import '@fontsource-variable/caveat';
 
 @tailwind base;
 @tailwind components;
@@ -121,6 +125,16 @@
       rgba(255,255,255,.045) 0 12px, transparent 12px 24px);
   }
   .text-balance { text-wrap: balance; }
+  /*
+   * Receipt type. The site runs on Outfit alone, but a till receipt has to be
+   * monospaced or it stops reading as one — the columns are the whole point.
+   * Uses the platform's own mono, so it costs nothing to download.
+   */
+  .font-receipt {
+    font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono',
+                 Menlo, Consolas, 'Liberation Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
   /* Outfit's default figures are proportional. Number columns — receipt
      prices, channel counts, rating percentages — need tabular figures to
      stay aligned now that the monospace face is gone. */

@@ -41,9 +41,6 @@ export const heroStats = [
   { value: 'HD · 4K', label: 'Quality' },
 ] as const;
 
-export const paymentMethods = ['VISA', 'MASTERCARD', 'AMEX', 'PAYPAL', 'APPLE PAY', 'GOOGLE PAY'] as const;
-export const footerPayments = ['VISA', 'MC', 'AMEX', 'PAYPAL'] as const;
-
 export const footerLinks = {
   Product: [
     { label: 'Pricing', to: '/pricing' },

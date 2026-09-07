@@ -3,19 +3,19 @@ import { Link } from 'react-router-dom';
 import { site, heroStats } from '../data/site';
 import { TERMS, quote, money, savingsPerMonth, DEFAULT_TERM_ID, INVOICE_PAYMENT_METHODS } from '../data/pricing';
 import EmailMock from '../components/EmailMock';
+import PaymentMarks from '../components/PaymentMarks';
 import { whySwitch, deviceTiles, coverageChecklist } from '../data/marquees';
 import { logoRows, networkLogos } from '../data/logos';
 import PosterWall from '../components/PosterWall';
+import SavingsSection from '../components/SavingsSection';
 import ShowcaseRow from '../components/ShowcaseRow';
 import TrustpilotBadge from '../components/TrustpilotBadge';
 import ReviewWall from '../components/ReviewWall';
 import TrustCards from '../components/TrustCards';
 import { trustpilot } from '../data/reviews';
 import Check from '../components/pricing/Check';
-import { basketMonthly, basketYearly, paymentsPerYear, smallPrint } from '../data/receipt';
 import { SectionHeading, LogoMarquee, Tick } from '../components/ui';
 import DeviceCard from '../components/DeviceCard';
-import Receipt from '../components/Receipt';
 import PricingOrder from '../components/pricing/PricingOrder';
 import Faq from '../components/Faq';
 
@@ -27,7 +27,7 @@ export default function Home() {
       <StatBar />
       <NetworkWall />        {/* Animated channels */}
       <OnDemand />           {/* Movies & series / premium content */}
-      <CostComparison />     {/* Savings */}
+      <SavingsSection />     {/* Savings */}
       <PricingOrder />       {/* Pricing + quick order flow */}
       <ThreeSteps />         {/* How it works */}
       <Reviews />            {/* Social proof */}
@@ -180,99 +180,7 @@ function NetworkWall() {
   );
 }
 
-/* ── 1.4 Cost comparison ───────────────────────────────────────────────────── */
-function CostComparison() {
-  const yearly = 108; // annual term headline, matches the 12-month plan
-  const savedMonthly = basketMonthly - yearly / 12;
-  const savedYearly = basketYearly - yearly;
-
-  const Row = ({ label, monthly, yearly: y, accent, bold }: {
-    label: string; monthly: string; yearly: string; accent?: boolean; bold?: boolean;
-  }) => (
-    <div
-      className={`grid grid-cols-[minmax(0,1fr)_64px_74px] gap-2 py-4 min-[400px]:grid-cols-[minmax(0,1fr)_100px_110px] sm:grid-cols-[minmax(0,1fr)_140px_150px] ${
-        accent ? 'border-t-2 border-accent' : 'border-t border-white/[.12]'
-      }`}
-    >
-      <span className={`min-w-0 text-[13.5px] sm:text-[15px] ${accent ? 'font-bold text-accent' : bold ? 'font-bold text-ink' : 'text-ink-2'}`}>
-        {label}
-      </span>
-      <span className={`nums text-right text-[13px] sm:text-[15px] ${accent ? 'font-bold text-accent' : bold ? 'font-bold text-ink' : 'text-ink-2'}`}>
-        {monthly}
-      </span>
-      <span className={`nums text-right text-[13px] sm:text-[15px] ${accent ? 'font-bold text-accent' : bold ? 'font-bold text-ink' : 'text-ink-2'}`}>
-        {y}
-      </span>
-    </div>
-  );
-
-  return (
-    <section
-      className="px-5 py-20 sm:px-7 sm:py-[110px]"
-      style={{ background: 'linear-gradient(180deg, #06080F, #080B16)' }}
-    >
-      <div className="mx-auto grid max-w-shell items-start gap-16 lg:grid-cols-[400px_1fr] lg:gap-[88px]">
-        {/* min-w-0: a grid item defaults to min-width:auto, so the receipt's
-            content could force the column wider than a 320px screen and push
-            the whole page sideways. */}
-        <div className="mx-auto w-full min-w-0 max-w-[400px]">
-          <Receipt />
-        </div>
-
-        <div>
-          <div className="label-accent">Let's do the math</div>
-          <h2
-            className="mt-4 font-display font-extrabold leading-none text-ink"
-            style={{ fontSize: 'clamp(38px, 6vw, 62px)' }}
-          >
-            You save
-            <br />
-            <span className="text-accent">${savedYearly.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span> a year.
-          </h2>
-
-          <p className="mt-6 max-w-[520px] text-[17.5px] leading-relaxed text-ink-3">
-            Six subscriptions. Six logins. Seventy-two payments a year.{' '}
-            <strong className="font-semibold text-ink">Why keep paying month after month?</strong>
-          </p>
-
-          <div className="mt-9">
-            <div className="grid grid-cols-[minmax(0,1fr)_64px_74px] gap-2 pb-3 min-[400px]:grid-cols-[minmax(0,1fr)_100px_110px] sm:grid-cols-[minmax(0,1fr)_140px_150px]">
-              <span />
-              <span className="text-right text-[11px] font-bold uppercase tracking-[.16em] text-ink-4">Monthly</span>
-              <span className="text-right text-[11px] font-bold uppercase tracking-[.16em] text-ink-4">Yearly</span>
-            </div>
-            <Row
-              label={`Now · ${paymentsPerYear / 12} subscriptions`}
-              monthly={`$${basketMonthly.toFixed(2)}`}
-              yearly={`$${basketYearly.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-            />
-            <Row label={site.name} monthly={`$${(yearly / 12).toFixed(2)}`} yearly={`$${yearly}.00`} bold />
-            <Row
-              label="You save"
-              monthly={`+$${savedMonthly.toFixed(2)}`}
-              yearly={`+$${savedYearly.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-              accent
-            />
-          </div>
-
-          <p className="mt-8 text-[17px] font-bold text-ink">
-            All of this combined. And there is still more with {site.name}.
-          </p>
-
-          <Link to="/pricing" className="btn-accent mt-6">
-            Get {site.name} for ${yearly} / year
-          </Link>
-
-          <p className="mt-6 max-w-[520px] text-[13.5px] text-ink-3">
-            One subscription replaces the lot — live TV, sport, films, series and the kids' channels,
-            on every screen you own.
-          </p>
-          <p className="mt-3 max-w-[520px] text-[12px] leading-relaxed text-ink-5">{smallPrint}</p>
-        </div>
-      </div>
-    </section>
-  );
-}
+/* ── Cost comparison lives in components/SavingsSection.tsx ────────────────── */
 
 /* ── 1.5 On-demand library ─────────────────────────────────────────────────── */
 function OnDemand() {
@@ -490,11 +398,7 @@ function ThreeSteps() {
             No payment is taken on this page.
           </p>
           <p className="mt-4 text-[10px] font-bold uppercase tracking-[.14em] text-ink-5">Pay your invoice with</p>
-          <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
-            {INVOICE_PAYMENT_METHODS.map((m) => (
-              <li key={m} className="text-[12px] font-semibold text-ink-3">{m}</li>
-            ))}
-          </ul>
+          <PaymentMarks methods={INVOICE_PAYMENT_METHODS} className="mt-2" />
         </div>
       ),
     },

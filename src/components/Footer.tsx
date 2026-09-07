@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
-import { site, footerLinks, footerPayments } from '../data/site';
+import { site, footerLinks } from '../data/site';
+import { INVOICE_PAYMENT_METHODS } from '../data/pricing';
+import PaymentMarks from './PaymentMarks';
 import logo from '../assets/logo-light.png';
 
 export default function Footer() {
@@ -14,16 +16,7 @@ export default function Footer() {
               <span className="font-display text-[16px] font-extrabold text-accent">4K</span>
             </Link>
             <p className="mt-4 max-w-[300px] text-[14px] leading-relaxed text-ink-4">{site.description}</p>
-            <div className="mt-5 flex flex-wrap gap-1.5">
-              {footerPayments.map((p) => (
-                <span
-                  key={p}
-                  className="rounded-[7px] border border-white/10 px-3 py-[7px] nums text-[12px] text-ink-4"
-                >
-                  {p}
-                </span>
-              ))}
-            </div>
+            <PaymentMarks methods={INVOICE_PAYMENT_METHODS} className="mt-5" />
           </div>
 
           {Object.entries(footerLinks).map(([heading, links]) => (

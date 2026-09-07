@@ -50,6 +50,8 @@ export default {
       fontFamily: {
         sans: ['"Outfit Variable"', 'Outfit', 'system-ui', 'sans-serif'],
         display: ['"Outfit Variable"', 'Outfit', 'system-ui', 'sans-serif'],
+        // Handwriting, used only for the notes pinned around the receipt.
+        hand: ['"Caveat Variable"', 'Caveat', 'cursive'],
       },
       maxWidth: {
         shell: '1180px',

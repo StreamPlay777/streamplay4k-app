@@ -110,5 +110,5 @@ export const TRUST_POINTS = [
  * is always labelled as invoice options — never as on-page checkout (§10).
  */
 export const INVOICE_PAYMENT_METHODS = [
-  'Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'Link', 'PayPal',
-];
+  'Visa', 'Mastercard', 'Amex', 'Apple Pay', 'Google Pay', 'PayPal', 'Link',
+] as const;
