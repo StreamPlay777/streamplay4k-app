@@ -110,5 +110,8 @@ export const TRUST_POINTS = [
  * is always labelled as invoice options — never as on-page checkout (§10).
  */
 export const INVOICE_PAYMENT_METHODS = [
-  'Visa', 'Mastercard', 'Amex', 'Apple Pay', 'Google Pay', 'PayPal', 'Link',
+  // Card schemes first, then wallets. Names must match the keys in
+  // components/PaymentMarks.tsx — an unknown name renders nothing.
+  'Visa', 'Mastercard', 'Amex', 'Discover', 'Diners Club', 'JCB', 'UnionPay',
+  'Apple Pay', 'Google Pay', 'PayPal', 'Link',
 ] as const;

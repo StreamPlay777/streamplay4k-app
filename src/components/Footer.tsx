@@ -16,7 +16,10 @@ export default function Footer() {
               <span className="font-display text-[16px] font-extrabold text-accent">4K</span>
             </Link>
             <p className="mt-4 max-w-[300px] text-[14px] leading-relaxed text-ink-4">{site.description}</p>
-            <PaymentMarks methods={INVOICE_PAYMENT_METHODS} className="mt-5" />
+            <h4 className="mt-7 font-display text-[12px] font-extrabold uppercase tracking-[.16em] text-ink-4">
+              We accept
+            </h4>
+            <PaymentMarks methods={INVOICE_PAYMENT_METHODS} className="mt-3.5 max-w-[330px]" />
           </div>
 
           {Object.entries(footerLinks).map(([heading, links]) => (
