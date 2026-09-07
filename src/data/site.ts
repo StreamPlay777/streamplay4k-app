@@ -81,6 +81,7 @@ export const navLinks: NavLink[] = [
   { label: 'Setup guide', to: '/setup', dropdown: true },
   { label: 'Channel list', to: '/channels' },
   { label: 'Reviews', to: '/reviews' },
+  { label: 'FAQs', to: '/#faq' },
   { label: 'Contact', to: '/contact' },
 ];
 
