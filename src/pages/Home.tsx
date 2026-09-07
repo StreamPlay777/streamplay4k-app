@@ -1,9 +1,5 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { site, heroStats } from '../data/site';
-import { TERMS, quote, money, savingsPerMonth, DEFAULT_TERM_ID, INVOICE_PAYMENT_METHODS } from '../data/pricing';
-import EmailMock from '../components/EmailMock';
-import PaymentMarks from '../components/PaymentMarks';
 import { whySwitch, deviceTiles, coverageChecklist } from '../data/marquees';
 import { logoRows, networkLogos } from '../data/logos';
 import PosterWall from '../components/PosterWall';
@@ -53,7 +49,8 @@ function Hero() {
     >
       {/* Drifting wall of artwork, blurred well back. Layer order matters:
           artwork, then a scrim heavy enough to hold the headline's contrast,
-          then the brand glow, then the grid. */}
+          then the brand glow. No grid overlay: it read as a
+          visible mesh over the artwork rather than as texture. */}
       <PosterWall variant="backdrop" />
       <div
         className="pointer-events-none absolute inset-0"
@@ -72,17 +69,6 @@ function Hero() {
                        radial-gradient(ellipse 700px 400px at 12% 40%, rgba(38,64,160,.20), transparent 70%)`,
         }}
       />
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px)`,
-          backgroundSize: '64px 64px',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 20%, #000, transparent)',
-          maskImage: 'radial-gradient(ellipse 80% 60% at 50% 20%, #000, transparent)',
-        }}
-      />
-
       <div className="relative mx-auto max-w-[1000px] text-center">
         <div className="inline-flex items-center gap-2.5 rounded-full border border-accent/[.32] bg-accent/[.09] px-4 py-2">
           <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent" />
@@ -138,7 +124,7 @@ function Hero() {
  */
 function StatBar() {
   return (
-    <section className="relative border-y border-white/[.07] bg-bg px-5 py-11 sm:px-7 sm:py-14">
+    <section className="section-tight relative bg-bg">
       {/* Carries the hero's warmth down over the seam so the two sections read
           as one movement rather than two stacked blocks. */}
       <div
@@ -181,7 +167,7 @@ function NetworkWall() {
   ];
 
   return (
-    <section className="relative overflow-hidden bg-bg py-12 sm:py-14">
+    <section className="section-tight relative overflow-hidden bg-bg">
       {/* Red wash behind the rails, echoing the band on the brand sites */}
       <div
         className="pointer-events-none absolute inset-0"
@@ -221,7 +207,7 @@ function OnDemand() {
   ];
 
   return (
-    <section className="relative isolate overflow-hidden bg-bg py-[86px]">
+    <section className="section relative isolate overflow-hidden bg-bg">
       {/* Blurred wall of artwork behind everything — the library, felt rather
           than listed. Scrimmed heavily so the copy in front stays readable. */}
       <PosterWall variant="backdrop" />
@@ -285,7 +271,7 @@ function OnDemand() {
 /* ── 1.7 Device coverage ───────────────────────────────────────────────────── */
 function DeviceCoverage() {
   return (
-    <section className="bg-bg-alt px-7 py-[100px]">
+    <section className="section bg-bg">
       <div className="mx-auto max-w-shell">
         <SectionHeading
           label="What is on"
@@ -321,7 +307,7 @@ function DeviceCoverage() {
 /* ── 1.8 Why switch ────────────────────────────────────────────────────────── */
 function WhySwitch() {
   return (
-    <section className="px-7 py-[110px]" style={{ background: 'linear-gradient(180deg, #080B16, #06080F)' }}>
+    <section className="section amb amb-cool bg-bg">
       <div className="mx-auto max-w-shell">
         <SectionHeading title={<>Why people switch to <span className="text-grad">{site.name}</span></>} />
         <div className="mt-14 grid gap-[18px] md:grid-cols-2 lg:grid-cols-3">
@@ -341,109 +327,39 @@ function WhySwitch() {
 }
 
 /* ── How it works / three steps ────────────────────────────────────────────── */
+/**
+ * How it works.
+ *
+ * Was three rows of copy each paired with a live widget card: a plan selector,
+ * an order summary and an email preview. Two of those duplicated the pricing
+ * section immediately above, and the bordered cards made the section read as
+ * feature tiles rather than a process.
+ *
+ * Now it is editorial: a numeral, a title, a sentence, a hairline. The step
+ * text is the client's approved wording and describes the real process — no
+ * payment is taken on this site, the invoice follows by email and WhatsApp.
+ */
 function ThreeSteps() {
-  // Mirrors the locked pricing; the live selector with device count is Section 05.
-  const [termId, setTermId] = useState(DEFAULT_TERM_ID);
-  const q = quote(termId, 1);
-
-  // "Best value" is computed, not asserted: the term with the lowest cost per
-  // month. With the locked ladder that is 12 months, but it is derived so the
-  // label can never drift out of step with the prices.
-  const bestValueId = TERMS.reduce((best, t) =>
-    t.baseCents / t.months < best.baseCents / best.months ? t : best, TERMS[0]).id;
-
   const steps = [
     {
       n: '01',
-      title: 'Pick your plan.',
-      body: `Every plan gets all ${site.channels} channels. Longer just costs less.`,
-      widget: (
-        <div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-2.5" role="group" aria-label="Choose a plan">
-          <div className="flex flex-col gap-2">
-            {TERMS.map((t) => {
-              const on = t.id === termId;
-              const save = savingsPerMonth(t);
-              const best = t.id === bestValueId;
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setTermId(t.id)}
-                  aria-pressed={on}
-                  className={`flex min-h-[54px] items-center gap-3 rounded-xl px-4 text-left transition-colors ${
-                    on ? 'bg-accent text-white shadow-cta' : 'bg-white/[.04] text-ink hover:bg-white/[.07]'
-                  }`}
-                >
-                  <span className="flex-1 font-display text-[15px] font-bold">{t.label}</span>
-                  {best ? (
-                    <span className={`rounded px-1.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wide ${
-                      on ? 'bg-white text-accent' : 'bg-accent/[.14] text-accent-bright'
-                    }`}>
-                      Best value
-                    </span>
-                  ) : (
-                    <span className={`text-[11.5px] ${on ? 'text-white/80' : 'text-ink-4'}`}>
-                      {save > 0 ? `Save ${money(save)}/mo` : 'Try it out'}
-                    </span>
-                  )}
-                  <span className="nums font-display text-[19px] font-extrabold">{money(t.baseCents)}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ),
+      title: 'Choose Your Plan',
+      body: 'Choose term and number of devices.',
     },
     {
       n: '02',
-      title: 'Place your order.',
-      // No payment is taken on this site — the invoice follows by email and
-      // WhatsApp — so this step is honest about that rather than echoing the
-      // reference's "pay now".
-      body: 'Phone and email, that\'s all we ask. Your invoice arrives by email and WhatsApp, and you pay it however suits you.',
-      widget: (
-        <div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-5">
-          <div className="flex items-start gap-3">
-            <span
-              className="grid h-10 w-10 flex-none place-items-center rounded-lg bg-accent-gradient-diag font-display text-[17px] font-extrabold text-white"
-              aria-hidden="true"
-            >
-              S
-            </span>
-            <span className="min-w-0">
-              <span className="block font-display text-[15.5px] font-bold text-ink">{site.name}, {q.term.label.toLowerCase()}</span>
-              <span className="block text-[12.5px] text-ink-4">1 device · 4K where available · Login by email</span>
-            </span>
-          </div>
-          <div className="my-4 border-t border-white/[.09]" />
-          <div className="flex items-end justify-between">
-            <span className="text-[14px] text-ink-3">Total on your invoice</span>
-            <span className="nums font-display text-[28px] font-extrabold leading-none text-ink">{money(q.totalCents)}</span>
-          </div>
-          <Link to="/#pricing" className="btn-accent mt-5 w-full !py-3.5 !text-[14.5px]">
-            Order now →
-          </Link>
-          <p className="mt-3 text-center text-[11.5px] text-ink-4">
-            No payment is taken on this page.
-          </p>
-          <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[.14em] text-ink-5">
-            Pay your invoice with
-          </p>
-          <PaymentMarks methods={INVOICE_PAYMENT_METHODS} align="center" className="mx-auto mt-2.5 max-w-[226px] sm:max-w-[248px]" />
-        </div>
-      ),
+      title: 'Place Your Order',
+      body: 'Enter phone/WhatsApp, then email and submit the order.',
     },
     {
       n: '03',
-      title: 'Open the email. Start watching.',
-      body: 'Once your invoice is paid, your login lands in your inbox — usually within 5–15 minutes. Paste it into the app on your TV, phone or laptop and watch.',
-      extra: <Link to="/setup" className="btn-outline mt-6 !py-3 !text-[14px]">See the setup guides</Link>,
-      widget: <EmailMock />,
+      title: 'Receive Your Invoice',
+      body: 'We send invoice/payment instructions by email and WhatsApp. After payment, activation is usually completed within 5\u201315 minutes.',
     },
   ];
 
   return (
-    <section id="setup" className="bg-bg px-5 py-20 sm:px-7 sm:py-[110px]">
+    <section id="setup" className="section amb amb-cine bg-bg">
       <div className="mx-auto max-w-shell">
         {/* Header */}
         <div className="mx-auto max-w-[720px] text-center">
@@ -461,45 +377,47 @@ function ThreeSteps() {
           </p>
         </div>
 
-        {/* Rules-only table: giant numeral, copy, live widget */}
-        <div className="mt-12 border-t border-white/[.09] sm:mt-16">
+        {/* Numeral, title, sentence, hairline. Nothing else. */}
+        <ol className="mx-auto mt-12 max-w-[880px] sm:mt-16">
           {steps.map((step, i) => (
-            <div
+            <li
               key={step.n}
-              className={`grid items-center gap-8 py-12 sm:py-14 lg:grid-cols-[180px_minmax(0,1fr)_380px] lg:gap-12 lg:py-16 ${
-                i < steps.length - 1 ? 'border-b border-white/[.09]' : ''
+              className={`grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-6 py-8 sm:gap-x-10 sm:py-10 lg:py-12 ${
+                i > 0 ? 'border-t border-white/[.07]' : ''
               }`}
             >
-              {/* Phone: numeral and copy share a row; desktop: three columns */}
-              <div className="flex items-center gap-5 lg:contents">
-                <div
-                  className="text-grad flex-none font-display font-extrabold leading-[.8] tracking-[-.06em]"
-                  style={{ fontSize: 'clamp(64px, 10vw, 120px)' }}
-                  aria-hidden="true"
+              {/* Fixed column so every title starts on the same line */}
+              <span
+                className="text-grad w-[76px] flex-none font-display font-extrabold leading-[.78] tracking-[-.055em] sm:w-[124px] lg:w-[152px]"
+                style={{ fontSize: 'clamp(52px, 9vw, 116px)' }}
+                aria-hidden="true"
+              >
+                {step.n}
+              </span>
+              <div className="min-w-0">
+                <h3
+                  className="font-display font-extrabold leading-[1.1] text-ink"
+                  style={{ fontSize: 'clamp(21px, 2.7vw, 32px)' }}
                 >
-                  {step.n}
-                </div>
-                <div className="min-w-0 max-w-[440px]">
-                  <h3 className="font-display text-[24px] font-extrabold leading-tight text-ink sm:text-[28px] lg:text-[30px]">
-                    <span className="sr-only">Step {step.n}: </span>{step.title}
-                  </h3>
-                  <p className="mt-2.5 text-[15.5px] leading-relaxed text-ink-3 sm:text-[16px]">{step.body}</p>
-                  {step.extra}
-                </div>
+                  <span className="sr-only">Step {step.n}: </span>
+                  {step.title}
+                </h3>
+                <p className="mt-3 max-w-[520px] text-[15.5px] leading-relaxed text-ink-3 sm:text-[16.5px]">
+                  {step.body}
+                </p>
               </div>
-              <div className="min-w-0">{step.widget}</div>
-            </div>
+            </li>
           ))}
-        </div>
+        </ol>
 
         {/* Close */}
-        <div className="mt-10 flex flex-col items-center gap-4 border-t border-white/[.09] pt-10 sm:mt-12">
+        <div className="mt-12 flex flex-col items-center gap-4 sm:mt-14">
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <Link to="/#pricing" className="btn-accent w-full sm:w-auto">I'm in — get my sub →</Link>
+            <Link to="/#pricing" className="btn-accent w-full sm:w-auto">I&apos;m in \u2014 get my sub \u2192</Link>
             <Link to="/setup" className="btn-outline w-full sm:w-auto">See the setup guides</Link>
           </div>
           <p className="text-center text-[11.5px] font-bold uppercase tracking-[.13em] text-ink-4">
-            7-day money-back guarantee · 24/7 support
+            7-day money-back guarantee \u00b7 24/7 support
           </p>
         </div>
       </div>
@@ -520,7 +438,7 @@ function Reviews() {
   ];
 
   return (
-    <section className="relative isolate overflow-hidden bg-bg-alt px-5 py-20 sm:px-7 sm:py-[110px]">
+    <section className="section amb amb-cool relative overflow-hidden bg-bg">
       <ReviewWall />
       <div
         className="pointer-events-none absolute inset-0"
@@ -595,7 +513,7 @@ function Reviews() {
 /* ── 1.11 FAQ ──────────────────────────────────────────────────────────────── */
 function FaqSection() {
   return (
-    <section id="faq" className="bg-bg px-7 py-[110px]">
+    <section id="faq" className="section bg-bg">
       <div className="mx-auto max-w-narrow">
         <SectionHeading
           label="Questions"
@@ -614,7 +532,7 @@ function FaqSection() {
 /* ── 1.12 Closing CTA ──────────────────────────────────────────────────────── */
 function ClosingCta() {
   return (
-    <section className="relative overflow-hidden border-t border-white/[.07] px-7 py-[120px] text-center">
+    <section className="section-lead relative overflow-hidden bg-bg text-center">
       <div
         className="pointer-events-none absolute inset-0"
         style={{ background: 'radial-gradient(ellipse 800px 400px at 50% 100%, rgba(255,43,42,.22), transparent 70%)' }}

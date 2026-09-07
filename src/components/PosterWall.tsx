@@ -41,8 +41,12 @@ const BACKDROP_VISIBLE_MD = 9;    // tablets
 /** Different speeds so the columns never fall into step with one another. */
 const DURATIONS = [38, 46, 32, 52, 42, 44, 36, 50, 40, 48, 34, 54, 43];
 
-/** Backdrops drift at roughly a third of the pace. */
-const BACKDROP_SLOWDOWN = 3;
+/**
+ * Backdrops drift slower than the showcase wall so they stay behind the copy.
+ * Was 3 (a third of the pace); 1.9 is about 58% faster and still slow enough
+ * to read as ambient movement rather than an animation playing.
+ */
+const BACKDROP_SLOWDOWN = 1.9;
 
 export interface PosterWallProps {
   variant?: 'showcase' | 'backdrop';

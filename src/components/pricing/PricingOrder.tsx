@@ -37,7 +37,7 @@ export default function PricingOrder() {
   };
 
   return (
-    <section id="pricing" className="bg-bg-alt px-5 py-20 sm:px-7 sm:py-[110px]">
+    <section id="pricing" className="section amb amb-warm bg-bg">
       <div className="mx-auto max-w-shell">
         {/* Header (spec §3) */}
         <div className="mx-auto max-w-[720px] text-center">

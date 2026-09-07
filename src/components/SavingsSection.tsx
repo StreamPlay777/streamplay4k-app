@@ -38,7 +38,7 @@ export default function SavingsSection({ id = 'savings' }: { id?: string }) {
   return (
     <section
       id={id}
-      className="px-5 py-20 sm:px-7 sm:py-[110px]"
+      className="section"
       style={{ background: 'linear-gradient(180deg, #06080F, #080B16)' }}
     >
       <div className="mx-auto grid max-w-shell items-start gap-12 lg:grid-cols-[400px_minmax(0,1fr)] lg:gap-[80px]">

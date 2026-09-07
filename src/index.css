@@ -188,3 +188,60 @@
 ::-webkit-scrollbar-track { background: #06080F; }
 ::-webkit-scrollbar-thumb { background: #23293C; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #FF2B2A; }
+
+/* ── Section rhythm ────────────────────────────────────────────────────────
+   One spacing system for the whole page, replacing the per-section values
+   (py-11 / py-12 / 86px / 100px / 110px / 120px) that had accumulated.
+
+   clamp() rather than breakpoints: padding grows with the viewport, so tablet
+   tightens on its own instead of inheriting a desktop number. Two adjacent
+   sections each contribute their padding, so the visible gap between content
+   is roughly double these values — that is why they look small written down.
+
+       .section        52px (phone) -> 84px (desktop)   gap 104 -> 168
+       .section-tight  36px         -> 52px             for bands and strips
+       .section-lead   64px         -> 104px            hero-adjacent, closing
+*/
+.section       { padding-block: clamp(3.25rem, 5vw, 5.25rem);  padding-inline: clamp(1.25rem, 3.4vw, 1.75rem); }
+.section-tight { padding-block: clamp(2.25rem, 3.2vw, 3.25rem); padding-inline: clamp(1.25rem, 3.4vw, 1.75rem); }
+.section-lead  { padding-block: clamp(4rem, 6.4vw, 6.5rem);     padding-inline: clamp(1.25rem, 3.4vw, 1.75rem); }
+
+/* ── Ambient light ─────────────────────────────────────────────────────────
+   Every section now sits on the same near-black ground (#06080F). Instead of
+   swapping background colours — which produced visible "black, then a slightly
+   different black" seams — sections are told apart by soft off-centre light.
+
+   The mask fades the glow out at the top and bottom edges, so there is never a
+   hard boundary where one section's lighting stops and the next begins. */
+.amb { position: relative; isolation: isolate; }
+.amb::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 15%, #000 85%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 15%, #000 85%, transparent 100%);
+}
+
+.amb-warm::before {
+  background:
+    radial-gradient(ellipse 900px 480px at 22% 6%,  rgba(255, 64, 28, .10), transparent 66%),
+    radial-gradient(ellipse 720px 420px at 82% 92%, rgba(255, 122, 24, .075), transparent 68%);
+}
+
+.amb-cool::before {
+  background:
+    radial-gradient(ellipse 860px 460px at 78% 8%,  rgba(52, 86, 190, .11), transparent 68%),
+    radial-gradient(ellipse 700px 400px at 14% 88%, rgba(255, 64, 28, .06), transparent 70%);
+}
+
+/* Deeper, more cinematic — the How-it-works section. Three light sources at
+   different depths give the numerals something to sit in front of. */
+.amb-cine::before {
+  background:
+    radial-gradient(ellipse 820px 460px at 16% 10%,  rgba(255, 58, 24, .15), transparent 64%),
+    radial-gradient(ellipse 760px 440px at 88% 76%,  rgba(255, 128, 28, .11), transparent 68%),
+    radial-gradient(ellipse 1150px 720px at 50% 48%, rgba(46, 76, 180, .085), transparent 72%);
+}
+
