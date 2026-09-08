@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import Seo from '../components/Seo';
 import { pageSeo } from '../data/seo';
 import { Link } from 'react-router-dom';
-import { site, heroStats, routes } from '../data/site';
+import { site, heroStats, routes, trialUrl } from '../data/site';
 import { track } from '../lib/analytics';
 import Reveal from '../components/Reveal';
 import { useAutoScroll } from '../hooks/useAutoScroll';
@@ -113,13 +113,15 @@ function Hero() {
           >
             View plans →
           </Link>
-          <Link
-            to={routes.contact}
+          <a
+            href={trialUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={() => track('start_free_trial', { from: 'hero' })}
             className="btn-outline"
           >
             Start free trial
-          </Link>
+          </a>
         </div>
 
         <p className="mt-5 text-[13px] text-ink-3">
@@ -533,7 +535,7 @@ function ThreeSteps() {
           <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[.14em] text-ink-5">
             Pay your invoice with
           </p>
-          <PaymentMarks methods={INVOICE_PAYMENT_METHODS} align="center" variant="bare" className="mt-3" />
+          <PaymentMarks methods={INVOICE_PAYMENT_METHODS} align="center" className="mt-3.5" />
         </div>
       ),
     },
@@ -746,13 +748,15 @@ function ClosingCta() {
           >
             View plans →
           </Link>
-          <Link
-            to={routes.contact}
+          <a
+            href={trialUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={() => track('start_free_trial', { from: 'closing-cta' })}
             className="btn-outline"
           >
             Start free trial
-          </Link>
+          </a>
         </div>
         <p className="mx-auto mt-7 max-w-[520px] text-[13px] leading-relaxed text-ink-4">
           {site.refundLabel} · Usually Ready in {site.activationWindow} · 24/7 Support

@@ -4,7 +4,7 @@ import {
   Menu, X, ChevronDown,
   Cast, MonitorPlay, Tv, Airplay, Smartphone, Laptop,
 } from 'lucide-react';
-import { navLinks, mobileNavLinks, setupMenu, routes, site, type SetupIcon } from '../data/site';
+import { navLinks, mobileNavLinks, setupMenu, routes, site, trialUrl, type SetupIcon } from '../data/site';
 import { track } from '../lib/analytics';
 import ThemeToggle from './ThemeToggle';
 import Wordmark from './Wordmark';
@@ -261,14 +261,16 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              to={routes.contact}
+            <a
+              href={trialUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => track('start_free_trial', { from: 'nav-drawer' })}
               className="mt-1 flex items-center gap-2 rounded-xl px-3 py-3 font-display text-[15px] font-semibold text-ink-2"
             >
               <span className="h-[7px] w-[7px] rounded-full bg-success" aria-hidden="true" />
               Free trial
-            </Link>
+            </a>
             <a
               href={site.whatsappUrl}
               target="_blank"

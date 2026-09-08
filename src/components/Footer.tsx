@@ -51,7 +51,10 @@ export default function Footer() {
                         href={l.to}
                         target={l.to.startsWith('http') ? '_blank' : undefined}
                         rel={l.to.startsWith('http') ? 'noopener noreferrer' : undefined}
-                        onClick={l.to.startsWith('https://wa.me') ? () => track('whatsapp_click', { from: 'footer' }) : undefined}
+                        // The event is declared on the link, not inferred
+                        // from its URL: the trial and the support chat are
+                        // both wa.me links but are not the same intent.
+                        onClick={'event' in l ? () => track(l.event, { from: 'footer' }) : undefined}
                         className="break-words text-[14px] text-ink-3 transition-colors hover:text-accent-link"
                       >
                         {l.label}
@@ -69,7 +72,13 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-4 border-t border-line pt-6 text-[12.5px] text-ink-5 md:flex-row md:items-start md:justify-between">
-          <p>© {site.year} {site.legalName}. All rights reserved.</p>
+          <div>
+            <p>© {site.year} {site.legalName}. All rights reserved.</p>
+            {/* A postal address is the cheapest signal that there is a real
+                business behind the site, and its absence is one of the first
+                things a cautious buyer notices. */}
+            <address className="mt-1.5 not-italic">{site.address}</address>
+          </div>
           <p className="max-w-[560px] md:text-right">{site.disclaimer}</p>
         </div>
       </div>

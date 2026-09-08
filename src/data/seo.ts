@@ -55,6 +55,16 @@ export const organizationLd: Record<string, unknown> = {
   url: SITE_URL,
   logo: absolute('/favicon.png'),
   description: site.description,
+  // A postal address in the Organization graph is one of the signals search
+  // engines use to treat a site as a real business rather than a page.
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: site.addressParts.street,
+    addressLocality: site.addressParts.city,
+    addressRegion: site.addressParts.region,
+    postalCode: site.addressParts.postalCode,
+    addressCountry: site.addressParts.countryCode,
+  },
   contactPoint: [
     {
       '@type': 'ContactPoint',

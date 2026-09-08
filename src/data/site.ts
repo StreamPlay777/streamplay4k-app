@@ -32,6 +32,18 @@ export const site = {
   whatsappE164: '33675734132',
   whatsappUrl: 'https://wa.me/33675734132',
 
+  /** Postal address, client-supplied. One line and a structured form, so the
+      footer can print it inline and the legal pages can lay it out. */
+  address: '1520 Bedford Ave, Brooklyn, NY 11216, USA',
+  addressParts: {
+    street: '1520 Bedford Ave',
+    city: 'Brooklyn',
+    region: 'NY',
+    postalCode: '11216',
+    country: 'USA',
+    countryCode: 'US',
+  },
+
   /* ── Service promises ──────────────────────────────────────────────────── */
   /** Short form, for inline use: "within {activationWindow}". */
   activationWindow: '5–15 minutes',
@@ -51,6 +63,26 @@ export const site = {
   disclaimer:
     'StreamPlay4K is a reseller of IPTV subscription services. All content is supplied by third-party providers; users are responsible for compliance with applicable law.',
 } as const;
+
+/* ── Free trial ────────────────────────────────────────────────────────────
+ *
+ * The trial is arranged by hand over WhatsApp — there is no self-serve trial
+ * to sign up for, so every "free trial" control opens a chat with the message
+ * already written. Before this, all four of them pointed at the contact page,
+ * which is a page about how to get in touch rather than a way to get a trial.
+ *
+ * `from` is carried in the analytics event, not in the message: a visitor
+ * should not be made to send a string containing tracking data they did not
+ * write. The text is what a person would reasonably type themselves.
+ */
+const TRIAL_MESSAGE = `Hi ${site.name}, I'm interested and I'd like to try the free trial.`;
+
+export const trialUrl = `${site.whatsappUrl}?text=${encodeURIComponent(TRIAL_MESSAGE)}`;
+
+/** A chat opened from somewhere other than the trial buttons. */
+export function whatsappUrlWith(message: string): string {
+  return `${site.whatsappUrl}?text=${encodeURIComponent(message)}`;
+}
 
 /** Stat strip under the hero. */
 export const heroStats = [
@@ -89,7 +121,7 @@ export const footerLinks = {
   Product: [
     { label: 'Pricing', to: routes.pricing },
     { label: 'Channels', to: routes.channels },
-    { label: 'Free trial', to: routes.contact },
+    { label: 'Free trial', to: trialUrl, external: true, event: 'start_free_trial' },
     { label: 'Reviews', to: routes.reviews },
   ],
   Setup: [
@@ -104,7 +136,7 @@ export const footerLinks = {
     { label: 'Setup guide', to: routes.setup },
     { label: 'FAQ', to: routes.faq },
     { label: 'Contact', to: routes.contact },
-    { label: 'WhatsApp', to: site.whatsappUrl, external: true },
+    { label: 'WhatsApp', to: site.whatsappUrl, external: true, event: 'whatsapp_click' },
     { label: site.email, to: `mailto:${site.email}`, external: true },
   ],
   Legal: [

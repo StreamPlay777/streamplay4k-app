@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route, Link, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import CampaignBanner from './components/CampaignBanner';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import { useScrollTop } from './hooks/useScrollTop';
@@ -64,6 +65,7 @@ export default function App() {
   useScrollTop();
   return (
     <>
+      <CampaignBanner />
       <Navbar />
       <main>
         <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>

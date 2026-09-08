@@ -9,14 +9,24 @@ import { MAX_DEVICES } from './pricing';
  *
  * DELIBERATELY NOT STATED, because nobody has supplied them and inventing them
  * would be worse than omitting them:
- *   - a registered company name or number
- *   - a registered or trading address
- *   - a governing law / jurisdiction clause
- *   - a named DMCA designated agent
+ *   - a registered company name or number (site.legalName is the brand, not a
+ *     registered entity — the postal address below is a real one, but an
+ *     address without an entity is still only half an identity)
+ *   - a governing law / jurisdiction clause. The address is in New York, which
+ *     points at US and New York law, but which law governs a contract is a
+ *     decision for the business and its lawyer, not an inference from a ZIP
+ *     code, so it stays unstated.
+ *   - a named DMCA designated agent. Note that a US-facing service that wants
+ *     the DMCA safe harbour has to register an agent with the US Copyright
+ *     Office; naming one here without that registration would claim a
+ *     protection that does not exist.
  *   - named payment processors or sub-processors
  *   - any content licensing or studio relationship
  *
- * TODO(client): supply the above and they can be added. Until then the pages
+ * SUPPLIED: the postal address (site.address), added to the contact sections
+ * of every document below.
+ *
+ * TODO(client): supply the rest and they can be added. Until then the pages
  * read as complete documents that simply do not make those claims, rather than
  * showing placeholder text to customers.
  *
@@ -185,6 +195,7 @@ export const terms: LegalDoc = {
       heading: '15. Contact',
       blocks: [
         p(`Questions about these terms can be sent to ${site.email}, or to us on WhatsApp at ${site.whatsapp}.`),
+        p(`Postal address: ${site.address}.`),
       ],
     },
   ],
@@ -288,6 +299,7 @@ export const privacy: LegalDoc = {
       heading: '11. Contact',
       blocks: [
         p(`Privacy questions can be sent to ${site.email}.`),
+        p(`Postal address: ${site.address}.`),
       ],
     },
   ],
@@ -350,6 +362,7 @@ export const refund: LegalDoc = {
       heading: '6. Contact',
       blocks: [
         p(`Refund questions: ${site.email}, or WhatsApp ${site.whatsapp}.`),
+        p(`Postal address: ${site.address}.`),
       ],
     },
   ],
@@ -397,7 +410,7 @@ export const cookies: LegalDoc = {
     {
       id: 'contact',
       heading: '5. Contact',
-      blocks: [p(`Questions: ${site.email}.`)],
+      blocks: [p(`Questions: ${site.email}.`), p(`Postal address: ${site.address}.`)],
     },
   ],
 };
@@ -459,7 +472,10 @@ export const dmca: LegalDoc = {
     {
       id: 'contact',
       heading: '6. Contact',
-      blocks: [p(`Copyright notices: ${site.email}.`)],
+      blocks: [
+        p(`Copyright notices: ${site.email}.`),
+        p(`Postal address: ${site.address}.`),
+      ],
     },
   ],
 };

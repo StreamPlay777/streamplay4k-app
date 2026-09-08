@@ -713,6 +713,12 @@
   -webkit-text-fill-color: currentColor;
 }
 
+/* Seasonal offer bar. Solid brand fill in both themes: it sits above the
+   navbar's glass and has to read as a separate strip, not as more chrome. */
+.campaign-bar {
+  background: linear-gradient(90deg, #FF2B20, #FF7A18);
+}
+
 /* Wordmark: the pale mark on the dark theme, the ink one on light. Same
    CSS-not-JS swap as the toggle glyphs below, and for the same reason. */
 :root[data-theme='dark'] .mark-on-light,

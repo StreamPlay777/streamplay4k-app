@@ -123,6 +123,27 @@ export default function Contact() {
               Support is available 24/7. When you write, include the email address you ordered with
               and your device model — it usually saves a round trip.
             </p>
+
+            {/* Post is not a support channel and saying so avoids someone
+                waiting on a letter. It is here because a buyer checking
+                whether we are real looks for exactly this. */}
+            <div className="mt-6 border-t border-line pt-5">
+              <p className="text-[11px] font-bold uppercase tracking-[.14em] text-ink-5">
+                Postal address
+              </p>
+              <address className="mt-2 text-[13.5px] not-italic leading-relaxed text-ink-3">
+                {site.legalName}
+                <br />
+                {site.addressParts.street}
+                <br />
+                {site.addressParts.city}, {site.addressParts.region} {site.addressParts.postalCode}
+                <br />
+                {site.addressParts.country}
+              </address>
+              <p className="mt-2 text-[12.5px] text-ink-5">
+                For correspondence. Support questions are answered fastest on WhatsApp.
+              </p>
+            </div>
           </div>
 
           {/* Triage */}

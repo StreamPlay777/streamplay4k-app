@@ -405,7 +405,7 @@ function Assurances({ className = '' }: { className?: string }) {
       <p className="mt-5 text-[11px] font-bold uppercase tracking-[.14em] text-ink-5">
         Pay your invoice with
       </p>
-      <PaymentMarks methods={INVOICE_PAYMENT_METHODS} variant="bare" className="mt-2.5" />
+      <PaymentMarks methods={INVOICE_PAYMENT_METHODS} className="mt-3" />
     </div>
   );
 }
