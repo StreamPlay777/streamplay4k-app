@@ -104,7 +104,75 @@ function Vlc({ className = '' }: G) {
   );
 }
 
-const MARKS = { fire: Fire, android: Android, apple: Apple, tv: Tv, cast: Cast, windows: Windows, mac: Mac, vlc: Vlc };
+
+function Roku({ className = '' }: G) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${svg} ${className}`} fill="none" aria-hidden="true">
+      {/* Rounded badge with the notch of the Roku mark, drawn not copied */}
+      <rect x="1.6" y="5" width="20.8" height="14" rx="3.4" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M7 15.4V8.6h3.1a2.1 2.1 0 0 1 0 4.2H7.9l2.6 2.6" stroke="currentColor" strokeWidth="1.7"
+            strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="16.4" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.7" />
+    </svg>
+  );
+}
+
+function Mag({ className = '' }: G) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${svg} ${className}`} fill="none" aria-hidden="true">
+      {/* Set-top box: shallow slab, front indicator, vents */}
+      <rect x="1.8" y="7.6" width="20.4" height="8.8" rx="2.2" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="18.4" cy="12" r="1.15" fill="currentColor" />
+      <path d="M5 10.9h7.4M5 13.3h5.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function Kodi({ className = '' }: G) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${svg} ${className}`} fill="none" aria-hidden="true">
+      {/* Media-centre play mark inside a soft container */}
+      <path d="M12 1.9 22.1 12 12 22.1 1.9 12 12 1.9Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+      <path d="M10.1 8.5 15.3 12l-5.2 3.5V8.5Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function Box({ className = '' }: G) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${svg} ${className}`} fill="none" aria-hidden="true">
+      {/* Android set-top box: cube with a status light */}
+      <rect x="2.6" y="6.4" width="18.8" height="11.2" rx="2.6" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="17.6" cy="12" r="1.2" fill="currentColor" />
+      <path d="M6 9.6h6.6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M6 14.4h4.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function TabletMark({ className = '' }: G) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${svg} ${className}`} fill="none" aria-hidden="true">
+      <rect x="4.2" y="2.2" width="15.6" height="19.6" rx="2.6" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M10.6 19h2.8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function PhoneMark({ className = '' }: G) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${svg} ${className}`} fill="none" aria-hidden="true">
+      <rect x="6.4" y="2.2" width="11.2" height="19.6" rx="2.6" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M10.8 18.9h2.4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+const MARKS = {
+  fire: Fire, android: Android, apple: Apple, tv: Tv, cast: Cast,
+  windows: Windows, mac: Mac, vlc: Vlc,
+  roku: Roku, mag: Mag, kodi: Kodi, box: Box, tablet: TabletMark, phone: PhoneMark,
+};
 
 /**
  * One platform tile. Glyph over name, on the same dark glass surface the
@@ -114,6 +182,7 @@ export default function PlatformTile({ platform }: { platform: Platform }) {
   const Mark = MARKS[platform.mark];
   return (
     <div
+      title={platform.note}
       className="group flex h-[104px] w-[140px] flex-none flex-col items-center justify-center gap-2.5
                  rounded-2xl border border-white/[.08]
                  bg-[linear-gradient(158deg,rgba(255,255,255,.055),rgba(255,255,255,.014))]

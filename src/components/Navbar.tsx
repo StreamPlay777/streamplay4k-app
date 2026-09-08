@@ -114,8 +114,11 @@ export default function Navbar() {
         className={`nav-shell mx-auto grid items-center gap-3 rounded-2xl border
                     lg:grid-cols-[auto_1fr_auto] ${
                       scrolled
-                        ? 'border-white/[.13] bg-[rgba(9,12,23,.90)] shadow-pill backdrop-blur-2xl'
-                        : 'border-white/[.075] bg-[rgba(10,14,27,.62)] shadow-none backdrop-blur-xl'
+                        // Exactly the previous glass values. The resize pass
+                        // had pushed these to .90/.13 and .62/.075, which read
+                        // as an almost-solid black bar rather than smoked glass.
+                        ? 'border-white/[.1] bg-[rgba(9,12,23,.86)] shadow-pill backdrop-blur-2xl'
+                        : 'border-white/[.07] bg-[rgba(10,14,27,.6)] shadow-none backdrop-blur-xl'
                     }`}
       >
         {/* Left — logo. The wordmark stands alone; the separate red "4K" chip

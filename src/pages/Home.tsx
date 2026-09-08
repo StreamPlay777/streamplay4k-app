@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { site, heroStats, routes } from '../data/site';
 import { track } from '../lib/analytics';
 import Reveal from '../components/Reveal';
+import ChannelFinder from '../components/ChannelFinder';
 import { TERMS, quote, money, savingsPerMonth, DEFAULT_TERM_ID, INVOICE_PAYMENT_METHODS } from '../data/pricing';
 import EmailMock from '../components/EmailMock';
 import PaymentMarks from '../components/PaymentMarks';
@@ -32,7 +33,8 @@ export default function Home() {
       {/* Home page order — see the brief. Keep these in this sequence. */}
       <Hero />
       <StatBar />
-      <NetworkWall />        {/* Animated channels */}
+      <NetworkWall />        {/* Animated channel logos */}
+      <ChannelFinder />      {/* Live search over the real channel dataset */}
       <OnDemand />           {/* Movies & series / premium content */}
       <SavingsSection />     {/* Savings */}
       <PricingOrder />       {/* Pricing + quick order flow */}
@@ -219,30 +221,10 @@ function NetworkWall() {
           ))}
         </div>
 
-        {/* Channel search panel (§4). Sends people to the real, bundled
-            channel dataset on /channels/ — nothing here fakes a result. */}
-        <div className="mx-auto mt-11 max-w-[640px] px-6 sm:mt-14">
-          <div className="rounded-2xl border border-white/[.09] bg-white/[.025] p-7 text-center backdrop-blur-[2px] sm:p-9">
-            <p className="label">Channel search</p>
-            <h3 className="mt-3.5 font-display text-[21px] font-extrabold leading-snug text-ink sm:text-[25px]">
-              Looking for something specific?
-            </h3>
-            <p className="mx-auto mt-3 max-w-[420px] text-[15px] leading-relaxed text-ink-3">
-              Search our available channel lineup by name, category or country.
-            </p>
-            <Link
-              to={routes.channels}
-              onClick={() => track('channel_search', { from: 'home' })}
-              className="btn-accent mt-6"
-            >
-              Search channels →
-            </Link>
-          </div>
-          <p className="mt-6 text-center text-[12px] leading-relaxed text-ink-5">
-            Showing {networkLogos.length} of the networks a subscription can reach. Network names and
-            logos belong to their owners and are shown for identification only.
-          </p>
-        </div>
+        <p className="mt-8 px-6 text-center text-[12px] leading-relaxed text-ink-5 sm:mt-10">
+          Showing {networkLogos.length} of the networks a subscription can reach. Network names and
+          logos belong to their owners and are shown for identification only.
+        </p>
       </div>
     </section>
   );

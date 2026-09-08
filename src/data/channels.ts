@@ -405,3 +405,67 @@ export function categoryCounts(country: Country): { category: Category; count: n
     return { category, count: Math.round((inSample / sample) * country.count) };
   });
 }
+
+/* ── Global search (homepage channel finder) ──────────────────────────────── */
+
+export interface ChannelHit extends Channel {
+  /** Which region's sample this came from. */
+  country: string;
+  countryId: string;
+  flag: string;
+}
+
+/**
+ * Flattened index of every channel in every region's sample, built once.
+ *
+ * The homepage finder searches across all regions rather than one at a time,
+ * which is what someone typing "espn" expects. It reads the same `countries`
+ * array the /channels page renders, so a result can never appear here that is
+ * not in the real dataset.
+ */
+const searchIndex: ChannelHit[] = countries.flatMap((c) =>
+  c.channels.map((ch) => ({ ...ch, country: c.name, countryId: c.id, flag: c.flag })),
+);
+
+/**
+ * Ranked lookup across every region.
+ *
+ * Ranking matters more than it looks: a plain `includes` puts "ESPN Deportes"
+ * above "ESPN" for the query "espn", which is not what anyone wants. Exact
+ * match sorts first, then prefix, then substring, then category matches.
+ */
+export function searchChannels(query: string, limit = 6): ChannelHit[] {
+  const q = query.trim().toLowerCase();
+  if (q.length < 2) return [];
+
+  const scored: { hit: ChannelHit; score: number }[] = [];
+  for (const hit of searchIndex) {
+    const name = hit.name.toLowerCase();
+    let score = -1;
+    if (name === q) score = 0;
+    else if (name.startsWith(q)) score = 1;
+    else if (name.includes(q)) score = 2;
+    else if (hit.category.toLowerCase().startsWith(q)) score = 3;
+    else if (hit.country.toLowerCase().startsWith(q)) score = 4;
+    if (score >= 0) scored.push({ hit, score });
+  }
+
+  scored.sort((a, b) =>
+    a.score - b.score || a.hit.name.length - b.hit.name.length || a.hit.name.localeCompare(b.hit.name),
+  );
+
+  // De-duplicate by name: the same network appears in several regional samples.
+  const seen = new Set<string>();
+  const out: ChannelHit[] = [];
+  for (const { hit } of scored) {
+    const key = hit.name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(hit);
+    if (out.length === limit) break;
+  }
+  return out;
+}
+
+/** Total channels in the browsable sample, for the finder's helper line. */
+export const sampleSize = searchIndex.length;
