@@ -21,7 +21,7 @@ export default function DeviceCard({ tile }: { tile: DeviceTile }) {
   const showArt = src && !failed;
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-white/[.08] bg-white/[.02]">
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-line bg-raise">
       {/* Device photo, lifted off the dark card by a soft glow.
           The image is sized by object-contain inside a fixed-height box rather
           than by max-height, so the portrait phone shot cannot outgrow the
@@ -31,7 +31,7 @@ export default function DeviceCard({ tile }: { tile: DeviceTile }) {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'radial-gradient(ellipse 70% 55% at 50% 55%, rgba(255,255,255,.07), transparent 70%)',
+              'radial-gradient(ellipse 70% 55% at 50% 55%, var(--raise-2), transparent 70%)',
           }}
         />
         {showArt ? (
@@ -55,7 +55,7 @@ export default function DeviceCard({ tile }: { tile: DeviceTile }) {
         <p className="mt-2 flex-1 text-[14px] leading-relaxed text-ink-3">{tile.note}</p>
 
         {/* Compatibility row — pinned to the card foot so all four line up */}
-        <div className="mt-5 border-t border-white/[.08] pt-4">
+        <div className="mt-5 border-t border-line pt-4">
           <div className="text-[10px] font-bold uppercase tracking-[.16em] text-ink-5">
             {tile.brandLabel}
           </div>

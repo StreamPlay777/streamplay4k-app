@@ -10,7 +10,7 @@ export default function Stars({ value = 5, size = 15 }: { value?: number; size?:
       {Array.from({ length: 5 }, (_, i) => (
         <svg key={i} viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" style={{ display: 'block' }}>
           <path
-            fill={i < value ? trustpilot.green : 'rgba(255,255,255,.22)'}
+            fill={i < value ? trustpilot.green : 'var(--line-3)'}
             d="M12 1.6l3.1 6.9 7.5.7-5.6 5 1.6 7.4L12 17.8 5.4 21.6 7 14.2l-5.6-5 7.5-.7z"
           />
         </svg>

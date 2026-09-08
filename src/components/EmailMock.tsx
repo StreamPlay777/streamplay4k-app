@@ -18,11 +18,11 @@ export default function EmailMock() {
   return (
     <div aria-hidden="true" className="relative mx-auto w-full max-w-[340px] select-none pt-6 sm:pt-8">
       {/* Envelope back */}
-      <div className="absolute inset-x-2 bottom-0 top-[42%] rounded-2xl border border-white/[.08] bg-[#101524]" />
+      <div className="absolute inset-x-2 bottom-0 top-[42%] rounded-2xl border border-line bg-surface-3" />
 
       {/* Letter, pulled up out of the envelope and tilted a touch */}
       <div
-        className="relative mx-4 rounded-xl border border-white/[.1] bg-[#171C2B] p-4 shadow-[0_22px_50px_rgba(0,0,0,.6)]
+        className="relative mx-4 rounded-xl border border-line-2 bg-surface-2 p-4 shadow-dropdown
                    sm:mx-6 sm:p-5"
         style={{ transform: 'rotate(-2deg)' }}
       >
@@ -47,7 +47,7 @@ export default function EmailMock() {
           You're in. Start watching.
         </p>
 
-        <dl className="mt-4 divide-y divide-white/[.07] rounded-lg bg-[#0E1220] px-3.5">
+        <dl className="mt-4 divide-y divide-line rounded-lg bg-surface px-3.5">
           {rows.map((r) => (
             <div key={r.k} className="flex items-center justify-between gap-4 py-2.5">
               <dt className="text-[10px] font-bold uppercase tracking-[.14em] text-ink-5">{r.k}</dt>
@@ -61,8 +61,8 @@ export default function EmailMock() {
 
       {/* Envelope front flap, drawn on top so the letter reads as inside it */}
       <div
-        className="pointer-events-none absolute inset-x-2 bottom-0 h-[38%] rounded-b-2xl border border-t-0 border-white/[.1]
-                   bg-gradient-to-b from-[#141A2C] to-[#0E1220]"
+        className="pointer-events-none absolute inset-x-2 bottom-0 h-[38%] rounded-b-2xl border border-t-0 border-line-2
+                   bg-gradient-to-b from-surface-3 to-surface"
         style={{ clipPath: 'polygon(0 0, 50% 46%, 100% 0, 100% 100%, 0 100%)' }}
       />
     </div>

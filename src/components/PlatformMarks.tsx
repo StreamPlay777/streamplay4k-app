@@ -184,11 +184,11 @@ export default function PlatformTile({ platform }: { platform: Platform }) {
     <div
       title={platform.note}
       className="group flex h-[104px] w-[140px] flex-none flex-col items-center justify-center gap-2.5
-                 rounded-2xl border border-white/[.08]
-                 bg-[linear-gradient(158deg,rgba(255,255,255,.055),rgba(255,255,255,.014))]
+                 rounded-2xl border border-line
+                 bg-[linear-gradient(158deg,var(--raise-2),var(--raise))]
                  px-3 text-center backdrop-blur-[2px]
-                 shadow-[inset_0_1px_0_rgba(255,255,255,.06)]
-                 transition-colors duration-300 hover:border-white/20
+                 shadow-[inset_0_1px_0_var(--glass-inset)]
+                 transition-colors duration-300 hover:border-line-3
                  sm:h-[116px] sm:w-[158px]"
     >
       <span className="h-[26px] w-[26px] flex-none text-ink-2 transition-colors duration-300 group-hover:text-accent-bright sm:h-[28px] sm:w-[28px]">

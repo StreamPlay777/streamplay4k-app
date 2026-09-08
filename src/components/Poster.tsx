@@ -18,7 +18,7 @@ export default function Poster({ title, width = 160, height = 240 }: {
 
   return (
     <div
-      className={`group relative flex-none overflow-hidden rounded-[10px] border border-white/[.07]
+      className={`group relative flex-none overflow-hidden rounded-[10px] border border-line
                   ${showArt ? '' : 'placeholder-stripes'}`}
       style={{ width: width ?? '100%', height, backgroundColor: '#0E1424' }}
     >
@@ -43,7 +43,7 @@ export default function Poster({ title, width = 160, height = 240 }: {
         className="absolute inset-x-0 bottom-0 px-2.5 pb-2.5 pt-6"
         style={{ background: 'linear-gradient(180deg, transparent, rgba(4,6,11,.92))' }}
       >
-        <div className="truncate font-display text-[12px] font-bold leading-tight text-ink">{title.name}</div>
+        <div className="truncate font-display text-[12px] font-bold leading-tight text-white">{title.name}</div>
         <div className="mt-0.5 nums text-[9.5px] text-ink-5">
           {title.year} · {title.genre}
         </div>

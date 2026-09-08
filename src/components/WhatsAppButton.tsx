@@ -47,7 +47,7 @@ export default function WhatsAppButton() {
       aria-label={`Message ${site.name} support on WhatsApp`}
       className="wa-pill group fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))]
                  z-50 inline-flex h-[48px] min-w-[48px] items-center gap-2.5 overflow-hidden
-                 rounded-full border border-white/[.14] bg-[rgba(11,15,26,.92)] px-[13px]
+                 rounded-full border border-line-2 bg-[rgba(11,15,26,.92)] px-[13px]
                  shadow-[0_8px_24px_-8px_rgba(0,0,0,.8)] backdrop-blur-xl
                  transition-[border-color,box-shadow,transform,bottom] duration-300
                  hover:border-[#25D366]/60 hover:shadow-[0_10px_30px_-8px_rgba(37,211,102,.35)]

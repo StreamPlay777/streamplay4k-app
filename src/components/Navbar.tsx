@@ -6,7 +6,8 @@ import {
 } from 'lucide-react';
 import { navLinks, mobileNavLinks, setupMenu, routes, site, type SetupIcon } from '../data/site';
 import { track } from '../lib/analytics';
-import logo from '../assets/logo-light.png';
+import ThemeToggle from './ThemeToggle';
+import Wordmark from './Wordmark';
 
 /**
  * Floating glass navigation bar.
@@ -117,8 +118,8 @@ export default function Navbar() {
                         // Exactly the previous glass values. The resize pass
                         // had pushed these to .90/.13 and .62/.075, which read
                         // as an almost-solid black bar rather than smoked glass.
-                        ? 'border-white/[.1] bg-[rgba(9,12,23,.86)] shadow-pill backdrop-blur-2xl'
-                        : 'border-white/[.07] bg-[rgba(10,14,27,.6)] shadow-none backdrop-blur-xl'
+                        ? 'border-line-2 bg-[var(--glass-strong)] shadow-pill backdrop-blur-2xl'
+                        : 'border-line bg-[var(--glass-soft)] shadow-none backdrop-blur-xl'
                     }`}
       >
         {/* Left — logo. The wordmark stands alone; the separate red "4K" chip
@@ -129,17 +130,12 @@ export default function Navbar() {
             className="flex flex-none items-center rounded-lg transition-opacity duration-200 hover:opacity-80"
             aria-label={`${site.name} home`}
           >
-            <img
-              src={logo}
-              alt={site.name}
-              width={960}
-              height={280}
-              className="nav-logo w-auto"
-            />
+            <Wordmark className="nav-logo w-auto" />
           </Link>
 
           {/* Controls sit here on mobile, where there is no centre column */}
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2 lg:hidden">
+            <ThemeToggle />
             <Link
               to={routes.pricing}
               onClick={() => track('view_pricing', { from: 'navbar-mobile' })}
@@ -151,8 +147,8 @@ export default function Navbar() {
               onClick={() => setMobileOpen((o) => !o)}
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={mobileOpen}
-              className="grid h-[38px] w-[38px] place-items-center rounded-xl border border-white/[.1]
-                         text-ink transition-colors duration-200 hover:border-white/25"
+              className="grid h-[38px] w-[38px] place-items-center rounded-xl border border-line-2
+                         text-ink transition-colors duration-200 hover:border-line-3"
             >
               {mobileOpen ? <X size={17} /> : <Menu size={17} />}
             </button>
@@ -172,8 +168,8 @@ export default function Navbar() {
                     aria-haspopup="true"
                     className={`${linkBase} flex items-center gap-1 ${
                       active || menuOpen
-                        ? 'bg-accent/[.13] text-accent'
-                        : 'text-ink-2 hover:bg-white/[.05] hover:text-ink'
+                        ? 'bg-accent/[.13] text-accent-ink'
+                        : 'text-ink-2 hover:bg-raise-2 hover:text-ink'
                     }`}
                   >
                     {link.label}
@@ -189,7 +185,7 @@ export default function Navbar() {
                     // never moves it.
                     <div
                       className="absolute left-1/2 top-[calc(100%+10px)] w-[356px] -translate-x-1/2 rounded-2xl
-                                 border border-white/10 bg-[rgba(12,17,32,.96)] p-2.5 shadow-dropdown
+                                 border border-line-2 bg-[var(--glass-solid)] p-2.5 shadow-dropdown
                                  backdrop-blur-2xl"
                     >
                       <div className="px-2 pb-1.5 pt-1 text-[10.5px] font-semibold uppercase tracking-[.16em] text-ink-4">
@@ -202,7 +198,7 @@ export default function Navbar() {
                             key={row.hash}
                             onClick={() => goSetup(row.hash)}
                             className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left
-                                       transition-colors duration-150 hover:bg-white/[.055]"
+                                       transition-colors duration-150 hover:bg-raise-2"
                           >
                             <span
                               className="grid h-[30px] w-[30px] flex-none place-items-center rounded-lg border
@@ -212,7 +208,7 @@ export default function Navbar() {
                             </span>
                             <span className="min-w-0">
                               <span className="block font-display text-[14.5px] font-bold text-ink">{row.name}</span>
-                              <span className="block text-[12.5px] text-[#8792A8]">{row.note}</span>
+                              <span className="block text-[12.5px] text-ink-3">{row.note}</span>
                             </span>
                           </button>
                         );
@@ -228,7 +224,7 @@ export default function Navbar() {
                 to={link.to}
                 aria-current={active ? 'page' : undefined}
                 className={`${linkBase} ${
-                  active ? 'bg-accent/[.13] text-accent' : 'text-ink-2 hover:bg-white/[.05] hover:text-ink'
+                  active ? 'bg-accent/[.13] text-accent-ink' : 'text-ink-2 hover:bg-raise-2 hover:text-ink'
                 }`}
               >
                 {link.label}
@@ -238,7 +234,8 @@ export default function Navbar() {
         </div>
 
         {/* Right — one primary CTA, visually separated from the links. */}
-        <div className="hidden items-center justify-end lg:flex">
+        <div className="hidden items-center justify-end gap-2.5 lg:flex">
+          <ThemeToggle />
           <Link
             to={routes.pricing}
             onClick={() => track('view_pricing', { from: 'navbar' })}
@@ -251,14 +248,14 @@ export default function Navbar() {
 
         {/* Mobile drawer */}
         {mobileOpen && (
-          <div className="col-span-full border-t border-white/[.08] pt-2 lg:hidden">
+          <div className="col-span-full border-t border-line pt-2 lg:hidden">
             {mobileNavLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 aria-current={isActive(link.to) ? 'page' : undefined}
                 className={`block rounded-xl px-3 py-3 font-display text-[15px] font-semibold transition-colors duration-150 ${
-                  isActive(link.to) ? 'bg-accent/[.13] text-accent' : 'text-ink-2 hover:bg-white/[.05]'
+                  isActive(link.to) ? 'bg-accent/[.13] text-accent-ink' : 'text-ink-2 hover:bg-raise-2'
                 }`}
               >
                 {link.label}

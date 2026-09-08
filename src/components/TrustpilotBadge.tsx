@@ -12,8 +12,8 @@ export default function TrustpilotBadge({ className = '' }: { className?: string
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`StreamPlay4K is rated ${trustpilot.rating} out of 5 from ${trustpilot.reviewCount} reviews on Trustpilot. Opens in a new tab.`}
-      className={`inline-flex items-center gap-2.5 rounded-xl border border-white/[.12] bg-white/[.05]
-                  px-3.5 py-2.5 transition-colors hover:border-white/25 sm:gap-3 sm:px-4 ${className}`}
+      className={`inline-flex items-center gap-2.5 rounded-xl border border-line-2 bg-raise-2
+                  px-3.5 py-2.5 transition-colors hover:border-line-3 sm:gap-3 sm:px-4 ${className}`}
     >
       <span
         className="grid h-7 w-7 flex-none place-items-center rounded-md"

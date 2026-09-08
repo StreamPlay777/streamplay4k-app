@@ -15,7 +15,7 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="border-t border-white/[.06] bg-bg-deep px-7 py-11">
+    <section className="border-t border-line bg-bg-deep px-7 py-11">
       <div className="mx-auto grid max-w-shell items-center gap-6 md:grid-cols-[1fr_auto] md:gap-10">
         <div>
           <h3 className="font-display text-[20px] font-bold text-ink">Join the {site.name} insider list</h3>

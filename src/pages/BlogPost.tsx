@@ -103,12 +103,12 @@ export default function BlogPost() {
               src={post.featuredImage}
               alt={post.featuredImageAlt || ''}
               loading="lazy"
-              className="mt-9 w-full rounded-2xl border border-white/[.08]"
+              className="mt-9 w-full rounded-2xl border border-line"
             />
           )}
 
           {post.headings.length > 2 && (
-            <nav aria-label="On this page" className="mt-10 rounded-2xl border border-white/[.08] bg-white/[.02] p-6">
+            <nav aria-label="On this page" className="mt-10 rounded-2xl border border-line bg-raise p-6">
               <h2 className="font-display text-[12px] font-extrabold uppercase tracking-[.16em] text-ink-4">
                 On this page
               </h2>
@@ -129,14 +129,14 @@ export default function BlogPost() {
           {post.tags.length > 0 && (
             <ul className="mt-12 flex flex-wrap gap-2">
               {post.tags.map((t) => (
-                <li key={t} className="rounded-full border border-white/[.1] px-3 py-1.5 text-[12.5px] text-ink-4">
+                <li key={t} className="rounded-full border border-line-2 px-3 py-1.5 text-[12.5px] text-ink-4">
                   {t}
                 </li>
               ))}
             </ul>
           )}
 
-          <div className="mt-12 rounded-2xl border border-white/[.08] bg-white/[.02] p-7 text-center">
+          <div className="mt-12 rounded-2xl border border-line bg-raise p-7 text-center">
             <h2 className="font-display text-[20px] font-extrabold text-ink">Ready to get started?</h2>
             <p className="mx-auto mt-3 max-w-[440px] text-[15px] leading-relaxed text-ink-3">
               Pick a plan, choose your devices, and we will send your invoice by email and WhatsApp.
@@ -148,7 +148,7 @@ export default function BlogPost() {
           </div>
 
           {related.length > 0 && (
-            <div className="mt-14 border-t border-white/[.07] pt-10">
+            <div className="mt-14 border-t border-line pt-10">
               <h2 className="font-display text-[19px] font-extrabold text-ink">Related reading</h2>
               <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {related.map((r) => (

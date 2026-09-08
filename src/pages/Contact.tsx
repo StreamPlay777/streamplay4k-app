@@ -130,7 +130,7 @@ export default function Contact() {
             <div className="label">Before you write</div>
             <div className="mt-4">
               {triage.map((row, i) => (
-                <div key={row.q} className={`py-[18px] ${i < triage.length - 1 ? 'border-b border-white/[.08]' : ''}`}>
+                <div key={row.q} className={`py-[18px] ${i < triage.length - 1 ? 'border-b border-line' : ''}`}>
                   <h3 className="font-display text-[16.5px] font-bold text-ink">{row.q}</h3>
                   <p className="mt-2 text-[14.5px] leading-relaxed text-ink-3">{row.a}</p>
                 </div>

@@ -48,7 +48,7 @@ export default function ShowcaseRow() {
                   <li
                     key={`${pass}-${t.slug}`}
                     className="relative w-[132px] flex-none overflow-hidden rounded-xl border
-                               border-white/10 shadow-[0_14px_36px_rgba(0,0,0,.55)]
+                               border-line-2 shadow-[0_14px_36px_rgba(0,0,0,.55)]
                                sm:w-[152px] lg:w-[168px]"
                     aria-hidden={pass === 1}
                   >

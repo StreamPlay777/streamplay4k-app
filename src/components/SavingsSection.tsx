@@ -39,7 +39,7 @@ export default function SavingsSection({ id = 'savings' }: { id?: string }) {
     <section
       id={id}
       className="section"
-      style={{ background: 'linear-gradient(180deg, #06080F, #080B16)' }}
+      style={{ background: 'linear-gradient(180deg, var(--bg), var(--bg-alt))' }}
     >
       <div className="mx-auto grid max-w-shell items-start gap-12 lg:grid-cols-[400px_minmax(0,1fr)] lg:gap-[80px]">
         {/* Receipt */}
@@ -79,21 +79,21 @@ export default function SavingsSection({ id = 'savings' }: { id?: string }) {
               <div
                 key={r.label}
                 className={`grid grid-cols-[minmax(0,1fr)_64px_74px] gap-2 py-4 min-[400px]:grid-cols-[minmax(0,1fr)_100px_110px] sm:grid-cols-[minmax(0,1fr)_140px_150px] ${
-                  r.accent ? 'border-t-2 border-accent' : 'border-t border-white/[.12]'
+                  r.accent ? 'border-t-2 border-accent' : 'border-t border-line-2'
                 }`}
               >
                 <span className={`min-w-0 text-[13.5px] sm:text-[15px] ${
-                  r.accent ? 'font-bold text-accent' : r.bold ? 'font-bold text-ink' : 'text-ink-2'
+                  r.accent ? 'font-bold text-accent-ink' : r.bold ? 'font-bold text-ink' : 'text-ink-2'
                 }`}>
                   {r.label}
                 </span>
                 <span className={`nums text-right text-[13px] sm:text-[15px] ${
-                  r.accent ? 'font-bold text-accent' : r.bold ? 'font-bold text-ink' : 'text-ink-2'
+                  r.accent ? 'font-bold text-accent-ink' : r.bold ? 'font-bold text-ink' : 'text-ink-2'
                 }`}>
                   {r.monthly}
                 </span>
                 <span className={`nums text-right text-[13px] sm:text-[15px] ${
-                  r.accent ? 'font-bold text-accent' : r.bold ? 'font-bold text-ink' : 'text-ink-2'
+                  r.accent ? 'font-bold text-accent-ink' : r.bold ? 'font-bold text-ink' : 'text-ink-2'
                 }`}>
                   {r.yearly}
                 </span>

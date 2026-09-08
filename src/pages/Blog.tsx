@@ -108,7 +108,7 @@ function CategoryChip({ label, on, onClick }: { label: string; on: boolean; onCl
       onClick={onClick}
       aria-pressed={on}
       className={`min-h-[40px] rounded-full border px-4 font-display text-[13.5px] font-semibold transition-colors ${
-        on ? 'border-accent bg-accent/[.14] text-accent' : 'border-white/[.12] text-ink-3 hover:border-white/25 hover:text-ink'
+        on ? 'border-accent bg-accent/[.14] text-accent-ink' : 'border-line-2 text-ink-3 hover:border-line-3 hover:text-ink'
       }`}
     >
       {label}

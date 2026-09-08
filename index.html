@@ -8,7 +8,29 @@
     <!-- Set before first paint. Scroll-reveal hides content only when scripting
          is available, so pre-rendered HTML stays readable without JavaScript
          and there is no flash between paint and hydration. -->
-    <script>document.documentElement.classList.add('js')</script>
+    <script>
+      document.documentElement.classList.add('js');
+      /* Theme, before first paint. Applied here rather than on mount because
+         the pages are pre-rendered: a class set by React would arrive after
+         the browser had already painted the default theme, and a light-mode
+         visitor would see a flash of the dark site on every navigation.
+         Dark is the fallback — the brand's own dress. To follow the operating
+         system instead, replace the 'dark' below with
+         (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'). */
+      (function () {
+        var t = 'dark';
+        try {
+          var v = localStorage.getItem('sp-theme');
+          if (v === 'light' || v === 'dark') t = v;
+        } catch (e) { /* private mode: fall back to the brand's dark */ }
+        document.documentElement.dataset.theme = t;
+        /* The browser chrome is told here as well as in the toggle, or a
+           light-mode visitor gets a black address bar and iOS notch on every
+           fresh load until they touch the switch. */
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'light' ? '#FFFFFF' : '#06080F');
+      })();
+    </script>
     <!--app-head-->
   </head>
   <body>

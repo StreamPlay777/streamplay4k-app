@@ -51,7 +51,7 @@ export default function ReviewWall() {
                 col.map((r, i) => (
                   <div
                     key={`${pass}-${i}`}
-                    className="rounded-xl border border-white/[.07] bg-white/[.035] px-4 py-4"
+                    className="rounded-xl border border-line bg-raise px-4 py-4"
                   >
                     <div className="text-[11px] tracking-[.2em]" style={{ color: trustpilot.green }}>
                       ★★★★★

@@ -66,7 +66,7 @@ export default function Reviews() {
               {dist.map((row) => (
                 <div key={row.stars} className="flex items-center gap-3 sm:gap-4">
                   <span className="w-[44px] flex-none text-[13px] text-ink-3">{row.stars} star</span>
-                  <div className="h-[9px] min-w-0 flex-1 overflow-hidden rounded-[5px] bg-white/[.07]">
+                  <div className="h-[9px] min-w-0 flex-1 overflow-hidden rounded-[5px] bg-raise-2">
                     <div className="h-full rounded-[5px] bg-accent" style={{ width: `${row.percent}%` }} />
                   </div>
                   <span className="nums w-11 flex-none text-right text-[12px] text-ink-3">{row.percent}%</span>
@@ -91,10 +91,10 @@ export default function Reviews() {
                 <blockquote className="mt-3.5 flex-1 text-[15.5px] leading-relaxed text-ink-2">
                   “{r.quote}”
                 </blockquote>
-                <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/[.08] pt-4">
+                <div className="mt-5 flex items-center justify-between gap-3 border-t border-line pt-4">
                   <span className="text-[12.5px] text-ink-4">{r.name} · {r.country} · {r.date}</span>
                   <span className="flex-none whitespace-nowrap rounded px-2 py-1 text-[9.5px] font-bold uppercase tracking-wide"
-                        style={{ background: 'rgba(0,182,122,.14)', color: '#3FD9A8' }}>
+                        style={{ background: 'var(--verified-bg)', color: 'var(--verified-ink)' }}>
                     {REVIEW_BADGE}
                   </span>
                 </div>

@@ -87,13 +87,13 @@ export function Marquee({
 
 /** Accent tick used across feature and checklist rows. */
 export function Tick() {
-  return <span className="mt-[2px] flex-none font-display text-[15px] font-bold text-accent">✓</span>;
+  return <span className="mt-[2px] flex-none font-display text-[15px] font-bold text-accent-ink">✓</span>;
 }
 
 /** Five accent stars. */
 export function Stars({ size = 14 }: { size?: number }) {
   return (
-    <div className="tracking-[.2em] text-accent" style={{ fontSize: size }} aria-label="5 out of 5 stars">
+    <div className="tracking-[.2em] text-accent-ink" style={{ fontSize: size }} aria-label="5 out of 5 stars">
       ★★★★★
     </div>
   );
@@ -159,14 +159,10 @@ export function LogoMarquee({ logos, direction, duration }: {
             {logos.map((logo) => (
               <span
                 key={`${pass}-${logo.slug}`}
-                className="flex h-11 min-w-[84px] flex-none items-center justify-center rounded-xl
-                           border border-white/40 px-4 shadow-[0_4px_16px_rgba(0,0,0,.28)]
-                           sm:h-[52px] sm:min-w-[104px] sm:px-5 lg:h-[58px] lg:min-w-[116px]"
-                style={{
-                  background: 'rgba(255,255,255,.93)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                }}
+                className="logo-plate flex h-11 min-w-[84px] flex-none items-center justify-center
+                           rounded-xl px-4 sm:h-[52px] sm:min-w-[104px] sm:px-5
+                           lg:h-[58px] lg:min-w-[116px]"
+                style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
               >
                 <img
                   src={logo.src}

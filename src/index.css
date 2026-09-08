@@ -13,6 +13,181 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ══ THEME ═════════════════════════════════════════════════════════════════
+ *
+ * Two palettes, one set of names. Every colour on the site resolves through
+ * these variables, so a component never states which theme it is in.
+ *
+ * Dark is the default and the brand's own dress. Light is opt-in: an explicit
+ * choice on <html data-theme>, remembered in localStorage and written by an
+ * inline script in index.html before first paint (a class applied on mount
+ * would flash the wrong theme through the pre-rendered HTML). Visitors who
+ * have never chosen keep the dark site — a system preference does not silently
+ * restyle a brand. Swap the fallback in that script to follow the OS instead.
+ *
+ * The two workhorses are --line-* and --raise-*, which are RELATIVE: one step
+ * of contrast away from the current ground, a white wash in dark and an ink
+ * wash in light. That is what lets every border and card invert correctly
+ * without being restated per theme.
+ *
+ * Light is built the way Apple builds a light page: a white ground, faintly
+ * tinted cards, hairline rules, no heavy shadows — and darker reds, because
+ * the brand orange measures 2.61:1 on white and cannot carry text there.
+ */
+:root {
+  color-scheme: dark;
+
+  --bg: #06080F;
+  --bg-alt: #080B16;
+  --bg-deep: #05070D;
+  --bg-deepest: #04060B;
+
+  --surface: #0A0E1B;
+  --surface-2: #0B1020;
+  --surface-3: #0F1526;
+
+  --ink: #E8ECF5;
+  --ink-2: #C4CCDC;
+  --ink-3: #97A2B8;
+  --ink-4: #6B7689;
+  --ink-5: #5C6680;
+  --ink-6: #465066;
+
+  --line: rgba(255, 255, 255, .08);
+  --line-2: rgba(255, 255, 255, .12);
+  --line-3: rgba(255, 255, 255, .26);
+
+  --raise: rgba(255, 255, 255, .025);
+  --raise-2: rgba(255, 255, 255, .05);
+  --raise-3: rgba(255, 255, 255, .11);
+
+  --accent-bright: #FF6A5A;
+  --accent-soft: #FF7A63;
+  --accent-link: #FF8A72;
+
+  --accent-ink: #FF2B20;
+  --grad-from: #FF2B20;
+  --grad-to: #FF7A18;
+
+  --success: #35C86A;
+
+  /* The "on Trustpilot" pill. Trustpilot's own green is 2.6:1 on white, so
+     light uses a deeper one; dark keeps the brighter tint it needs. */
+  --verified-bg: rgba(0, 182, 122, .14);
+  --verified-ink: #3FD9A8;
+
+  /* Payment marks whose brand colour cannot carry both grounds. Visa navy is
+     unreadable on near-black and PayPal's blues go muddy, so dark lifts them;
+     light restores the true brand values. Everything else uses currentColor. */
+  --mark-visa: #3D77FF;
+  --mark-paypal-a: #5A97FF;
+  --mark-paypal-b: #12BEEC;
+
+  --pay-chip-bg: linear-gradient(160deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .018));
+  --pay-chip-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), 0 2px 6px -2px rgba(0, 0, 0, .55);
+  --pay-chip-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, .16), 0 6px 16px -6px rgba(0, 0, 0, .7);
+
+  /* Glass: the navbar, the order bar, the channel finder. */
+  --glass-tint: rgba(9, 12, 23, .88);
+  --glass-strong: rgba(9, 12, 23, .86);
+  --glass-soft: rgba(10, 14, 27, .6);
+  --glass-solid: rgba(12, 17, 32, .96);
+  --glass-sheen: rgba(255, 255, 255, .04);
+  --glass-inset: rgba(255, 255, 255, .07);
+
+  --shadow-cta-sm: rgba(255, 43, 32, .35);
+  --shadow-cta: rgba(255, 60, 26, .34);
+  --shadow-pill: rgba(0, 0, 0, .45);
+  --shadow-dropdown: rgba(0, 0, 0, .6);
+  --shadow-card: rgba(0, 0, 0, .85);
+  --shadow-lift: rgba(0, 0, 0, .9);
+
+  /* Ambient section light, and the scrims over the poster and logo walls. */
+  --amb-strength: 1;
+  --scrim-solid: #06080F;
+  --scrim-mid: rgba(6, 8, 15, .62);
+  --scrim-heavy: rgba(6, 8, 15, .9);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #FFFFFF;
+  --bg-alt: #F6F6F8;
+  --bg-deep: #F4F4F7;
+  --bg-deepest: #F1F1F4;
+
+  --surface: #FFFFFF;
+  --surface-2: #FFFFFF;
+  --surface-3: #F4F4F7;
+
+  /* A light ground compresses the usable range: every step here still clears
+     4.5:1 against #F1F1F4, the deepest of the light grounds (the footer), not
+     merely against white. Measured, not eyeballed. */
+  --ink: #111114;
+  --ink-2: #2F3138;
+  --ink-3: #4B4F5A;
+  --ink-4: #5B6070;
+  --ink-5: #656A78;
+  --ink-6: #6E7382;
+
+  --line: rgba(17, 20, 32, .09);
+  --line-2: rgba(17, 20, 32, .13);
+  --line-3: rgba(17, 20, 32, .24);
+
+  --raise: rgba(17, 20, 32, .028);
+  --raise-2: rgba(17, 20, 32, .05);
+  --raise-3: rgba(17, 20, 32, .09);
+
+  /* #FF2B20, #FF6A5A and #FF8A72 measure 3.7:1, 2.6:1 and 2.1:1 on white.
+     These are the same hues taken deep enough to carry text on every light
+     ground, the footer's #F1F1F4 included. */
+  --accent-ink: #C41F0F;
+  --accent-bright: #C41F0F;
+  --accent-soft: #B91C0C;
+  --accent-link: #B91C0C;
+
+  --grad-from: #CE2114;
+  --grad-to: #C2410C;
+
+  --success: #12864A;
+
+  --verified-bg: rgba(0, 182, 122, .12);
+  --verified-ink: #046B45;
+
+  --mark-visa: #1A1F71;
+  --mark-paypal-a: #003087;
+  --mark-paypal-b: #0079C1;
+
+  --pay-chip-bg: #FFFFFF;
+  --pay-chip-shadow: 0 1px 2px rgba(17, 20, 32, .06);
+  --pay-chip-shadow-hover: 0 4px 12px -2px rgba(17, 20, 32, .12);
+
+  --glass-tint: rgba(255, 255, 255, .82);
+  --glass-strong: rgba(255, 255, 255, .84);
+  --glass-soft: rgba(255, 255, 255, .62);
+  --glass-solid: rgba(255, 255, 255, .97);
+  --glass-sheen: rgba(255, 255, 255, .9);
+  --glass-inset: rgba(255, 255, 255, .9);
+
+  --shadow-cta-sm: rgba(255, 43, 32, .28);
+  --shadow-cta: rgba(255, 60, 26, .26);
+  --shadow-pill: rgba(17, 20, 32, .16);
+  --shadow-dropdown: rgba(17, 20, 32, .18);
+  --shadow-card: rgba(17, 20, 32, .12);
+  --shadow-lift: rgba(17, 20, 32, .14);
+
+  /* The coloured washes that separate sections are a dark-room effect. On
+     white they turn into stains, so they are dialled most of the way down
+     rather than removed — a trace of warmth still tells the sections apart. */
+  --amb-strength: .34;
+  --scrim-solid: #FFFFFF;
+  /* Heavier than the dark theme's. A pale wall of cards behind pale content
+     reads as clutter rather than as texture, so light holds more of it back. */
+  --scrim-mid: rgba(255, 255, 255, .86);
+  --scrim-heavy: rgba(255, 255, 255, .95);
+}
+
 @layer base {
   /* Height of the floating nav, so a full-bleed hero can sit underneath it.
      The pill wraps to a second row on narrow screens, hence the two values. */
@@ -27,14 +202,15 @@
   html { scroll-behavior: smooth; }
   body {
     margin: 0;
-    background: #06080F;
-    color: #E8ECF5;
+    background: var(--bg);
+    color: var(--ink);
     font-family: 'Outfit Variable', 'Outfit', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    transition: background-color .3s ease, color .3s ease;
   }
-  a { color: #FF2B2A; text-decoration: none; }
-  a:hover { color: #FF8A72; }
-  ::selection { background: #FF2B2A; color: #fff; }
+  a { color: var(--accent-link); text-decoration: none; }
+  a:hover { color: var(--accent-bright); }
+  ::selection { background: #FF2B20; color: #fff; }
 
   h1, h2, h3, h4 { margin: 0; }
   h1 { letter-spacing: -.035em; }
@@ -99,7 +275,7 @@
   }
   .btn-outline {
     @apply btn rounded-xl px-7 py-[15px] text-[15.5px] text-ink border
-           border-white/[.16] bg-white/[.03] hover:border-accent hover:text-white;
+           border-line-2 bg-raise hover:border-accent hover:text-white;
   }
   .btn-sm {
     @apply btn rounded-[9px] px-4 py-2 text-[13.5px];
@@ -107,7 +283,7 @@
 
   /* Standard card */
   .card {
-    @apply rounded-2xl border border-white/[.08] bg-white/[.02];
+    @apply rounded-2xl border border-line bg-raise;
   }
   .card-hover {
     @apply card hover:border-accent/[.35];
@@ -120,7 +296,7 @@
 
   /* Form fields */
   .field {
-    @apply w-full rounded-lg border border-white/10 bg-white/[.04] px-[14px] py-3
+    @apply w-full rounded-lg border border-line-2 bg-raise-2 px-[14px] py-3
            text-[15px] text-ink placeholder:text-ink-5 outline-none
            transition-colors focus:border-accent;
   }
@@ -138,9 +314,9 @@
   }
   /* Striped fill standing in for artwork not yet supplied */
   .placeholder-stripes {
-    background-color: #0F1526;
+    background-color: var(--surface-3);
     background-image: repeating-linear-gradient(135deg,
-      rgba(255,255,255,.045) 0 12px, transparent 12px 24px);
+      var(--raise-2) 0 12px, transparent 12px 24px);
   }
   .text-balance { text-wrap: balance; }
   /*
@@ -203,9 +379,9 @@
 }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: #06080F; }
-::-webkit-scrollbar-thumb { background: #23293C; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #FF2B2A; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--line-3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #FF2B20; }
 
 /* ── Section rhythm ────────────────────────────────────────────────────────
    One spacing system for the whole page, replacing the per-section values
@@ -243,12 +419,14 @@
 }
 
 .amb-warm::before {
+  opacity: var(--amb-strength);
   background:
     radial-gradient(ellipse 900px 480px at 22% 6%,  rgba(255, 64, 28, .10), transparent 66%),
     radial-gradient(ellipse 720px 420px at 82% 92%, rgba(255, 122, 24, .075), transparent 68%);
 }
 
 .amb-cool::before {
+  opacity: var(--amb-strength);
   background:
     radial-gradient(ellipse 860px 460px at 78% 8%,  rgba(52, 86, 190, .11), transparent 68%),
     radial-gradient(ellipse 700px 400px at 14% 88%, rgba(255, 64, 28, .06), transparent 70%);
@@ -257,6 +435,7 @@
 /* Deeper, more cinematic — the How-it-works section. Three light sources at
    different depths give the numerals something to sit in front of. */
 .amb-cine::before {
+  opacity: var(--amb-strength);
   background:
     radial-gradient(ellipse 820px 460px at 16% 10%,  rgba(255, 58, 24, .15), transparent 64%),
     radial-gradient(ellipse 760px 440px at 88% 76%,  rgba(255, 128, 28, .11), transparent 68%),
@@ -332,18 +511,18 @@
   font-style: italic;
 }
 .prose-sp code {
-  @apply rounded bg-white/[.06] text-ink-2;
+  @apply rounded bg-raise-2 text-ink-2;
   padding: .15em .4em;
   font-size: .92em;
   font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 .prose-sp pre {
-  @apply overflow-x-auto rounded-xl border border-white/[.08] bg-white/[.03];
+  @apply overflow-x-auto rounded-xl border border-line bg-raise;
   padding: 1.1em 1.2em;
 }
 .prose-sp pre code { @apply bg-transparent p-0; }
-.prose-sp img { @apply rounded-xl border border-white/[.08]; }
-.prose-sp hr { @apply border-white/[.09]; margin-top: 2.4em; margin-bottom: 2.4em; }
+.prose-sp img { @apply rounded-xl border border-line; }
+.prose-sp hr { @apply border-line; margin-top: 2.4em; margin-bottom: 2.4em; }
 
 /* ── Resizable glass navbar ────────────────────────────────────────────────
    All the interpolation lives here; Navbar.tsx only flips one boolean.
@@ -405,7 +584,7 @@
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .04), transparent 42%);
+  background: linear-gradient(180deg, var(--glass-sheen), transparent 42%);
   opacity: .6;
   transition: opacity .34s cubic-bezier(.22, 1, .36, 1);
 }
@@ -445,14 +624,14 @@
 
 .finder-card {
   background:
-    linear-gradient(158deg, rgba(255, 255, 255, .055), rgba(255, 255, 255, .015)),
-    rgba(10, 14, 26, .55);
-  border: 1px solid rgba(255, 255, 255, .09);
+    linear-gradient(158deg, var(--raise-2), var(--raise)),
+    var(--glass-tint);
+  border: 1px solid var(--line);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .07),
-    0 18px 50px -24px rgba(0, 0, 0, .85);
+    inset 0 1px 0 var(--glass-inset),
+    0 18px 50px -24px var(--shadow-card);
   isolation: isolate;
 }
 
@@ -477,24 +656,24 @@
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .06), transparent 68%);
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), var(--raise-2), transparent 68%);
   transition: opacity .3s ease;
 }
 .finder-card:hover::after { opacity: 1; }
 
 .finder-input {
-  background: rgba(255, 255, 255, .035);
-  border: 1px solid rgba(255, 255, 255, .1);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
+  background: var(--raise);
+  border: 1px solid var(--line-2);
+  box-shadow: inset 0 1px 0 var(--glass-inset);
   transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
 }
-.finder-input:hover { border-color: rgba(255, 255, 255, .2); }
+.finder-input:hover { border-color: var(--line-3); }
 .finder-input:focus {
   border-color: rgba(255, 90, 40, .55);
-  background: rgba(255, 255, 255, .05);
+  background: var(--raise-2);
   /* Restrained: a rim, not a bloom. */
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .06),
+    inset 0 1px 0 var(--glass-inset),
     0 0 0 3px rgba(255, 64, 28, .13);
 }
 
@@ -505,7 +684,7 @@
 }
 .finder-results {
   animation: finder-in .22s cubic-bezier(.22, 1, .36, 1) both;
-  border-top: 1px solid rgba(255, 255, 255, .07);
+  border-top: 1px solid var(--line);
   padding-top: .5rem;
 }
 
@@ -514,19 +693,95 @@
   .finder-card::after { display: none; }
 }
 
+/* Wordmark: the pale mark on the dark theme, the ink one on light. Same
+   CSS-not-JS swap as the toggle glyphs below, and for the same reason. */
+:root[data-theme='dark'] .mark-on-light,
+:root[data-theme='light'] .mark-on-dark { display: none; }
+
+/* Theme toggle glyphs. Swapped in CSS, not JS: the pre-rendered HTML contains
+   both, so the right one is on screen at first paint whichever theme the
+   visitor chose, and hydration has nothing to disagree about. */
+:root[data-theme='dark'] .ico-moon,
+:root[data-theme='light'] .ico-sun { display: none; }
+
+/* ── Payment acceptance marks ──────────────────────────────────────────────
+   A card per mark, in the manner of Stripe's and Untitled UI's icon sets: a
+   small rounded plate, a hairline rim, the logo centred with room to breathe.
+
+   The plate follows the theme rather than staying dark. On white a dark chip
+   reads as a hole punched in the page; on near-black a white one reads as a
+   row of lights. Each is what the logos were drawn to sit on. */
+.pay-chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 44px;
+  height: 30px;
+  padding: 5px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--line-2);
+  background: var(--pay-chip-bg);
+  color: var(--ink);
+  box-shadow: var(--pay-chip-shadow);
+  transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+@media (min-width: 640px) {
+  .pay-chip { width: 48px; height: 32px; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .pay-chip:hover {
+    transform: translateY(-1.5px);
+    border-color: var(--line-3);
+    box-shadow: var(--pay-chip-shadow-hover);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pay-chip { transition: none; }
+  .pay-chip:hover { transform: none; }
+}
+
+/* No plate at all — the artwork alone, beside a price. */
+.pay-bare {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  width: auto;
+  height: 17px;
+  color: var(--ink-2);
+  opacity: .78;
+  transition: opacity .3s ease;
+}
+@media (min-width: 640px) {
+  .pay-bare { height: 19px; }
+}
+.pay-bare:hover { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .pay-bare { transition: none; }
+}
+
+/* A white plate behind a channel's coloured logo. Stays white in both themes —
+   the logos are drawn for a light background — so in light mode it needs a rim,
+   or it dissolves into the page. */
+.logo-plate {
+  background: rgba(255, 255, 255, .95);
+  box-shadow: inset 0 0 0 1px var(--line-2), 0 4px 16px var(--shadow-pill);
+}
+
 /* ── Pricing configurator ──────────────────────────────────────────────────
    One surface, split by a hairline, rather than two floating cards with a gap
    between them. The divider is a border on the right column, so it only exists
    once the columns sit side by side. */
 
 .config-shell {
-  border: 1px solid rgba(255, 255, 255, .09);
+  border: 1px solid var(--line);
   background:
-    linear-gradient(168deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012)),
-    rgba(9, 12, 22, .5);
+    linear-gradient(168deg, var(--raise-2), var(--raise)),
+    var(--surface);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .06),
-    0 24px 60px -30px rgba(0, 0, 0, .9);
+    inset 0 1px 0 var(--glass-inset),
+    0 24px 60px -30px var(--shadow-lift);
 }
 
 /* The right column reads a touch deeper, which separates the two halves
@@ -539,13 +794,13 @@
   .config-shell[data-ordering] { min-height: var(--shell-rest, auto); }
 }
 
-.config-panel { background: rgba(255, 255, 255, .022); }
+.config-panel { background: var(--raise); }
 
 @media (min-width: 1024px) {
-  .config-panel { border-left: 1px solid rgba(255, 255, 255, .075); }
+  .config-panel { border-left: 1px solid var(--line); }
 }
 @media (max-width: 1023.98px) {
-  .config-panel { border-top: 1px solid rgba(255, 255, 255, .075); }
+  .config-panel { border-top: 1px solid var(--line); }
 }
 
 /* Selected term / device. A tinted surface and a soft rim, not a flood of red:
@@ -572,9 +827,9 @@
 .term-tile-on {
   background:
     linear-gradient(158deg, rgba(255, 43, 32, .16), rgba(255, 122, 24, .07)),
-    rgba(255, 255, 255, .02);
+    var(--raise);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .08),
+    inset 0 1px 0 var(--glass-inset),
     0 0 0 1px rgba(255, 64, 28, .25),
     0 8px 22px -14px rgba(255, 64, 28, .7);
 }
@@ -613,14 +868,14 @@
 .order-bar-out { transform: translate3d(0, 110%, 0); opacity: 0; pointer-events: none; }
 
 .order-bar-shell {
-  border: 1px solid rgba(255, 255, 255, .11);
-  background: rgba(9, 12, 23, .88);
+  border: 1px solid var(--line-2);
+  background: var(--glass-tint);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .07),
-    0 -6px 30px -12px rgba(0, 0, 0, .8),
-    0 18px 40px -20px rgba(0, 0, 0, .9);
+    inset 0 1px 0 var(--glass-inset),
+    0 -6px 30px -12px var(--shadow-card),
+    0 18px 40px -20px var(--shadow-lift);
 }
 
 /* While the bar is docked, the WhatsApp pill steps up out of its way. */

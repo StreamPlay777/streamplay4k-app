@@ -41,7 +41,7 @@ function NotFound() {
   return (
     <section className="grid min-h-[60vh] place-items-center px-7 text-center">
       <div>
-        <h1 className="font-display text-[72px] font-extrabold leading-none text-accent">404</h1>
+        <h1 className="font-display text-[72px] font-extrabold leading-none text-accent-ink">404</h1>
         <p className="mt-4 text-[18px] text-ink-3">That page does not exist.</p>
         <Link to={routes.home} className="btn-accent mt-7">Back home</Link>
       </div>

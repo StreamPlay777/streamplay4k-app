@@ -156,13 +156,13 @@ export default function PricingOrder() {
                 onClick={() => setEditingPlan((v) => !v)}
                 aria-expanded={editingPlan}
                 aria-controls="plan-editor"
-                className="mb-6 flex w-full items-center justify-between gap-4 rounded-xl border border-white/[.09] bg-white/[.03] px-4 py-3.5 text-left transition-colors hover:border-white/[.2] lg:hidden"
+                className="mb-6 flex w-full items-center justify-between gap-4 rounded-xl border border-line bg-raise px-4 py-3.5 text-left transition-colors hover:border-line-3 lg:hidden"
               >
                 <span className="min-w-0">
                   <span className="block font-display text-[14.5px] font-bold text-ink">
                     {q.term.label} · {q.devices} {q.devices === 1 ? 'device' : 'devices'}
                   </span>
-                  <span className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-accent">
+                  <span className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-accent-ink">
                     <Chevron open={editingPlan} />
                     {editingPlan ? 'Hide plan options' : 'Change plan or devices'}
                   </span>
@@ -198,13 +198,13 @@ export default function PricingOrder() {
                             : ''
                         }${best ? ', best value' : ''}`}
                         className={`term-tile relative rounded-xl border p-4 pt-5 text-left ${
-                          on ? 'term-tile-on border-accent' : 'border-white/[.1] bg-white/[.02] hover:border-white/[.28]'
+                          on ? 'term-tile-on border-accent' : 'border-line-2 bg-raise hover:border-line-3'
                         }`}
                       >
                         {best && (
                           <span
                             className={`absolute -top-2 left-4 rounded-full px-2 py-[3px] text-[9.5px] font-extrabold uppercase tracking-[.1em] ${
-                              on ? 'bg-accent text-white' : 'bg-white/[.12] text-ink-2'
+                              on ? 'bg-accent text-white' : 'bg-raise-3 text-ink-2'
                             }`}
                           >
                             Best value
@@ -212,7 +212,7 @@ export default function PricingOrder() {
                         )}
                         {/* Selection carries a mark as well as colour. */}
                         {on && (
-                          <span className="absolute right-3 top-3 text-accent" aria-hidden="true">
+                          <span className="absolute right-3 top-3 text-accent-ink" aria-hidden="true">
                             <Check />
                           </span>
                         )}
@@ -236,7 +236,7 @@ export default function PricingOrder() {
               </fieldset>
 
               {/* Devices — the resulting total under each, not "+$X" */}
-              <fieldset className="mt-7 border-t border-white/[.09] pt-6">
+              <fieldset className="mt-7 border-t border-line pt-6">
                 <legend className="text-[11px] font-bold uppercase tracking-[.16em] text-ink-4">
                   Devices
                 </legend>
@@ -255,7 +255,7 @@ export default function PricingOrder() {
                         className={`device-tile min-h-[62px] rounded-xl border px-2 py-2.5 ${
                           on
                             ? 'device-tile-on border-accent'
-                            : 'border-white/[.12] bg-white/[.02] text-ink-2 hover:border-white/[.28]'
+                            : 'border-line-2 bg-raise text-ink-2 hover:border-line-3'
                         }`}
                       >
                         <span className="block font-display text-[17px] font-extrabold leading-none">{n}</span>
@@ -273,7 +273,7 @@ export default function PricingOrder() {
             </div>
 
             {/* Price + CTA */}
-            <div className={`border-t border-white/[.09] pt-6 ${
+            <div className={`border-t border-line pt-6 ${
               ordering ? `mt-0 ${editingPlan ? 'max-lg:mt-7' : 'max-lg:hidden'}` : 'mt-7'
             }`}>
               <p className="sr-only" aria-live="polite" aria-atomic="true">
@@ -302,7 +302,7 @@ export default function PricingOrder() {
                     </dt>
                     <dd className="text-ink-2">{money(q.extraDevicesCents)}</dd>
                   </div>
-                  <div className="flex justify-between gap-4 border-t border-white/[.12] pt-1.5">
+                  <div className="flex justify-between gap-4 border-t border-line-2 pt-1.5">
                     <dt className="font-semibold text-ink">Total</dt>
                     <dd className="font-semibold text-ink">{money(q.totalCents)}</dd>
                   </div>
@@ -339,7 +339,7 @@ export default function PricingOrder() {
                     they are the first thing anyone reads here. */}
                 <div className="mt-5 grid grid-cols-2 gap-2.5">
                   {PLAN_HIGHLIGHTS.map((h) => (
-                    <div key={h.label} className="rounded-xl border border-white/[.08] bg-white/[.03] px-4 py-4">
+                    <div key={h.label} className="rounded-xl border border-line bg-raise px-4 py-4">
                       <p className="nums text-grad font-display text-[22px] font-extrabold leading-none">
                         {h.value}
                       </p>
@@ -351,7 +351,7 @@ export default function PricingOrder() {
                 <ul className="mt-5 space-y-[11px]">
                   {PLAN_FEATURES.map((f) => (
                     <li key={f} className="flex items-start gap-2.5">
-                      <span className="mt-[3px] flex-none text-accent"><Check /></span>
+                      <span className="mt-[3px] flex-none text-accent-ink"><Check /></span>
                       <span className="text-[13.5px] leading-snug text-ink-2">{f}</span>
                     </li>
                   ))}
@@ -390,7 +390,7 @@ export default function PricingOrder() {
  */
 function Assurances({ className = '' }: { className?: string }) {
   return (
-    <div className={`border-t border-white/[.07] ${className}`}>
+    <div className={`border-t border-line ${className}`}>
       {/* Line icons rather than the accent tick used by the feature list. The
           two sit next to each other now, and identical ticks would read as one
           twelve-row list instead of features and then guarantees. */}

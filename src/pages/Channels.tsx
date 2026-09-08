@@ -69,9 +69,9 @@ export default function Channels() {
 
       {/* Browser shell */}
       <section className="px-7 pb-[110px]">
-        <div className="mx-auto max-w-shell overflow-hidden rounded-[18px] border border-white/[.09] bg-surface">
+        <div className="mx-auto max-w-shell overflow-hidden rounded-[18px] border border-line bg-surface">
           {/* Top bar */}
-          <div className="flex items-center gap-3.5 border-b border-white/[.09] px-[22px] py-5">
+          <div className="flex items-center gap-3.5 border-b border-line px-[22px] py-5">
             <span className="h-2 w-2 flex-none animate-pulse-dot rounded-full bg-accent" />
             <input
               value={query}
@@ -84,7 +84,7 @@ export default function Channels() {
 
           <div className="grid lg:grid-cols-[260px_1fr]">
             {/* Country rail */}
-            <aside className="border-b border-white/[.09] p-4 lg:border-b-0 lg:border-r">
+            <aside className="border-b border-line p-4 lg:border-b-0 lg:border-r">
               <input
                 value={countryQuery}
                 onChange={(e) => setCountryQuery(e.target.value)}
@@ -100,7 +100,7 @@ export default function Channels() {
                       key={c.id}
                       onClick={() => { setCountryId(c.id); setCategory(null); }}
                       className={`flex items-center gap-2.5 rounded-[9px] px-3.5 py-2.5 text-left transition-colors ${
-                        on ? 'bg-accent text-white' : 'hover:bg-white/[.04]'
+                        on ? 'bg-accent text-white' : 'hover:bg-raise-2'
                       }`}
                     >
                       <span className="flex-none text-[15px]">{c.flag}</span>
@@ -118,10 +118,10 @@ export default function Channels() {
                 )}
               </div>
 
-              <label className="mt-4 flex cursor-pointer items-center gap-2.5 border-t border-white/[.08] pt-4">
+              <label className="mt-4 flex cursor-pointer items-center gap-2.5 border-t border-line pt-4">
                 <span
                   className={`relative h-[18px] w-8 flex-none rounded-full transition-colors ${
-                    adult ? 'bg-accent' : 'bg-white/[.12]'
+                    adult ? 'bg-accent' : 'bg-raise-3'
                   }`}
                 >
                   <span
@@ -147,7 +147,7 @@ export default function Channels() {
                 <button
                   onClick={() => setCategory(null)}
                   className={`btn-sm ${
-                    category === null ? 'bg-accent text-white' : 'border border-white/[.12] bg-white/[.02] text-ink-2'
+                    category === null ? 'bg-accent text-white' : 'border border-line-2 bg-raise text-ink-2'
                   }`}
                 >
                   All categories
@@ -160,7 +160,7 @@ export default function Channels() {
                     key={cat}
                     onClick={() => setCategory(cat)}
                     className={`btn-sm ${
-                      category === cat ? 'bg-accent text-white' : 'border border-white/[.12] bg-white/[.02] text-ink-2'
+                      category === cat ? 'bg-accent text-white' : 'border border-line-2 bg-raise text-ink-2'
                     }`}
                   >
                     {cat}
@@ -178,7 +178,7 @@ export default function Channels() {
                   <strong className="font-semibold text-ink">{country.count.toLocaleString('en-US')}</strong>{' '}
                   channels in {country.name}
                 </p>
-                <span className="font-display text-[11px] font-bold uppercase tracking-[.16em] text-accent">
+                <span className="font-display text-[11px] font-bold uppercase tracking-[.16em] text-accent-ink">
                   Live now
                 </span>
               </div>
@@ -188,7 +188,7 @@ export default function Channels() {
                 {results.map((ch) => (
                   <div
                     key={ch.name}
-                    className="rounded-[11px] border border-white/[.07] bg-white/[.02] px-[15px] py-3.5
+                    className="rounded-[11px] border border-line bg-raise px-[15px] py-3.5
                                transition-colors hover:border-accent/40 hover:bg-accent/[.05]"
                   >
                     <div className="flex items-start gap-2.5">
@@ -198,11 +198,11 @@ export default function Channels() {
                       {(() => {
                         const mark = ch.logo ?? logoFor(ch.name);
                         return mark ? (
-                          <span className="grid h-8 w-8 flex-none place-items-center overflow-hidden rounded-md bg-[#F2F4F8] p-1">
+                          <span className="grid h-8 w-8 flex-none place-items-center logo-plate overflow-hidden rounded-md p-1">
                             <img src={mark} alt="" loading="lazy" className="max-h-full max-w-full object-contain" />
                           </span>
                         ) : (
-                          <span className="grid h-8 w-8 flex-none place-items-center rounded-md border border-white/[.09] bg-white/[.04] text-[10.5px] font-bold text-ink-3">
+                          <span className="grid h-8 w-8 flex-none place-items-center rounded-md border border-line bg-raise-2 text-[10.5px] font-bold text-ink-3">
                             {channelInitials(ch.name)}
                           </span>
                         );
@@ -230,7 +230,7 @@ export default function Channels() {
               )}
 
               {/* Foot */}
-              <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-white/[.08] pt-5">
+              <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-5">
                 <p className="max-w-[520px] text-[14px] text-ink-3">
                   Missing a channel? Search first, then ask us — if it exists, we can usually add it.
                 </p>

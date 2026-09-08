@@ -70,7 +70,7 @@ function Hero() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'linear-gradient(180deg, rgba(6,8,15,.52) 0%, rgba(6,8,15,.66) 46%, rgba(6,8,15,.90) 82%, #06080F 100%)',
+            'linear-gradient(180deg, var(--scrim-mid) 0%, var(--scrim-heavy) 46%, var(--scrim-heavy) 82%, var(--scrim-solid) 100%)',
         }}
       />
 
@@ -160,7 +160,7 @@ function StatBar() {
       />
       <dl
         className="relative mx-auto grid max-w-shell grid-cols-2 gap-y-10 [&>*:nth-child(even)]:border-l
-                   [&>*]:border-white/[.09] md:grid-cols-4 md:gap-y-0 md:[&>*:nth-child(n+2)]:border-l"
+                   [&>*]:border-line md:grid-cols-4 md:gap-y-0 md:[&>*:nth-child(n+2)]:border-l"
       >
         {heroStats.map((s) => (
           <div key={s.label} className="flex flex-col-reverse items-center px-3 text-center sm:px-6">
@@ -251,14 +251,14 @@ function OnDemand() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'linear-gradient(180deg, #06080F 0%, rgba(6,8,15,.58) 26%, rgba(6,8,15,.58) 74%, #06080F 100%)',
+            'linear-gradient(180deg, var(--scrim-solid) 0%, var(--scrim-mid) 26%, var(--scrim-mid) 74%, var(--scrim-solid) 100%)',
         }}
       />
 
       <div className="relative mx-auto max-w-shell px-5 sm:px-7">
         {/* Header */}
         <div className="mx-auto max-w-[760px] text-center">
-          <p className="flex items-center justify-center gap-3 text-[12px] font-bold uppercase tracking-[.18em] text-accent">
+          <p className="flex items-center justify-center gap-3 text-[12px] font-bold uppercase tracking-[.18em] text-accent-ink">
             <span className="h-px w-8 bg-accent/50" aria-hidden="true" />
             Movies &amp; series
             <span className="h-px w-8 bg-accent/50" aria-hidden="true" />
@@ -420,7 +420,7 @@ function WhySwitch() {
         <div className="mt-14 grid gap-[18px] md:grid-cols-2 lg:grid-cols-3">
           {whySwitch.map((card, i) => (
             <Reveal key={card.title} delay={i} shift={16} className="card-hover px-[26px] pb-[30px] pt-7">
-              <div className="nums text-[13px] font-bold text-accent">
+              <div className="nums text-[13px] font-bold text-accent-ink">
                 {String(i + 1).padStart(2, '0')}
               </div>
               <h3 className="mt-4 font-display text-[21px] font-bold text-ink">{card.title}</h3>
@@ -462,7 +462,7 @@ function ThreeSteps() {
       title: 'Choose Your Plan',
       body: 'Select your subscription length and the number of devices you need.',
       widget: (
-        <div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-2.5" role="group" aria-label="Choose a plan">
+        <div className="rounded-2xl border border-line bg-raise p-2.5" role="group" aria-label="Choose a plan">
           <div className="flex flex-col gap-2">
             {TERMS.map((t) => {
               const on = t.id === termId;
@@ -475,13 +475,13 @@ function ThreeSteps() {
                   onClick={() => setTermId(t.id)}
                   aria-pressed={on}
                   className={`flex min-h-[54px] items-center gap-3 rounded-xl px-4 text-left transition-colors ${
-                    on ? 'bg-accent text-white shadow-cta' : 'bg-white/[.04] text-ink hover:bg-white/[.07]'
+                    on ? 'bg-accent text-white shadow-cta' : 'bg-raise-2 text-ink hover:bg-raise-2'
                   }`}
                 >
                   <span className="flex-1 font-display text-[15px] font-bold">{t.label}</span>
                   {best ? (
                     <span className={`rounded px-1.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wide ${
-                      on ? 'bg-white text-accent' : 'bg-accent/[.14] text-accent-bright'
+                      on ? 'bg-white text-accent-ink' : 'bg-accent/[.14] text-accent-bright'
                     }`}>
                       Best value
                     </span>
@@ -506,7 +506,7 @@ function ThreeSteps() {
       // reference's "pay now".
       body: 'Enter your contact details and confirm your order. No payment is taken on the order form.',
       widget: (
-        <div className="rounded-2xl border border-white/[.08] bg-white/[.03] p-5">
+        <div className="rounded-2xl border border-line bg-raise p-5">
           <div className="flex items-start gap-3">
             <span
               className="grid h-10 w-10 flex-none place-items-center rounded-lg bg-accent-gradient-diag font-display text-[17px] font-extrabold text-white"
@@ -519,7 +519,7 @@ function ThreeSteps() {
               <span className="block text-[12.5px] text-ink-4">1 device · 4K where available · Login by email</span>
             </span>
           </div>
-          <div className="my-4 border-t border-white/[.09]" />
+          <div className="my-4 border-t border-line" />
           <div className="flex items-end justify-between">
             <span className="text-[14px] text-ink-3">Total on your invoice</span>
             <span className="nums font-display text-[28px] font-extrabold leading-none text-ink">{money(q.totalCents)}</span>
@@ -566,12 +566,12 @@ function ThreeSteps() {
         </div>
 
         {/* Rules-only table: giant numeral, copy, live widget */}
-        <div className="mt-12 border-t border-white/[.09] sm:mt-16">
+        <div className="mt-12 border-t border-line sm:mt-16">
           {steps.map((step, i) => (
             <div
               key={step.n}
               className={`grid items-center gap-8 py-12 sm:py-14 lg:grid-cols-[180px_minmax(0,1fr)_380px] lg:gap-12 lg:py-16 ${
-                i < steps.length - 1 ? 'border-b border-white/[.09]' : ''
+                i < steps.length - 1 ? 'border-b border-line' : ''
               }`}
             >
               {/* Phone: numeral and copy share a row; desktop: three columns */}
@@ -597,7 +597,7 @@ function ThreeSteps() {
         </div>
 
         {/* Close */}
-        <div className="mt-10 flex flex-col items-center gap-4 border-t border-white/[.09] pt-10 sm:mt-12">
+        <div className="mt-10 flex flex-col items-center gap-4 border-t border-line pt-10 sm:mt-12">
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <Link to="/#pricing" className="btn-accent w-full sm:w-auto">I'm in — get my sub →</Link>
             <Link to="/setup" className="btn-outline w-full sm:w-auto">See the setup guides</Link>
@@ -630,7 +630,7 @@ function Reviews() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'linear-gradient(180deg, #06080F 0%, rgba(6,8,15,.62) 20%, rgba(6,8,15,.62) 80%, #06080F 100%)',
+            'linear-gradient(180deg, var(--scrim-solid) 0%, var(--scrim-mid) 20%, var(--scrim-mid) 80%, var(--scrim-solid) 100%)',
         }}
       />
 
@@ -660,9 +660,9 @@ function Reviews() {
         </div>
 
         {/* Metrics — 2x2 on phones, four across from tablet up */}
-        <dl className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/[.1] bg-white/[.06] lg:grid-cols-4">
+        <dl className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line-2 bg-raise-2 lg:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className="bg-[#0A0E1B] px-4 py-5 sm:px-6 sm:py-7">
+            <div key={s.label} className="bg-surface px-4 py-5 sm:px-6 sm:py-7">
               <dt className="font-display text-[24px] font-extrabold leading-none text-ink sm:text-[30px] lg:text-[34px]">
                 {s.value}
               </dt>

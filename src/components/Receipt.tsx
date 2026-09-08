@@ -38,12 +38,12 @@ export default function Receipt() {
     <div className="relative">
       {/* Annotation above the paper */}
       <div className="relative mb-3 flex items-start justify-between gap-3">
-        <span className="pt-1 font-display text-[12px] font-extrabold uppercase tracking-[.18em] text-accent sm:text-[13px]">
+        <span className="pt-1 font-display text-[12px] font-extrabold uppercase tracking-[.18em] text-accent-ink sm:text-[13px]">
           Without {site.name}
         </span>
         <span className="relative flex-none text-right">
           <span
-            className="block whitespace-nowrap font-hand text-[17px] font-bold text-accent sm:text-[20px]"
+            className="block whitespace-nowrap font-hand text-[17px] font-bold text-accent-ink sm:text-[20px]"
             style={{ transform: 'rotate(-3deg)' }}
           >
             Every. Single. Month.
@@ -51,9 +51,9 @@ export default function Receipt() {
           {/* Hand-drawn arrow curving down toward the receipt */}
           <svg viewBox="0 0 90 54" className="ml-auto mt-0.5 h-[34px] w-[58px]" aria-hidden="true">
             <path d="M78 4 C64 2, 30 8, 14 34" fill="none" stroke="currentColor"
-                  strokeWidth="2.6" strokeLinecap="round" className="text-accent" />
+                  strokeWidth="2.6" strokeLinecap="round" className="text-accent-ink" />
             <path d="M8 46 L14 33 L25 39" fill="none" stroke="currentColor"
-                  strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className="text-accent" />
+                  strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className="text-accent-ink" />
           </svg>
         </span>
       </div>
@@ -144,7 +144,7 @@ export default function Receipt() {
 
       {/* Notes under the paper */}
       <div className="mt-4 flex items-start justify-between gap-4 px-1">
-        <span className="font-hand text-[17px] font-bold leading-tight text-accent sm:text-[19px]"
+        <span className="font-hand text-[17px] font-bold leading-tight text-accent-ink sm:text-[19px]"
               style={{ transform: 'rotate(-3deg)' }}>
           6 apps.<br />6 logins.
         </span>

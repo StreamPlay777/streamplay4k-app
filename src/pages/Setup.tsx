@@ -47,7 +47,7 @@ export default function Setup() {
             <div className="label">Downloader code</div>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <span className="nums text-[26px] font-bold tracking-[.12em] text-ink">{site.downloaderCode}</span>
-              <button onClick={copyCode} className="btn-sm border border-white/[.16] text-ink hover:border-accent">
+              <button onClick={copyCode} className="btn-sm border border-line-2 text-ink hover:border-accent">
                 {copied ? 'Copied' : 'Copy'}
               </button>
             </div>
@@ -82,7 +82,7 @@ export default function Setup() {
                   key={d.id}
                   onClick={() => setDeviceId(d.id)}
                   className={`rounded-[9px] px-4 py-2.5 font-display text-[14px] font-bold transition-colors ${
-                    on ? 'bg-accent text-white' : 'border border-white/[.12] bg-white/[.02] text-ink-2 hover:border-white/25'
+                    on ? 'bg-accent text-white' : 'border border-line-2 bg-raise text-ink-2 hover:border-line-3'
                   }`}
                 >
                   {d.name}

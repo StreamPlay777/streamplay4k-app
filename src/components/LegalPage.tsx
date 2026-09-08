@@ -40,7 +40,7 @@ export default function LegalPage({ doc, path }: { doc: LegalDoc; path: string }
           <p className="mt-6 text-[17px] leading-relaxed text-ink-2">{doc.intro}</p>
 
           {/* Contents */}
-          <nav aria-label="On this page" className="mt-10 rounded-2xl border border-white/[.08] bg-white/[.02] p-6">
+          <nav aria-label="On this page" className="mt-10 rounded-2xl border border-line bg-raise p-6">
             <h2 className="font-display text-[12px] font-extrabold uppercase tracking-[.16em] text-ink-4">
               On this page
             </h2>
@@ -58,7 +58,7 @@ export default function LegalPage({ doc, path }: { doc: LegalDoc; path: string }
           {/* Body */}
           <div className="mt-12">
             {doc.sections.map((s) => (
-              <section key={s.id} id={s.id} className="scroll-mt-28 border-t border-white/[.07] py-9 first:border-t-0 first:pt-0">
+              <section key={s.id} id={s.id} className="scroll-mt-28 border-t border-line py-9 first:border-t-0 first:pt-0">
                 <h2 className="font-display text-[21px] font-extrabold leading-tight text-ink sm:text-[24px]">
                   {s.heading}
                 </h2>
@@ -80,7 +80,7 @@ export default function LegalPage({ doc, path }: { doc: LegalDoc; path: string }
             ))}
           </div>
 
-          <p className="mt-12 border-t border-white/[.07] pt-8 text-[14px] leading-relaxed text-ink-4">
+          <p className="mt-12 border-t border-line pt-8 text-[14px] leading-relaxed text-ink-4">
             This page is part of our{' '}
             <Link to={routes.terms} className="text-accent-link hover:underline">Terms of Service</Link>,{' '}
             <Link to={routes.privacy} className="text-accent-link hover:underline">Privacy Policy</Link>,{' '}

@@ -150,7 +150,7 @@ export default function ChannelFinder() {
                 onClick={() => { setQuery(''); inputRef.current?.focus(); }}
                 aria-label="Clear search"
                 className="absolute right-2.5 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-lg
-                           text-ink-4 transition-colors hover:bg-white/[.07] hover:text-ink"
+                           text-ink-4 transition-colors hover:bg-raise-2 hover:text-ink"
               >
                 <X size={16} />
               </button>
@@ -173,7 +173,7 @@ export default function ChannelFinder() {
                           onClick={() => goToChannels(query)}
                           className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left
                                       transition-colors duration-150 ${
-                                        i === active ? 'bg-white/[.07]' : 'hover:bg-white/[.05]'
+                                        i === active ? 'bg-raise-2' : 'hover:bg-raise-2'
                                       }`}
                         >
                           <ChannelMark hit={hit} />
@@ -218,14 +218,14 @@ function ChannelMark({ hit }: { hit: ChannelHit }) {
   const src = hit.logo || logoFor(hit.name);
   if (src) {
     return (
-      <span className="grid h-8 w-11 flex-none place-items-center rounded-md bg-white/95 p-1">
+      <span className="grid h-8 w-11 flex-none place-items-center logo-plate rounded-md p-1">
         <img src={src} alt="" loading="lazy" decoding="async" className="max-h-full max-w-full object-contain" />
       </span>
     );
   }
   const initials = hit.name.replace(/[^A-Za-z0-9 ]/g, '').split(/\s+/).map((w) => w[0]).join('').slice(0, 3).toUpperCase();
   return (
-    <span className="grid h-8 w-11 flex-none place-items-center rounded-md border border-white/[.1] bg-white/[.05]
+    <span className="grid h-8 w-11 flex-none place-items-center rounded-md border border-line-2 bg-raise-2
                      font-display text-[11px] font-extrabold tracking-wide text-ink-3">
       {initials}
     </span>

@@ -149,7 +149,7 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
           type="button"
           onClick={details ? onCancel : () => setStage('details')}
           aria-label={details ? 'Back to plan options' : 'Back to your details'}
-          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/[.14] bg-white/[.04] px-3 py-2 text-[13px] font-semibold text-ink-2 transition-colors hover:border-white/[.3] hover:text-ink"
+          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-line-2 bg-raise-2 px-3 py-2 text-[13px] font-semibold text-ink-2 transition-colors hover:border-line-3 hover:text-ink"
         >
           <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
             <path d="M9.5 3.5 5 8l4.5 4.5" fill="none" stroke="currentColor" strokeWidth="2"
@@ -193,7 +193,7 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
             )}
           </div>
           {phoneErr ? (
-            <p id="order-phone-err" role="alert" className="mt-2 flex items-center gap-1.5 text-[12.5px] text-accent">
+            <p id="order-phone-err" role="alert" className="mt-2 flex items-center gap-1.5 text-[12.5px] text-accent-ink">
               <span aria-hidden="true">✕</span> {phoneErr}
             </p>
           ) : (
@@ -228,7 +228,7 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
                 )}
               </div>
               {emailErr && (
-                <p id="order-email-err" role="alert" className="mt-2 flex items-center gap-1.5 text-[12.5px] text-accent">
+                <p id="order-email-err" role="alert" className="mt-2 flex items-center gap-1.5 text-[12.5px] text-accent-ink">
                   <span aria-hidden="true">✕</span> {emailErr}
                 </p>
               )}
@@ -239,7 +239,7 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
               panel only ever shows the next thing to do. */}
           {emailShown && (
           <div className={emailOk ? 'field-unfold' : 'opacity-50'}>
-          <dl className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-white/[.08] bg-white/[.025] px-4 py-3.5">
+          <dl className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-line bg-raise px-4 py-3.5">
             <div>
               <dt className="sr-only">Selection</dt>
               <dd className="font-display text-[14px] font-bold text-ink">
@@ -263,7 +263,7 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
         </div>
       ) : (
         <div className="mt-5 flex flex-1 flex-col">
-          <dl className="space-y-2.5 rounded-xl border border-white/[.08] bg-white/[.025] p-4 text-[14px]">
+          <dl className="space-y-2.5 rounded-xl border border-line bg-raise p-4 text-[14px]">
             {[
               ['Plan', q.term.label],
               ['Devices', `${q.devices} ${q.devices === 1 ? 'device' : 'devices'}`],
@@ -275,7 +275,7 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
                 <dd className="min-w-0 truncate text-right text-ink-2">{v}</dd>
               </div>
             ))}
-            <div className="flex items-center justify-between gap-4 border-t border-white/[.09] pt-2.5">
+            <div className="flex items-center justify-between gap-4 border-t border-line pt-2.5">
               <dt className="font-semibold text-ink">Total</dt>
               <dd className="nums font-display text-[19px] font-extrabold text-ink">{money(q.totalCents)}</dd>
             </div>
@@ -300,7 +300,7 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
           </p>
 
           {IS_MOCK && (
-            <p className="mt-3 rounded-lg border border-white/[.1] bg-white/[.03] px-3 py-2 text-center text-[11.5px] text-ink-4">
+            <p className="mt-3 rounded-lg border border-line-2 bg-raise px-3 py-2 text-center text-[11.5px] text-ink-4">
               Development mode — no order endpoint configured, so nothing is sent.
             </p>
           )}
@@ -312,7 +312,7 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
 
 function StepDot({ n, label, state }: { n: number; label: string; state: 'done' | 'current' | 'todo' }) {
   const tone =
-    state === 'current' ? 'text-accent' : state === 'done' ? 'text-ink-3' : 'text-ink-5';
+    state === 'current' ? 'text-accent-ink' : state === 'done' ? 'text-ink-3' : 'text-ink-5';
   return (
     <li className={`flex items-center gap-1.5 ${tone}`} aria-current={state === 'current' ? 'step' : undefined}>
       <span
@@ -320,8 +320,8 @@ function StepDot({ n, label, state }: { n: number; label: string; state: 'done' 
           state === 'current'
             ? 'bg-accent text-white'
             : state === 'done'
-              ? 'bg-white/[.14] text-ink-2'
-              : 'border border-white/[.14] text-ink-5'
+              ? 'bg-raise-3 text-ink-2'
+              : 'border border-line-2 text-ink-5'
         }`}
         aria-hidden="true"
       >
@@ -332,4 +332,4 @@ function StepDot({ n, label, state }: { n: number; label: string; state: 'done' 
   );
 }
 
-const Rail = () => <li aria-hidden="true" className="h-px flex-1 bg-white/[.1]" />;
+const Rail = () => <li aria-hidden="true" className="h-px flex-1 bg-raise-3" />;
