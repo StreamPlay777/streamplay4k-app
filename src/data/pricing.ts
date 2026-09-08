@@ -124,5 +124,5 @@ export const TRUST_POINTS = [
 export const INVOICE_PAYMENT_METHODS = [
   // Card schemes first, then wallets. Names must match the keys in
   // components/PaymentMarks.tsx — an unknown name renders nothing.
-  'Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'Link', 'PayPal',
+  'Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'PayPal',
 ] as const;

@@ -40,15 +40,28 @@ const chip =
   'hover:shadow-[inset_0_1px_0_rgba(255,255,255,.16),0_6px_16px_-6px_rgba(0,0,0,.7)] ' +
   'motion-reduce:transform-none motion-reduce:transition-none';
 
-/** Fits inside the chip, keeps its own aspect ratio, never spills. */
-const art = 'block h-full w-full';
+/**
+ * Bare mark: no box at all, just the artwork at a fixed height.
+ *
+ * The chip is right where the marks are the point — the footer's "We accept"
+ * block. Beside a price it is six extra boxes competing with the one box that
+ * matters, the Order button. Stripped to the artwork the same six marks take
+ * roughly a third of the room and read as a quiet footnote, which is what an
+ * acceptance mark beside a plan should be.
+ *
+ * Height is fixed and width follows each viewBox, so proportions stay true and
+ * cap heights still line up (every viewBox is 40 units tall).
+ */
+const bare =
+  'inline-flex h-[17px] w-auto flex-none items-center opacity-[.72] sm:h-[19px] ' +
+  'transition-opacity duration-300 ease-out hover:opacity-100 motion-reduce:transition-none';
 
 const HELV = "Helvetica, Arial, 'Liberation Sans', sans-serif";
 
 function Visa({ className = '' }: MarkProps) {
   return (
-    <span className={`${chip} ${className}`} title="Visa">
-      <svg viewBox="0 0 88 40" className={art} preserveAspectRatio="xMidYMid meet"
+    <span className={className} title="Visa">
+      <svg viewBox="0 0 88 40" className="block h-full w-auto" preserveAspectRatio="xMidYMid meet"
            role="img" aria-label="Visa">
         {/* Visa navy (#1A1F71) is unreadable on near-black, so the scheme blue
             is lifted just enough to stay legible on a dark chip. */}
@@ -62,8 +75,8 @@ function Visa({ className = '' }: MarkProps) {
 
 function Mastercard({ className = '' }: MarkProps) {
   return (
-    <span className={`${chip} ${className}`} title="Mastercard">
-      <svg viewBox="0 0 62 40" className={art} preserveAspectRatio="xMidYMid meet"
+    <span className={className} title="Mastercard">
+      <svg viewBox="0 0 62 40" className="block h-full w-auto" preserveAspectRatio="xMidYMid meet"
            role="img" aria-label="Mastercard">
         <circle cx="21.5" cy="20" r="18.5" fill="#EB001B" />
         <circle cx="40.5" cy="20" r="18.5" fill="#F79E1B" />
@@ -75,8 +88,8 @@ function Mastercard({ className = '' }: MarkProps) {
 
 function Amex({ className = '' }: MarkProps) {
   return (
-    <span className={`${chip} ${className}`} title="American Express">
-      <svg viewBox="0 0 78 40" className={art} preserveAspectRatio="xMidYMid meet"
+    <span className={className} title="American Express">
+      <svg viewBox="0 0 78 40" className="block h-full w-auto" preserveAspectRatio="xMidYMid meet"
            role="img" aria-label="American Express">
         <rect x="1" y="1" width="76" height="38" rx="5" fill="#1F72CD" />
         <text x="39" y="18" textAnchor="middle" fontFamily={HELV} fontSize="11.5"
@@ -90,8 +103,8 @@ function Amex({ className = '' }: MarkProps) {
 
 function Discover({ className = '' }: MarkProps) {
   return (
-    <span className={`${chip} ${className}`} title="Discover">
-      <svg viewBox="0 0 122 40" className={art} preserveAspectRatio="xMidYMid meet"
+    <span className={className} title="Discover">
+      <svg viewBox="0 0 122 40" className="block h-full w-auto" preserveAspectRatio="xMidYMid meet"
            role="img" aria-label="Discover">
         <text x="0" y="29" fontFamily={HELV} fontSize="22" fontWeight="700"
               fill="#EEF1F6" letterSpacing="-0.4">DISC</text>
@@ -105,8 +118,8 @@ function Discover({ className = '' }: MarkProps) {
 
 function ApplePay({ className = '' }: MarkProps) {
   return (
-    <span className={`${chip} ${className}`} title="Apple Pay">
-      <svg viewBox="0 0 82 40" className={art} preserveAspectRatio="xMidYMid meet"
+    <span className={className} title="Apple Pay">
+      <svg viewBox="0 0 82 40" className="block h-full w-auto" preserveAspectRatio="xMidYMid meet"
            role="img" aria-label="Apple Pay">
         {/* Apple's dark-background asset is the white mark. */}
         <path
@@ -123,8 +136,8 @@ function ApplePay({ className = '' }: MarkProps) {
 
 function GooglePay({ className = '' }: MarkProps) {
   return (
-    <span className={`${chip} ${className}`} title="Google Pay">
-      <svg viewBox="0 0 88 40" className={art} preserveAspectRatio="xMidYMid meet"
+    <span className={className} title="Google Pay">
+      <svg viewBox="0 0 88 40" className="block h-full w-auto" preserveAspectRatio="xMidYMid meet"
            role="img" aria-label="Google Pay">
         {/* Four-colour G: arcs of one circle, plus the crossbar. */}
         <g fill="none" strokeWidth="6.3" strokeLinecap="butt">
@@ -143,8 +156,8 @@ function GooglePay({ className = '' }: MarkProps) {
 
 function PayPal({ className = '' }: MarkProps) {
   return (
-    <span className={`${chip} ${className}`} title="PayPal">
-      <svg viewBox="0 0 96 40" className={art} preserveAspectRatio="xMidYMid meet"
+    <span className={className} title="PayPal">
+      <svg viewBox="0 0 96 40" className="block h-full w-auto" preserveAspectRatio="xMidYMid meet"
            role="img" aria-label="PayPal">
         {/* PayPal's dark-background lockup keeps both blues, brightened. */}
         <text x="0" y="30" fontFamily={HELV} fontSize="26" fontWeight="700"
@@ -156,22 +169,9 @@ function PayPal({ className = '' }: MarkProps) {
   );
 }
 
-function LinkPay({ className = '' }: MarkProps) {
-  return (
-    <span className={`${chip} ${className}`} title="Link">
-      <svg viewBox="0 0 74 40" className={art} preserveAspectRatio="xMidYMid meet"
-           role="img" aria-label="Link">
-        <rect width="74" height="40" rx="9" fill="#00D66F" />
-        <text x="37" y="28" textAnchor="middle" fontFamily={HELV} fontSize="21"
-              fontWeight="700" fill="#011E0F">link</text>
-      </svg>
-    </span>
-  );
-}
-
 export const MARKS = {
   Visa, Mastercard, Amex, Discover, 'Apple Pay': ApplePay,
-  'Google Pay': GooglePay, PayPal, Link: LinkPay,
+  'Google Pay': GooglePay, PayPal,
 } as const;
 
 export type MarkName = keyof typeof MARKS;
@@ -187,6 +187,12 @@ const ALIGN = {
   end: 'justify-items-end min-[420px]:justify-end',
 } as const;
 
+const BARE_ALIGN = {
+  start: 'justify-start',
+  center: 'justify-center',
+  end: 'justify-end',
+} as const;
+
 /**
  * Row of acceptance marks. Names must match the MARKS keys.
  *
@@ -194,23 +200,30 @@ const ALIGN = {
  * card, left in a left-aligned column — so the marks never look adrift.
  */
 export default function PaymentMarks({
-  methods, align = 'start', className = '',
+  methods, align = 'start', variant = 'chip', className = '',
 }: {
   methods: readonly string[];
   align?: keyof typeof ALIGN;
+  /** 'chip' for a standalone block, 'bare' where the marks are a footnote. */
+  variant?: 'chip' | 'bare';
   className?: string;
 }) {
+  const chips = variant === 'chip';
   return (
     <ul
-      className={`grid grid-cols-3 gap-[6px] min-[420px]:flex min-[420px]:flex-wrap
-                  min-[420px]:items-center sm:gap-2 ${ALIGN[align]} ${className}`}
+      className={
+        chips
+          ? `grid grid-cols-3 gap-[6px] min-[420px]:flex min-[420px]:flex-wrap
+             min-[420px]:items-center sm:gap-2 ${ALIGN[align]} ${className}`
+          : `flex flex-wrap items-center gap-x-[15px] gap-y-2.5 sm:gap-x-[18px] ${BARE_ALIGN[align]} ${className}`
+      }
     >
       {methods.map((m) => {
         const Mark = MARKS[m as MarkName];
         if (!Mark) return null;
         return (
           <li key={m} className="flex">
-            <Mark />
+            <Mark className={chips ? chip : bare} />
           </li>
         );
       })}
