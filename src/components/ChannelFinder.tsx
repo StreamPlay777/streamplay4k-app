@@ -1,9 +1,11 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
-import { searchChannels, sampleSize, type ChannelHit } from '../data/channels';
+import { searchChannels, type ChannelHit } from '../data/channels';
+import { loadCatalogue, peekCatalogue, queryCatalogue, type Catalogue } from '../data/catalogue';
+import { channelStats } from '../data/channelStats';
 import { logoFor } from '../data/logos';
-import { routes, site } from '../data/site';
+import { routes } from '../data/site';
 import { track } from '../lib/analytics';
 
 /**
@@ -30,7 +32,38 @@ export default function ChannelFinder() {
   const navigate = useNavigate();
   const listId = useId();
 
-  const results = useMemo(() => searchChannels(query, 6), [query]);
+  /**
+   * The real catalogue, once it has arrived.
+   *
+   * Fetched on first focus rather than on mount: most homepage visitors never
+   * touch the search, and 310 KB spent on their behalf is 310 KB wasted. By the
+   * time anyone has typed two characters it has almost always landed.
+   *
+   * Until then the bundled sample answers, so the field is never dead and the
+   * first keystroke never waits on a network round trip. Results simply get
+   * better mid-typing rather than appearing late.
+   */
+  const [cat, setCat] = useState<Catalogue | null>(peekCatalogue);
+  const prefetch = () => {
+    if (peekCatalogue() || cat) return;
+    loadCatalogue().then(setCat).catch(() => { /* the sample still answers */ });
+  };
+
+  const results = useMemo<ChannelHit[]>(() => {
+    const q = query.trim();
+    if (q.length < 2) return [];
+    if (!cat) return searchChannels(q, 6);
+    // Adapted onto the same shape the rows already render, so the two sources
+    // are interchangeable and the markup below does not care which answered.
+    return queryCatalogue(cat, { text: q, limit: 6 }).channels.map((c) => ({
+      name: c.name,
+      category: c.category.split('|').pop()?.trim() || c.category,
+      country: c.regionName,
+      countryId: c.region,
+      flag: c.flag,
+    }));
+  }, [query, cat]);
+
   const open = query.trim().length >= 2;
 
   useEffect(() => setActive(0), [query]);
@@ -133,7 +166,8 @@ export default function ChannelFinder() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={onKeyDown}
+              onFocus={prefetch}
+            onKeyDown={onKeyDown}
               role="combobox"
               aria-expanded={open}
               aria-controls={listId}
@@ -189,8 +223,10 @@ export default function ChannelFinder() {
                   </ul>
                 ) : (
                   <p className="px-3 py-3 text-[14px] text-ink-4">
-                    No match in the browsable sample. The full {site.channels} line-up is much larger —{' '}
-                    <Link to={routes.contact} className="text-accent-link hover:underline">ask us</Link>{' '}
+                    {cat
+                      ? <>Nothing in the {channelStats.total.toLocaleString('en-US')}-channel line-up matches that. </>
+                      : <>No match in the quick list — the full line-up is still loading. </>}
+                    <Link to={routes.contact} className="text-accent-link hover:underline">Ask us</Link>{' '}
                     and we will check it for you.
                   </p>
                 )}
@@ -204,7 +240,8 @@ export default function ChannelFinder() {
 
           {!open && (
             <p className="mt-3 px-1 text-[12.5px] text-ink-5">
-              Browsing a sample of {sampleSize} channels. Start typing to search.
+              Search {channelStats.total.toLocaleString('en-US')} channels across{' '}
+              {channelStats.regions} countries and regions. Start typing.
             </p>
           )}
         </div>
