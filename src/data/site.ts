@@ -124,10 +124,14 @@ export interface NavLink {
 }
 
 /**
- * Desktop navigation (brief §15). Five links, then the VIEW PLANS CTA.
- * The logo is the Home link, so there is no separate "Home" item here.
+ * Desktop navigation. Six links, then the VIEW PLANS CTA.
+ *
+ * Home is listed explicitly as well as being the logo link: with six items the
+ * bar reads as a full navigation rather than a logo plus a few pages, and a
+ * visitor deep in the site should not have to know the logo is clickable.
  */
 export const navLinks: NavLink[] = [
+  { label: 'Home', to: routes.home },
   { label: 'Pricing', to: routes.pricing },
   { label: 'Channels', to: routes.channels },
   { label: 'Setup', to: routes.setup, dropdown: true },
@@ -150,12 +154,20 @@ export const mobileNavLinks: NavLink[] = [
 /**
  * Setup dropdown rows. `hash` selects the device section on /setup-guide/,
  * and matches the ids in data/setup.ts.
+ *
+ * `icon` names a lucide glyph, resolved in Navbar.tsx. It replaces the old
+ * two-letter codes (FT / AT / TV / AP / MB / PC), which needed decoding before
+ * they meant anything.
  */
-export const setupMenu = [
-  { code: 'FT', hash: 'firestick',  name: 'Firestick',       note: 'Amazon Fire TV — under 5 min' },
-  { code: 'AT', hash: 'android-tv', name: 'Android TV',      note: 'Google TV, Shield, Android boxes' },
-  { code: 'TV', hash: 'smart-tv',   name: 'Smart TV',        note: 'Samsung, LG and other smart TVs' },
-  { code: 'AP', hash: 'apple-tv',   name: 'Apple TV',        note: 'Apple TV 4K and HD' },
-  { code: 'MB', hash: 'mobile',     name: 'Phone & tablet',  note: 'iPhone, iPad and Android' },
-  { code: 'PC', hash: 'computer',   name: 'Computer',        note: 'Windows PC and Mac' },
-] as const;
+export type SetupIcon = 'cast' | 'monitor-play' | 'tv' | 'airplay' | 'smartphone' | 'laptop';
+
+export const setupMenu: {
+  hash: string; icon: SetupIcon; name: string; note: string;
+}[] = [
+  { hash: 'firestick',  icon: 'cast',         name: 'Firestick',      note: 'Amazon Fire TV — under 5 min' },
+  { hash: 'android-tv', icon: 'monitor-play', name: 'Android TV',     note: 'Google TV, Shield, Android boxes' },
+  { hash: 'smart-tv',   icon: 'tv',           name: 'Smart TV',       note: 'Samsung, LG and other smart TVs' },
+  { hash: 'apple-tv',   icon: 'airplay',      name: 'Apple TV',       note: 'Apple TV 4K and HD' },
+  { hash: 'mobile',     icon: 'smartphone',   name: 'Phone & tablet', note: 'iPhone, iPad and Android' },
+  { hash: 'computer',   icon: 'laptop',       name: 'Computer',       note: 'Windows PC and Mac' },
+];

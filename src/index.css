@@ -16,8 +16,12 @@
 @layer base {
   /* Height of the floating nav, so a full-bleed hero can sit underneath it.
      The pill wraps to a second row on narrow screens, hence the two values. */
-  :root { --nav-h: 124px; }
-  @media (min-width: 768px) { :root { --nav-h: 86px; } }
+  /* Height of the sticky nav block (wrapper padding + bar + border). The hero
+     pulls itself up by this much to sit full-bleed underneath it, so it must
+     track the bar's real height — see .nav-shell further down. */
+  :root { --nav-h: 122px; }
+  @media (min-width: 640px) { :root { --nav-h: 86px; } }
+  @media (min-width: 1024px) { :root { --nav-h: 90px; } }
 
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -340,4 +344,96 @@
 .prose-sp pre code { @apply bg-transparent p-0; }
 .prose-sp img { @apply rounded-xl border border-white/[.08]; }
 .prose-sp hr { @apply border-white/[.09]; margin-top: 2.4em; margin-bottom: 2.4em; }
+
+/* ── Resizable glass navbar ────────────────────────────────────────────────
+   All the interpolation lives here; Navbar.tsx only flips one boolean.
+
+   Only max-width and padding animate, never transform or width — a transform
+   would drag the Setup dropdown with it, and animating `width` on a grid
+   container forces layout on every frame. Padding changes the nav's own box
+   without moving anything around it, so the page never shifts.
+
+   Mobile keeps a fixed size on purpose: a header that resizes on every scroll
+   reads as jitter on a small screen, and the drawer needs a predictable box.
+   Below lg only the glass responds. */
+
+.nav-shell {
+  --nav-pad-x: 0.75rem;
+  --nav-pad-y: 0.625rem;
+
+  max-width: 100%;
+  padding: var(--nav-pad-y) var(--nav-pad-x);
+  transition:
+    max-width .34s cubic-bezier(.22, 1, .36, 1),
+    padding .34s cubic-bezier(.22, 1, .36, 1),
+    background-color .34s cubic-bezier(.22, 1, .36, 1),
+    border-color .34s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .34s cubic-bezier(.22, 1, .36, 1);
+}
+
+@media (min-width: 640px) {
+  .nav-shell { --nav-pad-x: 1rem; }
+}
+
+/* Tablet: a lighter version of the same move.
+   Percentages rather than pixel widths — a 940px cap does nothing on a 768px
+   screen, where the bar is already narrower than that. */
+@media (min-width: 768px) {
+  .nav-shell[data-scrolled='true'] { max-width: 94%; }
+}
+
+/* Desktop: the full resize.
+   min() so the inset still happens on a 1024px laptop, where a flat 1120px cap
+   would be wider than the available space and change nothing. */
+@media (min-width: 1024px) {
+  .nav-shell {
+    max-width: min(1260px, 100%);
+    --nav-pad-y: 0.6875rem;   /* 66px tall with the 42px control row */
+  }
+  .nav-shell[data-scrolled='true'] {
+    max-width: min(1120px, 94%);
+    --nav-pad-y: 0.4375rem;   /* 58px — 8px shorter */
+    --nav-pad-x: 0.875rem;
+  }
+}
+
+/* The top-edge highlight that makes the glass read as a raised surface rather
+   than a flat translucent panel. Strengthens with the rest when scrolled. */
+.nav-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .055), transparent 42%);
+  opacity: .75;
+  transition: opacity .34s cubic-bezier(.22, 1, .36, 1);
+}
+.nav-shell[data-scrolled='true']::before { opacity: 1; }
+
+/* Very faint warmth behind the CTA end of the bar. Sits under the content and
+   is far too dim to read as a glow around the navbar itself. */
+@media (min-width: 1024px) {
+  .nav-shell::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(ellipse 260px 90px at 88% 50%, rgba(255, 64, 28, .10), transparent 70%);
+    opacity: 0;
+    transition: opacity .34s cubic-bezier(.22, 1, .36, 1);
+  }
+  .nav-shell[data-scrolled='true']::after { opacity: 1; }
+}
+
+.nav-shell { position: relative; }
+.nav-shell > * { position: relative; }
+
+/* Logo: ~12% larger than before, and the only brand element in the bar now
+   that the separate "4K" chip is gone. Height is fixed per breakpoint so a
+   larger mark never drives the bar taller. */
+.nav-logo { height: 31px; }
+@media (min-width: 640px) { .nav-logo { height: 34px; } }
+@media (min-width: 1024px) { .nav-logo { height: 34px; } }
 
