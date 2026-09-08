@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Seo from '../components/Seo';
 import { pageSeo } from '../data/seo';
 import { Link } from 'react-router-dom';
 import { site, heroStats, routes } from '../data/site';
 import { track } from '../lib/analytics';
 import Reveal from '../components/Reveal';
+import { useAutoScroll } from '../hooks/useAutoScroll';
 import ChannelFinder from '../components/ChannelFinder';
 import { TERMS, quote, money, savingsPerMonth, DEFAULT_TERM_ID, INVOICE_PAYMENT_METHODS } from '../data/pricing';
 import EmailMock from '../components/EmailMock';
@@ -333,17 +334,10 @@ function DeviceCoverage() {
           Choose up to {MAX_DEVICES} devices with your plan.
         </p>
 
-        {/* Phones: one swipeable row, full-size tiles, no clipped logos. */}
-        <div className="mt-12 sm:hidden">
-          <div className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {platforms.map((pf) => (
-              <div key={pf.name} className="snap-start">
-                <PlatformTile platform={pf} />
-              </div>
-            ))}
-          </div>
-          <p className="mt-3 text-center text-[12px] text-ink-5">Swipe to see them all</p>
-        </div>
+        {/* Phones: one drifting row, full-size tiles, no clipped logos. It
+            moves on its own so the list reads as alive, and stops under a
+            finger so nothing slides away mid-tap. */}
+        <PlatformRail />
 
         {/* Tablet and up: two rows drifting in opposite directions. */}
         <div className="mt-14 hidden flex-col gap-3 sm:flex">
@@ -365,6 +359,34 @@ function DeviceCoverage() {
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * Phone rail of every platform. Same drift as the reviews rail: a real scroll
+ * container that nudges itself along between interactions, rendered twice so
+ * the wrap is invisible.
+ */
+function PlatformRail() {
+  const rail = useRef<HTMLDivElement>(null);
+  useAutoScroll(rail, { speed: 30 });
+  return (
+    <div className="mt-12 sm:hidden">
+      <div
+        ref={rail}
+        className="-mx-5 flex overflow-x-auto px-5 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        aria-label="Supported devices"
+      >
+        {[0, 1].map((pass) => (
+          <div key={pass} className="flex flex-none gap-3 pr-3" aria-hidden={pass === 1}>
+            {platforms.map((pf) => (
+              <PlatformTile key={pf.name} platform={pf} />
+            ))}
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-center text-[12px] text-ink-5">Swipe to hold and browse</p>
+    </div>
   );
 }
 

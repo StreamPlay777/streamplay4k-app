@@ -14,7 +14,10 @@
  *    height do not apply to non-replaced inline boxes, so an inline wrapper
  *    leaves the child <svg> with no resolvable height and it falls back to its
  *    intrinsic size (~300x150), which blows the whole row apart.
- * 2. Every viewBox is 40 units tall. Marks then scale by the same factor into
+ * 2. The chip steps down a size on the narrowest phones. Six marks beside a
+ *    form column at 390px would otherwise wrap with one mark stranded on a
+ *    line of its own, which reads as a broken row rather than a set.
+ * 3. Every viewBox is 40 units tall. Marks then scale by the same factor into
  *    the chip, so cap heights line up instead of each mark finding its own
  *    size. Width varies per mark, exactly as the real logos do.
  */
@@ -27,7 +30,8 @@ type MarkProps = { className?: string };
  * hover.
  */
 const chip =
-  'inline-flex h-[30px] w-[52px] sm:h-[32px] sm:w-[56px] flex-none items-center justify-center overflow-hidden ' +
+  'inline-flex h-[28px] w-[46px] min-[420px]:h-[30px] min-[420px]:w-[52px] sm:h-[32px] sm:w-[56px] '
+  'flex-none items-center justify-center overflow-hidden ' +
   'rounded-[9px] border border-white/[.09] bg-[linear-gradient(160deg,rgba(255,255,255,.075),rgba(255,255,255,.018))] ' +
   'px-[5px] py-[6px] backdrop-blur-[2px] ' +
   'shadow-[inset_0_1px_0_rgba(255,255,255,.10),0_2px_6px_-2px_rgba(0,0,0,.55)] ' +
@@ -172,10 +176,15 @@ export const MARKS = {
 
 export type MarkName = keyof typeof MARKS;
 
+/**
+ * Below 420px the row becomes a three-column grid, so six marks always land as
+ * a tidy 3 + 3. Left to wrap on their own they split 5 + 1 at 375px, and a
+ * lone stranded mark reads as a rendering fault rather than a set.
+ */
 const ALIGN = {
-  start: 'justify-start',
-  center: 'justify-center',
-  end: 'justify-end',
+  start: 'justify-items-start min-[420px]:justify-start',
+  center: 'justify-items-center min-[420px]:justify-center',
+  end: 'justify-items-end min-[420px]:justify-end',
 } as const;
 
 /**
@@ -192,7 +201,10 @@ export default function PaymentMarks({
   className?: string;
 }) {
   return (
-    <ul className={`flex flex-wrap items-center gap-[6px] sm:gap-2 ${ALIGN[align]} ${className}`}>
+    <ul
+      className={`grid grid-cols-3 gap-[6px] min-[420px]:flex min-[420px]:flex-wrap
+                  min-[420px]:items-center sm:gap-2 ${ALIGN[align]} ${className}`}
+    >
       {methods.map((m) => {
         const Mark = MARKS[m as MarkName];
         if (!Mark) return null;

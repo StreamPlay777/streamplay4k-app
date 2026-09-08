@@ -31,7 +31,15 @@ export default function PricingOrder() {
   const [termId, setTermId] = useState(DEFAULT_TERM_ID);
   const [devices, setDevices] = useState(DEFAULT_DEVICES);
   const [ordering, setOrdering] = useState(false);
+  /**
+   * Phones only. While the order form is open the configurator is folded away
+   * so the fields are reachable without scrolling past it; tapping the plan
+   * summary unfolds it again. The form itself stays mounted throughout, so a
+   * change of mind about the term or a device never costs a typed number.
+   */
+  const [editingPlan, setEditingPlan] = useState(false);
   const ctaRef = useRef<HTMLButtonElement>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
 
   /**
    * Flag the document while the order form is on screen, so the global
@@ -41,6 +49,25 @@ export default function PricingOrder() {
     if (!ordering) return;
     document.documentElement.dataset.orderOpen = 'true';
     return () => { delete document.documentElement.dataset.orderOpen; };
+  }, [ordering]);
+
+  /**
+   * Hold the surface at the height it has while the plans are showing.
+   *
+   * Opening the flow removes the Order button from the left column and swaps a
+   * long feature list for a short form, so the box would collapse by about
+   * 160px under the visitor's cursor at the exact moment they are reaching for
+   * a field. Measured, never guessed, and re-measured whenever the resting
+   * layout changes. Applied only from the large breakpoint up (see
+   * .config-shell in index.css) — on phones the configurator deliberately
+   * folds away and the box is meant to get shorter.
+   */
+  useEffect(() => {
+    const el = shellRef.current;
+    if (!el || ordering || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => el.style.setProperty('--shell-rest', `${el.offsetHeight}px`));
+    ro.observe(el);
+    return () => ro.disconnect();
   }, [ordering]);
 
   const q = useMemo(() => quote(termId, devices), [termId, devices]);
@@ -65,10 +92,23 @@ export default function PricingOrder() {
   /** Total for n devices on the current term — the engine, not a copy of it. */
   const totalFor = (n: number) => quote(termId, n).totalCents;
 
+  /**
+   * What a term saves against buying the same months in the shortest term,
+   * e.g. 12 months at $99.99 against four 3-month plans at $159.96. Straight
+   * arithmetic on the published prices — no invented "was" price, no monthly
+   * subscription we do not sell.
+   */
+  const shortest = useMemo(() => TERMS.reduce((a, t) => (t.months < a.months ? t : a), TERMS[0]), []);
+  const savingVsShortest = useMemo(() => Object.fromEntries(TERMS.map((t) => {
+    const same = Math.round(t.months / shortest.months) * shortest.baseCents;
+    return [t.id, t.months > shortest.months ? same - t.baseCents : 0];
+  })), [shortest]);
+
   const pickTerm = (id: string) => { setTermId(id); track('select_plan', { term: id, devices }); };
   const pickDevices = (n: number) => { setDevices(n); track('select_devices', { term: termId, devices: n }); };
   const beginOrder = () => {
     setOrdering(true);
+    setEditingPlan(false);
     track('begin_order', { term: termId, devices, total: q.totalCents / 100 });
   };
 
@@ -76,6 +116,7 @@ export default function PricingOrder() {
   const beginFromBar = () => {
     document.getElementById('pricing')?.scrollIntoView({ block: 'start' });
     setOrdering(true);
+    setEditingPlan(false);
     track('begin_order', { term: termId, devices, total: q.totalCents / 100, from: 'sticky-bar' });
   };
 
@@ -99,27 +140,40 @@ export default function PricingOrder() {
         </div>
 
         {/* ── One surface, two columns ─────────────────────────────────── */}
-        <div className="config-shell mt-11 grid overflow-hidden rounded-2xl lg:grid-cols-[1.34fr_1fr]">
+        <div
+          ref={shellRef}
+          data-ordering={ordering || undefined}
+          className="config-shell mt-11 grid overflow-hidden rounded-2xl lg:grid-cols-[1.34fr_1fr]"
+        >
           {/* ── Left: configurator. Never moves. ───────────────────────── */}
           <div className="p-5 sm:p-7 lg:p-8">
             {/* Compact summary, mobile only, once the order flow is open —
                 so the form is reachable without scrolling past the whole
                 configurator. */}
             {ordering && (
-              <div className="mb-6 flex items-center justify-between gap-4 rounded-xl border border-white/[.09] bg-white/[.03] px-4 py-3.5 lg:hidden">
-                <div className="min-w-0">
-                  <p className="font-display text-[14.5px] font-bold text-ink">
+              <button
+                type="button"
+                onClick={() => setEditingPlan((v) => !v)}
+                aria-expanded={editingPlan}
+                aria-controls="plan-editor"
+                className="mb-6 flex w-full items-center justify-between gap-4 rounded-xl border border-white/[.09] bg-white/[.03] px-4 py-3.5 text-left transition-colors hover:border-white/[.2] lg:hidden"
+              >
+                <span className="min-w-0">
+                  <span className="block font-display text-[14.5px] font-bold text-ink">
                     {q.term.label} · {q.devices} {q.devices === 1 ? 'device' : 'devices'}
-                  </p>
-                  <p className="mt-0.5 text-[12.5px] text-ink-4">≈ {money(q.perMonthCents)}/mo</p>
-                </div>
-                <p className="nums flex-none font-display text-[20px] font-extrabold text-ink">
+                  </span>
+                  <span className="mt-0.5 flex items-center gap-1.5 text-[12.5px] text-accent">
+                    <Chevron open={editingPlan} />
+                    {editingPlan ? 'Hide plan options' : 'Change plan or devices'}
+                  </span>
+                </span>
+                <span className="nums flex-none font-display text-[20px] font-extrabold text-ink">
                   {money(q.totalCents)}
-                </p>
-              </div>
+                </span>
+              </button>
             )}
 
-            <div className={ordering ? 'max-lg:hidden' : ''}>
+            <div id="plan-editor" className={ordering && !editingPlan ? 'max-lg:hidden' : ''}>
               {/* Term */}
               <fieldset>
                 <legend className="text-[11px] font-bold uppercase tracking-[.16em] text-ink-4">
@@ -138,7 +192,11 @@ export default function PricingOrder() {
                         // Explicit, so the name reads "12 Months, $99.99, best
                         // value" rather than leading with the badge, which sits
                         // first in the DOM because it is positioned.
-                        aria-label={`${t.label}, ${money(t.baseCents)}, ${money(termMonthly[t.id])} per month${best ? ', best value' : ''}`}
+                        aria-label={`${t.label}, ${money(t.baseCents)}, ${money(termMonthly[t.id])} per month${
+                          savingVsShortest[t.id] > 0
+                            ? `, saves ${money(savingVsShortest[t.id])} against ${shortest.label.toLowerCase()}`
+                            : ''
+                        }${best ? ', best value' : ''}`}
                         className={`term-tile relative rounded-xl border p-4 pt-5 text-left ${
                           on ? 'term-tile-on border-accent' : 'border-white/[.1] bg-white/[.02] hover:border-white/[.28]'
                         }`}
@@ -165,6 +223,11 @@ export default function PricingOrder() {
                         <span className="nums mt-1.5 block text-[12px] text-ink-4">
                           {money(termMonthly[t.id])}/mo
                         </span>
+                        {savingVsShortest[t.id] > 0 && (
+                          <span className="nums mt-2.5 inline-block rounded-md bg-success/[.13] px-1.5 py-[3px] text-[10.5px] font-bold text-success">
+                            Save {money(savingVsShortest[t.id])}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -186,7 +249,9 @@ export default function PricingOrder() {
                         type="button"
                         onClick={() => pickDevices(n)}
                         aria-pressed={on}
-                        aria-label={`${n} ${n === 1 ? 'device' : 'devices'}, ${money(totalFor(n))}`}
+                        aria-label={`${n} ${n === 1 ? 'device' : 'devices'}, ${
+                          n === 1 ? 'included' : `adds ${money(totalFor(n) - totalFor(1))}`
+                        }`}
                         className={`device-tile min-h-[62px] rounded-xl border px-2 py-2.5 ${
                           on
                             ? 'device-tile-on border-accent'
@@ -195,7 +260,7 @@ export default function PricingOrder() {
                       >
                         <span className="block font-display text-[17px] font-extrabold leading-none">{n}</span>
                         <span className={`nums mt-1.5 block text-[11px] ${on ? 'text-white/85' : 'text-ink-4'}`}>
-                          {n === 1 ? 'Included' : money(totalFor(n))}
+                          {n === 1 ? 'Included' : `+${money(totalFor(n) - totalFor(1))}`}
                         </span>
                       </button>
                     );
@@ -208,7 +273,9 @@ export default function PricingOrder() {
             </div>
 
             {/* Price + CTA */}
-            <div className={`border-t border-white/[.09] pt-6 ${ordering ? 'mt-0 max-lg:hidden' : 'mt-7'}`}>
+            <div className={`border-t border-white/[.09] pt-6 ${
+              ordering ? `mt-0 ${editingPlan ? 'max-lg:mt-7' : 'max-lg:hidden'}` : 'mt-7'
+            }`}>
               <p className="sr-only" aria-live="polite" aria-atomic="true">
                 Total {money(q.totalCents)} for {q.term.label}, {q.devices}{' '}
                 {q.devices === 1 ? 'device' : 'devices'}
@@ -252,27 +319,15 @@ export default function PricingOrder() {
               )}
             </div>
 
-            {/* Trust + invoice payment options */}
-            <div className={`border-t border-white/[.09] pt-5 ${ordering ? 'mt-6 max-lg:hidden' : 'mt-6'}`}>
-              <ul className="grid gap-2 sm:grid-cols-2">
-                {TRUST_POINTS.map((t) => (
-                  <li key={t} className="flex items-start gap-2.5 text-[13px] text-ink-3">
-                    <span className="mt-[3px] flex-none text-accent"><Check /></span>
-                    {t}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-5 text-[11px] font-bold uppercase tracking-[.14em] text-ink-5">
-                Payment methods available on your invoice
-              </p>
-              <PaymentMarks methods={INVOICE_PAYMENT_METHODS} className="mt-3" />
-            </div>
           </div>
 
           {/* ── Right: features, or the order flow. Hairline divider. ─── */}
           <div className="config-panel p-5 sm:p-7 lg:p-8">
             {ordering ? (
-              <OrderFlow q={q} onCancel={() => setOrdering(false)} />
+              <div className="flex h-full flex-col">
+                <OrderFlow q={q} onCancel={() => setOrdering(false)} />
+                <Assurances className="mt-auto pt-7" />
+              </div>
             ) : (
               // h-full + mt-auto on the closing note: the left column is the
               // taller of the two, so without this the feature list ended
@@ -305,9 +360,11 @@ export default function PricingOrder() {
                 {/* mt-auto rather than a fixed gap: the left column is the
                     taller of the two, so this settles at the bottom of the
                     panel instead of leaving a void beneath it. */}
-                <p className="mt-auto border-t border-white/[.07] pt-5 text-[12.5px] leading-relaxed text-ink-4">
-                  Everything above is included whichever term you choose. The term changes the price,
-                  never the line-up.
+                <Assurances className="mt-auto pt-7" />
+
+                <p className="mt-5 text-[12.5px] leading-relaxed text-ink-4">
+                  Every feature listed here is included whichever term you choose. The term changes
+                  the price, never the line-up.
                 </p>
               </div>
             )}
@@ -317,5 +374,68 @@ export default function PricingOrder() {
 
       <OrderBar q={q} ctaRef={ctaRef} onOrder={beginFromBar} hidden={ordering} />
     </section>
+  );
+}
+
+/**
+ * What you get and what you can pay with — the reassurance that used to sit
+ * under the configurator.
+ *
+ * It belongs beside the decision, not beneath the controls. On the left it
+ * competed with the price for attention and pushed the Order button down the
+ * page; on the right it reads as the fine print of whatever the panel is
+ * showing, which is what it is. Identical in both panel states, so the
+ * guarantees do not vanish at the moment someone is deciding to type their
+ * number in.
+ */
+function Assurances({ className = '' }: { className?: string }) {
+  return (
+    <div className={`border-t border-white/[.07] ${className}`}>
+      {/* Line icons rather than the accent tick used by the feature list. The
+          two sit next to each other now, and identical ticks would read as one
+          twelve-row list instead of features and then guarantees. */}
+      <ul className="grid gap-[9px]">
+        {TRUST_POINTS.map((t, i) => (
+          <li key={t} className="flex items-center gap-2.5 text-[12.5px] text-ink-3">
+            <span className="flex-none text-success/85">{ASSURANCE_ICONS[i % ASSURANCE_ICONS.length]}</span>
+            {t}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-5 text-[11px] font-bold uppercase tracking-[.14em] text-ink-5">
+        Payment methods available on your invoice
+      </p>
+      <PaymentMarks methods={INVOICE_PAYMENT_METHODS} className="mt-3" />
+    </div>
+  );
+}
+
+/**
+ * One glyph per guarantee: how fast it starts, the refund window, the support
+ * promise. Drawn here rather than pulled from an icon set — three shapes at
+ * one weight, no dependency.
+ */
+const ico = { width: 15, height: 15, viewBox: '0 0 20 20', fill: 'none', stroke: 'currentColor',
+              strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
+
+const ASSURANCE_ICONS = [
+  // Clock — activation time
+  <svg key="clock" {...ico} aria-hidden="true"><circle cx="10" cy="10" r="7.4" /><path d="M10 5.9V10l2.8 1.9" /></svg>,
+  // Shield — money-back guarantee
+  <svg key="shield" {...ico} aria-hidden="true"><path d="M10 2.6 4.4 4.9v4.4c0 3.4 2.3 6.5 5.6 7.9 3.3-1.4 5.6-4.5 5.6-7.9V4.9Z" /><path d="M7.7 9.9 9.4 11.6l3-3.2" /></svg>,
+  // Speech bubble — 24/7 support
+  <svg key="chat" {...ico} aria-hidden="true"><path d="M16.6 9.6c0 3.1-2.9 5.6-6.6 5.6a8 8 0 0 1-2-.2l-3.6 1.5.9-3A5.2 5.2 0 0 1 3.4 9.6C3.4 6.5 6.3 4 10 4s6.6 2.5 6.6 5.6Z" /></svg>,
+];
+
+/** Small disclosure caret for the phone-only plan summary. */
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"
+      className={`transition-transform duration-200 motion-reduce:transition-none ${open ? 'rotate-180' : ''}`}
+    >
+      <path d="M3.5 6 8 10.5 12.5 6" fill="none" stroke="currentColor" strokeWidth="2"
+            strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }

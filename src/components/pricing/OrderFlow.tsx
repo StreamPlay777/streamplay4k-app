@@ -142,12 +142,20 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
         >
           {details ? 'Where should we send your order details?' : 'Review your order'}
         </h3>
+        {/* One word, one direction. "Cancel" read as "throw this away" and
+            sat there as quiet grey text; this is a visible control that says
+            where it goes — out to the plan, or back to the details. */}
         <button
           type="button"
           onClick={details ? onCancel : () => setStage('details')}
-          className="-mr-2 shrink-0 rounded-lg px-3 py-2 text-[13px] text-ink-4 underline-offset-2 transition-colors hover:text-ink hover:underline"
+          aria-label={details ? 'Back to plan options' : 'Back to your details'}
+          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/[.14] bg-white/[.04] px-3 py-2 text-[13px] font-semibold text-ink-2 transition-colors hover:border-white/[.3] hover:text-ink"
         >
-          {details ? 'Cancel' : 'Back'}
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+            <path d="M9.5 3.5 5 8l4.5 4.5" fill="none" stroke="currentColor" strokeWidth="2"
+                  strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Back
         </button>
       </div>
 

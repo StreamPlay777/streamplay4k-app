@@ -1,13 +1,15 @@
+import { useRef } from 'react';
 import { featuredReviews, REVIEW_BADGE, type FeaturedReview } from '../data/reviews';
+import { useAutoScroll } from '../hooks/useAutoScroll';
 import Stars from './Stars';
 
 /**
  * The three real featured reviews.
  *
  * Desktop: raised white cards, the outer two tilted, centre straight.
- * Mobile: a scroll-snap carousel — three tilted desktop cards squeezed onto a
- * phone is unreadable, and a carousel scrolls inside itself without ever
- * pushing the page sideways.
+ * Mobile: a rail that drifts by itself and holds still under a finger —
+ * three tilted desktop cards squeezed onto a phone is unreadable, and a rail
+ * scrolls inside itself without ever pushing the page sideways.
  *
  * Badge reads "On Trustpilot", not "Verified": Trustpilot lists these as
  * unprompted reviews, which is a different claim, and we have no verification
@@ -24,7 +26,7 @@ function initials(name: string): string {
 function Card({ r, i }: { r: FeaturedReview; i: number }) {
   return (
     <article
-      className={`w-[86vw] max-w-[340px] flex-none snap-center rounded-2xl bg-white p-5
+      className={`w-[86vw] max-w-[340px] flex-none rounded-2xl bg-white p-5
                   text-[#14161C] shadow-[0_28px_70px_rgba(0,0,0,.6)] sm:w-[340px] sm:p-6
                   lg:w-auto lg:flex-1 ${TILT[i]} ${LIFT[i]}`}
     >
@@ -64,21 +66,32 @@ function Card({ r, i }: { r: FeaturedReview; i: number }) {
 }
 
 export default function TrustCards() {
+  const rail = useRef<HTMLDivElement>(null);
+  useAutoScroll(rail, { speed: 22 });
+
   return (
     <>
-      {/* Phone / tablet: swipeable, scrolls inside itself */}
-      <ul
-        className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 lg:hidden"
+      {/* Phone / tablet: drifts on its own, stops the moment a finger lands
+          on it. Rendered twice so the drift wraps without a visible jump —
+          the second pass is hidden from assistive tech. */}
+      <div
+        ref={rail}
+        className="-mx-5 flex overflow-x-auto px-5 pb-4 lg:hidden"
         style={{ scrollbarWidth: 'none' }}
+        aria-label="Customer reviews"
       >
-        {featuredReviews.map((r, i) => (
-          <li key={r.name} className="flex">
-            <Card r={r} i={i} />
-          </li>
+        {[0, 1].map((pass) => (
+          <ul key={pass} className="flex flex-none gap-4 pr-4" aria-hidden={pass === 1}>
+            {featuredReviews.map((r, i) => (
+              <li key={r.name} className="flex">
+                <Card r={r} i={i} />
+              </li>
+            ))}
+          </ul>
         ))}
-      </ul>
+      </div>
       <p className="mt-1 text-center text-[12px] text-ink-5 lg:hidden" aria-hidden="true">
-        Swipe for more →
+        Swipe to hold and read →
       </p>
 
       {/* Desktop: three raised cards */}

@@ -531,6 +531,14 @@
 
 /* The right column reads a touch deeper, which separates the two halves
    without a heavy rule between them. */
+/* While the order flow is open the surface keeps the height it had with the
+   plans on screen, so the box never collapses under the visitor mid-decision.
+   The value is measured by PricingOrder; phones are excluded on purpose —
+   there the configurator folds away and a shorter box is the point. */
+@media (min-width: 1024px) {
+  .config-shell[data-ordering] { min-height: var(--shell-rest, auto); }
+}
+
 .config-panel { background: rgba(255, 255, 255, .022); }
 
 @media (min-width: 1024px) {
