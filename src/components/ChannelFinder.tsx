@@ -84,7 +84,7 @@ export default function ChannelFinder() {
         <div>
           <p className="flex items-center gap-3 font-display text-[11.5px] font-extrabold uppercase tracking-[.18em] sm:text-[12px]">
             <span className="h-px w-7 flex-none bg-accent" aria-hidden="true" />
-            <span className="text-grad">Channels for every interest</span>
+            <span className="eyebrow">Channels for every interest</span>
           </p>
 
           <h2

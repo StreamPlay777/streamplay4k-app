@@ -147,8 +147,14 @@
   --accent-soft: #B91C0C;
   --accent-link: #B91C0C;
 
-  --grad-from: #CE2114;
-  --grad-to: #C2410C;
+  /* The display gradient keeps the dark theme's red exactly — #FF2B20 is
+     3.46:1 on the section grounds, clear of the 3:1 floor that large text
+     answers to. Only the orange end moves, from #FF7A18 (2.42:1, unreadable)
+     to a deeper but MORE saturated orange, so the sweep still reads as red
+     into orange rather than as one flat dark red. Small type cannot use this
+     — see the eyebrow rule further down. */
+  --grad-from: #FF2B20;
+  --grad-to: #E06508;
 
   --success: #12864A;
 
@@ -691,6 +697,20 @@
 @media (prefers-reduced-motion: reduce) {
   .finder-results { animation: none; }
   .finder-card::after { display: none; }
+}
+
+/* Eyebrows and small gradient labels, light theme only.
+   A gradient needs room to travel; across 11px of uppercase it is invisible
+   anyway, and at that size the type answers to 4.5:1 rather than the 3:1 the
+   display gradient is built for. So small labels drop to one solid, readable
+   red on light. Dark keeps the gradient, where it has the contrast to spare. */
+:root[data-theme='light'] .eyebrow,
+:root[data-theme='light'] .label-accent {
+  background-image: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: var(--accent-ink);
+  -webkit-text-fill-color: currentColor;
 }
 
 /* Wordmark: the pale mark on the dark theme, the ink one on light. Same
