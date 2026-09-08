@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { money, type Quote } from '../../data/pricing';
 import { track } from '../../lib/analytics';
 import { buildPayload, submitOrder, stashOrder, IS_MOCK } from '../../lib/orderService';
-import { isValidPhone, phoneError, emailError } from './validation';
+import { isValidPhone, isValidEmail, phoneError, emailError } from './validation';
 import Check from './Check';
 
 /**
@@ -15,15 +15,20 @@ import Check from './Check';
  * rather than restarting the count — the old "Step 1 of 2" made the plan
  * selection look like it had not happened.
  *
- * Phone and email are now collected together. They were split across two
- * internal steps with a timer that revealed the email field once the number
- * looked complete; there is no reason to hide a second field behind a delay,
- * and it meant the customer could not see what they were being asked for.
+ * PROGRESSIVE REVEAL. The details step asks one thing at a time: the phone
+ * field first; once the number is valid it earns a check and the email field
+ * unfolds beneath it; once the email is valid it earns a check and the summary
+ * and Continue appear. One decision per moment, nothing asked for before it is
+ * needed.
+ *
+ * Focus moves forward on its own, but only once typing has paused. A number
+ * can be valid at 7 digits and still be half-typed (+33 6 75 …), so stealing
+ * focus the instant validation passes would cut people off mid-number. The
+ * hand-off waits 700ms of quiet; Enter moves immediately.
  *
  * UNCHANGED: validation rules, the submitOrder/buildPayload call, the stashed
- * order shape, the /thank-you redirect, and every analytics event — including
- * phone_validated, which now fires on the Continue transition instead of the
- * timer, so it still fires exactly once per order.
+ * order shape, the /thank-you redirect, and every analytics event.
+ * phone_validated fires once, when the email field is first revealed.
  */
 export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => void }) {
   const navigate = useNavigate();
@@ -37,10 +42,43 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
   const [failure, setFailure] = useState<string | null>(null);
 
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const handoff = useRef<number>();
+  const validatedOnce = useRef(false);
 
-  // Move focus to the panel heading when it opens or changes stage, rather than
-  // yanking straight into a field.
-  useEffect(() => { headingRef.current?.focus(); }, [stage]);
+  const phoneOk = isValidPhone(phone) && !phoneErr;
+  const emailOk = isValidEmail(email) && !emailErr;
+  /** Email unfolds once the phone is valid and stays open after that. */
+  const [emailShown, setEmailShown] = useState(false);
+
+  // On open, land on the phone field: it is the only thing on screen to do.
+  // On the confirm stage, land on the heading so the review is read first.
+  useEffect(() => {
+    if (stage === 'details') phoneRef.current?.focus();
+    else headingRef.current?.focus();
+  }, [stage]);
+
+  // Reveal the email field once the number is valid, and fire phone_validated
+  // exactly once per order — the same moment the old two-step version did.
+  useEffect(() => {
+    if (!phoneOk || emailShown) return;
+    setEmailShown(true);
+    if (!validatedOnce.current) {
+      validatedOnce.current = true;
+      track('phone_validated', { term: q.term.id, devices: q.devices });
+    }
+  }, [phoneOk, emailShown, q.term.id, q.devices]);
+
+  // Hand focus to the email field after typing pauses, if the phone is done
+  // and the email is still empty. Never while someone is mid-keystroke.
+  useEffect(() => {
+    window.clearTimeout(handoff.current);
+    if (!phoneOk || !emailShown || email) return;
+    if (document.activeElement !== phoneRef.current) return;
+    handoff.current = window.setTimeout(() => emailRef.current?.focus(), 700);
+    return () => window.clearTimeout(handoff.current);
+  }, [phone, phoneOk, emailShown, email]);
 
   const goConfirm = () => {
     const pErr = phoneError(phone);
@@ -48,7 +86,6 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
     setPhoneErr(pErr);
     setEmailErr(eErr);
     if (pErr || eErr) return;
-    track('phone_validated', { term: q.term.id, devices: q.devices });
     setStage('confirm');
   };
 
@@ -121,6 +158,7 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
           </label>
           <div className="relative mt-2">
             <input
+              ref={phoneRef}
               id="order-phone"
               name="phone"
               type="tel"
@@ -128,13 +166,20 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
               autoComplete="tel"
               value={phone}
               onChange={(e) => { setPhone(e.target.value); setPhoneErr(null); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (phoneOk) emailRef.current?.focus();
+                  else setPhoneErr(phoneError(phone));
+                }
+              }}
               aria-invalid={!!phoneErr}
               aria-describedby={phoneErr ? 'order-phone-err' : 'order-phone-hint'}
               placeholder="+1 555 000 0000"
               className={`field min-h-[48px] pr-10 ${phoneErr ? '!border-accent' : ''}`}
             />
-            {isValidPhone(phone) && !phoneErr && (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-success" aria-hidden="true">
+            {phoneOk && (
+              <span className="field-check absolute right-3 top-1/2 -translate-y-1/2 text-success" aria-hidden="true">
                 <Check />
               </span>
             )}
@@ -149,27 +194,43 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
             </p>
           )}
 
-          <label htmlFor="order-email" className="mt-5 block text-[13px] font-semibold text-ink-2">
-            Email address
-          </label>
-          <input
-            id="order-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => { setEmail(e.target.value); setEmailErr(null); }}
-            aria-invalid={!!emailErr}
-            aria-describedby={emailErr ? 'order-email-err' : undefined}
-            placeholder="you@email.com"
-            className={`field mt-2 min-h-[48px] ${emailErr ? '!border-accent' : ''}`}
-          />
-          {emailErr && (
-            <p id="order-email-err" role="alert" className="mt-2 flex items-center gap-1.5 text-[12.5px] text-accent">
-              <span aria-hidden="true">✕</span> {emailErr}
-            </p>
+          {emailShown && (
+            <div className="field-unfold">
+              <label htmlFor="order-email" className="mt-5 block text-[13px] font-semibold text-ink-2">
+                Email address
+              </label>
+              <div className="relative mt-2">
+                <input
+                  ref={emailRef}
+                  id="order-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setEmailErr(null); }}
+                  aria-invalid={!!emailErr}
+                  aria-describedby={emailErr ? 'order-email-err' : undefined}
+                  placeholder="you@email.com"
+                  className={`field min-h-[48px] pr-10 ${emailErr ? '!border-accent' : ''}`}
+                />
+                {emailOk && (
+                  <span className="field-check absolute right-3 top-1/2 -translate-y-1/2 text-success" aria-hidden="true">
+                    <Check />
+                  </span>
+                )}
+              </div>
+              {emailErr && (
+                <p id="order-email-err" role="alert" className="mt-2 flex items-center gap-1.5 text-[12.5px] text-accent">
+                  <span aria-hidden="true">✕</span> {emailErr}
+                </p>
+              )}
+            </div>
           )}
 
+          {/* Summary and Continue appear once both fields are done, so the
+              panel only ever shows the next thing to do. */}
+          {emailShown && (
+          <div className={emailOk ? 'field-unfold' : 'opacity-50'}>
           <dl className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-white/[.08] bg-white/[.025] px-4 py-3.5">
             <div>
               <dt className="sr-only">Selection</dt>
@@ -189,6 +250,8 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
               →
             </span>
           </button>
+          </div>
+          )}
         </div>
       ) : (
         <div className="mt-5 flex flex-1 flex-col">

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   TERMS, MAX_DEVICES, DEFAULT_TERM_ID, DEFAULT_DEVICES,
   quote, money,
@@ -6,6 +6,7 @@ import {
 } from '../../data/pricing';
 import { track } from '../../lib/analytics';
 import OrderFlow from './OrderFlow';
+import OrderBar from './OrderBar';
 import Check from './Check';
 import PaymentMarks from '../PaymentMarks';
 
@@ -30,6 +31,7 @@ export default function PricingOrder() {
   const [termId, setTermId] = useState(DEFAULT_TERM_ID);
   const [devices, setDevices] = useState(DEFAULT_DEVICES);
   const [ordering, setOrdering] = useState(false);
+  const ctaRef = useRef<HTMLButtonElement>(null);
 
   /**
    * Flag the document while the order form is on screen, so the global
@@ -68,6 +70,13 @@ export default function PricingOrder() {
   const beginOrder = () => {
     setOrdering(true);
     track('begin_order', { term: termId, devices, total: q.totalCents / 100 });
+  };
+
+  /** From the sticky bar: bring the section back into view, then open the flow. */
+  const beginFromBar = () => {
+    document.getElementById('pricing')?.scrollIntoView({ block: 'start' });
+    setOrdering(true);
+    track('begin_order', { term: termId, devices, total: q.totalCents / 100, from: 'sticky-bar' });
   };
 
   return (
@@ -234,7 +243,7 @@ export default function PricingOrder() {
               )}
 
               {!ordering && (
-                <button type="button" onClick={beginOrder} className="btn-accent group mt-6 w-full">
+                <button ref={ctaRef} type="button" onClick={beginOrder} className="btn-accent group mt-6 w-full">
                   Order now
                   <span className="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden="true">
                     →
@@ -305,6 +314,8 @@ export default function PricingOrder() {
           </div>
         </div>
       </div>
+
+      <OrderBar q={q} ctaRef={ctaRef} onOrder={beginFromBar} hidden={ordering} />
     </section>
   );
 }
