@@ -64,6 +64,37 @@ export const site = {
     'StreamPlay4K is a reseller of IPTV subscription services. All content is supplied by third-party providers; users are responsible for compliance with applicable law.',
 } as const;
 
+/* ── Support presence ──────────────────────────────────────────────────────
+ *
+ * Drives the live dot on the WhatsApp pill. It exists so that "Support is
+ * online" is a fact the site can check rather than a decoration.
+ *
+ * Support is genuinely staffed around the clock, so today the answer is always
+ * yes. If that ever stops being true, set `alwaysOn` to false and fill in
+ * `hours` — the indicator then follows the clock and says "Leave a message"
+ * outside them, with no other change needed. Do not leave `alwaysOn` true for
+ * a service that has closed: an indicator that is wrong once is worse than no
+ * indicator at all, because it is the one thing on the page claiming to be
+ * live information.
+ */
+export const support = {
+  alwaysOn: true,
+  /** How the coverage is described in copy. */
+  label: '24/7',
+  /** Only consulted when alwaysOn is false. Whole hours, UTC, [open, close). */
+  hours: null as null | { openUtc: number; closeUtc: number },
+} as const;
+
+/** Whether support is available right now. */
+export function supportOnline(now: Date = new Date()): boolean {
+  if (support.alwaysOn) return true;
+  if (!support.hours) return false;
+  const h = now.getUTCHours();
+  const { openUtc, closeUtc } = support.hours;
+  // A window that wraps past midnight, e.g. 22:00 to 06:00.
+  return openUtc <= closeUtc ? h >= openUtc && h < closeUtc : h >= openUtc || h < closeUtc;
+}
+
 /* ── Free trial ────────────────────────────────────────────────────────────
  *
  * The trial is arranged by hand over WhatsApp — there is no self-serve trial

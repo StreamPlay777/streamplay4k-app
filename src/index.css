@@ -713,6 +713,21 @@
   -webkit-text-fill-color: currentColor;
 }
 
+/* Presence dot on the WhatsApp pill. A ring in the pill's own colour keeps it
+   legible on both themes, and the pulse is slow enough to read as "staffed"
+   rather than as an alert demanding attention. */
+.wa-dot {
+  box-shadow: 0 0 0 2px var(--glass-tint);
+  animation: wa-pulse 2.4s ease-in-out infinite;
+}
+@keyframes wa-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .55; transform: scale(.82); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wa-dot { animation: none; }
+}
+
 /* Seasonal offer bar. Solid brand fill in both themes: it sits above the
    navbar's glass and has to read as a separate strip, not as more chrome. */
 .campaign-bar {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { site } from '../data/site';
+import { site, support, supportOnline } from '../data/site';
 import { track } from '../lib/analytics';
 
 /**
@@ -27,6 +27,25 @@ export default function WhatsAppButton() {
   const { pathname } = useLocation();
   const [orderOpen, setOrderOpen] = useState(false);
 
+  /**
+   * Whether support is available right now, from data/site.ts.
+   *
+   * Held in state and set after mount rather than read during render: the
+   * pages are pre-rendered, so a value that depends on the clock would be
+   * frozen at build time in the static HTML and disagree with the client on
+   * hydration. Support is 24/7 today, so this is always true — but it is wired
+   * to the real check so the day the hours change, the dot follows.
+   */
+  const [online, setOnline] = useState<boolean>(support.alwaysOn);
+  useEffect(() => {
+    const read = () => setOnline(supportOnline());
+    read();
+    // Only worth re-checking when there are hours to cross.
+    if (support.alwaysOn) return;
+    const id = window.setInterval(read, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
   // The order flow marks the document while its form is on screen.
   useEffect(() => {
     const read = () => setOrderOpen(document.documentElement.dataset.orderOpen === 'true');
@@ -43,8 +62,12 @@ export default function WhatsAppButton() {
       href={site.whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={() => track('whatsapp_click', { route: pathname })}
-      aria-label={`Message ${site.name} support on WhatsApp`}
+      onClick={() => track('whatsapp_click', { route: pathname, online })}
+      aria-label={
+        online
+          ? `Message ${site.name} support on WhatsApp. Support is online, ${support.label}.`
+          : `Message ${site.name} support on WhatsApp. Leave a message and we will reply.`
+      }
       className="wa-pill group fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))]
                  z-50 inline-flex h-[48px] min-w-[48px] items-center gap-2.5 overflow-hidden
                  rounded-full border border-line-2 bg-[rgba(11,15,26,.92)] px-[13px]
@@ -56,19 +79,29 @@ export default function WhatsAppButton() {
                  motion-reduce:transition-none
                  sm:bottom-[max(1.5rem,env(safe-area-inset-bottom))] sm:right-[max(1.5rem,env(safe-area-inset-right))]"
     >
-      <span className="grid h-[22px] w-[22px] flex-none place-items-center text-[#25D366]">
+      <span className="relative grid h-[22px] w-[22px] flex-none place-items-center text-[#25D366]">
         <WhatsAppGlyph />
+        {/* Presence dot. Ringed in the pill's own background so it reads as a
+            badge sitting on the icon rather than a speck of green on it.
+            Decorative — the state is in the accessible label above, and an
+            aria-live dot would announce itself on every route change. */}
+        {online && (
+          <span
+            aria-hidden="true"
+            className="wa-dot absolute -right-[3px] -top-[3px] h-[9px] w-[9px] rounded-full bg-success"
+          />
+        )}
       </span>
       {/* Widens on hover on pointer devices; on touch it stays a circle. */}
       <span
         className="hidden max-w-0 whitespace-nowrap font-display text-[14px] font-semibold text-ink
                    opacity-0 transition-[max-width,opacity] duration-300 ease-out
-                   group-hover:max-w-[120px] group-hover:opacity-100
-                   group-focus-visible:max-w-[120px] group-focus-visible:opacity-100
+                   group-hover:max-w-[180px] group-hover:opacity-100
+                   group-focus-visible:max-w-[180px] group-focus-visible:opacity-100
                    motion-reduce:transition-none
                    [@media(hover:hover)and(pointer:fine)]:inline-block"
       >
-        Need help?
+        {online ? `Support online ${support.label}` : 'Leave a message'}
       </span>
     </a>
   );

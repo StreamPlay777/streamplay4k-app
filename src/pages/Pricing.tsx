@@ -3,6 +3,7 @@ import Seo from '../components/Seo';
 import { pageSeo } from '../data/seo';
 import PricingOrder from '../components/pricing/PricingOrder';
 import SavingsSection from '../components/SavingsSection';
+import ComparisonTable from '../components/ComparisonTable';
 import { SectionHeading } from '../components/ui';
 import Faq from '../components/Faq';
 
@@ -35,6 +36,10 @@ export default function Pricing() {
 
       {/* Section 05 — the one pricing + order experience, shared with the homepage */}
       <PricingOrder />
+
+      {/* Two different comparisons, in the order the questions get asked:
+          first "which provider", then "is this cheaper than what I pay now". */}
+      <ComparisonTable id="compare" />
 
       {/* Same cost comparison as the homepage — one component, not a copy */}
       <SavingsSection id="savings" />

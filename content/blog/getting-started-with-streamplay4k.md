@@ -11,7 +11,7 @@ tags:
   - Setup
   - Fire TV
 featuredImageAlt: "An Amazon Fire TV Stick plugged into the back of a television"
-draft: true
+draft: false
 ---
 
 The Amazon Fire TV Stick is the most common way our customers watch, and it is
