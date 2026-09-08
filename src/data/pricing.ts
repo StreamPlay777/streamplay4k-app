@@ -80,23 +80,34 @@ export function savingsPerMonth(term: Term): number {
 }
 
 /**
- * Feature list for the "Included with every plan" panel (spec §9).
+ * What every plan includes — client-approved list, used by the order panel.
  *
- * Catalogue figures, the refund label and the activation window all read from
- * data/site.ts. The earlier conflict (120,000+ here vs 60,000+/180,000+ there)
- * is resolved: 120,000+ for both is the approved figure and it now lives in
- * exactly one place.
+ * Split into two groups so the panel can give the catalogue figures more weight
+ * than the rest, which is how someone actually scans this: the two numbers
+ * first, then a checklist.
+ *
+ * The figures come from data/site.ts. Nothing here restates them.
+ *
+ * NOTE: "Anti-Freeze Technology" and "Ultra Fast Servers" are supplied by the
+ * client as approved product copy. They were removed in an earlier pass as
+ * unprovable performance claims and have been reinstated at the client's
+ * explicit instruction.
  */
+export const PLAN_HIGHLIGHTS = [
+  { value: site.channels, label: 'Live TV Channels' },
+  { value: site.vod, label: 'Movies & Series' },
+] as const;
+
 export const PLAN_FEATURES = [
-  `${site.channels} Live Channels`,
-  `${site.vod} Movies & Series`,
-  'HD / FHD / 4K where available',
-  'Sports, news, kids & international content',
-  'Multi-device compatibility',
-  'EPG / TV guide',
-  'Fast activation',
-  '24/7 support',
-  site.refundLabel,
+  'Adult Channels Available',
+  'Sports Packages (NFL, NBA, UFC, beIN, Sky Sports)',
+  'International Channels',
+  '4K + HDR Streaming',
+  'Anti-Freeze Technology',
+  'Ultra Fast Servers',
+  'EPG (TV Guide Included)',
+  'Works on Smart TV, Firestick, Android, iOS, PC & more',
+  '24/7 Customer Support',
 ];
 
 /** Trust points shown beside the order CTA (spec §10). */

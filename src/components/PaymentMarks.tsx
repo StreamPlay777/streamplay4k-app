@@ -152,9 +152,22 @@ function PayPal({ className = '' }: MarkProps) {
   );
 }
 
+function LinkPay({ className = '' }: MarkProps) {
+  return (
+    <span className={`${chip} ${className}`} title="Link">
+      <svg viewBox="0 0 74 40" className={art} preserveAspectRatio="xMidYMid meet"
+           role="img" aria-label="Link">
+        <rect width="74" height="40" rx="9" fill="#00D66F" />
+        <text x="37" y="28" textAnchor="middle" fontFamily={HELV} fontSize="21"
+              fontWeight="700" fill="#011E0F">link</text>
+      </svg>
+    </span>
+  );
+}
+
 export const MARKS = {
   Visa, Mastercard, Amex, Discover, 'Apple Pay': ApplePay,
-  'Google Pay': GooglePay, PayPal,
+  'Google Pay': GooglePay, PayPal, Link: LinkPay,
 } as const;
 
 export type MarkName = keyof typeof MARKS;
