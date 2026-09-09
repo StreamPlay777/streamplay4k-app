@@ -1,0 +1,154 @@
+# ══════════════════════════════════════════════════════════════════════
+#  DEPLOY TO HOSTINGER — never runs on its own.
+#
+#  You start it by hand: GitHub → Actions → "Deploy to Hostinger" →
+#  Run workflow. It will not fire on a push, so no code change can ever
+#  reach the live site by accident.
+#
+#  IT DEFAULTS TO A REHEARSAL. The "mode" box starts on `preview`, which
+#  connects, works out exactly what would change, prints the list, and
+#  changes nothing. You have to switch it to `live` on purpose.
+#
+#  WHAT IT WILL NEVER TOUCH
+#    api/config.php   your Mailgun key, Sheets token and dashboard password
+#    api/check.php    left exactly as it is, deployed or deleted, either way
+#    the orders folder  it lives outside public_html, so this cannot reach it
+#
+#  ROLLBACK is the "ref" box: put an older commit id in it and run again.
+# ══════════════════════════════════════════════════════════════════════
+name: Deploy to Hostinger
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'preview = show what would change, nothing written. live = actually deploy.'
+        required: true
+        default: preview
+        type: choice
+        options: [preview, live]
+      ref:
+        description: 'What to deploy. Leave as main, or paste an older commit id to roll back.'
+        required: true
+        default: main
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  # Two deploys writing at once would interleave files. One at a time.
+  group: hostinger-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production      # add reviewers here to require approval
+
+    steps:
+      - name: What is about to happen
+        run: |
+          {
+            echo "### ${{ inputs.mode == 'live' && 'LIVE DEPLOY' || 'Preview only — nothing will be written' }}"
+            echo ""
+            echo "- deploying: \`${{ inputs.ref }}\`"
+            echo "- protected: \`api/config.php\`, \`api/check.php\`, and everything outside public_html"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      # Same blocking checks as the build workflow. A deploy must never be
+      # the first time these are asked.
+      - name: Refuse to ship secrets
+        run: |
+          set -e
+          fail=0
+          [ -f dist/api/config.php ] && { echo "::error::dist/api/config.php exists"; fail=1; }
+          [ -f dist/api/check.php ]  && { echo "::error::check.php is in the build"; fail=1; }
+          [ ! -f dist/.htaccess ]    && { echo "::error::dist/.htaccess missing"; fail=1; }
+          grep -rIlE 'sk_(live|test)_[A-Za-z0-9]{20,}|whsec_[A-Za-z0-9]{24,}|key-[0-9a-f]{32}' dist 2>/dev/null | head -1 | grep -q . \
+            && { echo "::error::credential-shaped string in the build"; fail=1; }
+          exit $fail
+
+      - name: Set up the SSH key
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Pin the server's fingerprint rather than blindly trusting whatever
+          # answers. Without this a hijacked DNS entry could be handed the key.
+          printf '%s\n' "${{ secrets.HOSTINGER_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy
+        env:
+          HOST: ${{ secrets.HOSTINGER_HOST }}
+          USER: ${{ secrets.HOSTINGER_USER }}
+          PORT: ${{ secrets.HOSTINGER_PORT }}
+          TARGET: ${{ secrets.HOSTINGER_PATH }}
+        run: |
+          set -euo pipefail
+
+          DRY=""
+          if [ "${{ inputs.mode }}" != "live" ]; then DRY="--dry-run"; fi
+
+          # --checksum, not the default size-and-timestamp check. A file whose
+          # content changed but whose size and second-granularity timestamp did
+          # not would otherwise be skipped, leaving a stale page live with the
+          # deploy reporting success. Comparing content costs a few seconds on
+          # a site this size and removes that whole class of failure.
+          #
+          # --exclude protects a file from being written AND, because
+          # --delete-excluded is absent, from being deleted. Verified before
+          # this workflow was written: a --delete sync leaves config.php
+          # byte-identical.
+          rsync -rlptDvz $DRY --checksum --delete \
+            --exclude '/api/config.php' \
+            --exclude '/api/check.php' \
+            --exclude '.ftp-deploy-sync-state.json' \
+            --itemize-changes \
+            -e "ssh -p ${PORT:-22} -o StrictHostKeyChecking=yes" \
+            dist/ "${USER}@${HOST}:${TARGET}/" | tee /tmp/rsync.log
+
+          {
+            echo "### ${{ inputs.mode == 'live' && 'Deployed' || 'Preview — nothing was written' }}"
+            echo ""
+            echo '```'
+            grep -E '^(>f|<f|\*deleting|cd\+)' /tmp/rsync.log | head -60 || echo "no changes"
+            echo '```'
+            echo ""
+            echo "changed: $(grep -cE '^(>f|<f)' /tmp/rsync.log || echo 0) · deleted: $(grep -c '^\*deleting' /tmp/rsync.log || echo 0)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # After a live deploy, confirm the site actually answers. A green tick
+      # on a broken site is worse than a red one.
+      - name: Check the site is alive
+        if: inputs.mode == 'live'
+        run: |
+          set -e
+          sleep 5
+          for path in / /pricing/ /channels/; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://streamplay4k.com${path}")
+            echo "  ${path} → ${code}"
+            [ "$code" = "200" ] || { echo "::error::${path} returned ${code}"; exit 1; }
+          done
+          # The order endpoint must answer as PHP, not as the website.
+          body=$(curl -s https://streamplay4k.com/api/order)
+          echo "$body" | grep -q '"ok":false' \
+            || { echo "::error::/api/order did not answer as JSON — routing is broken"; exit 1; }
+          echo "  /api/order → answered as JSON, routing intact"
+
+      - name: Always remove the key
+        if: always()
+        run: rm -f ~/.ssh/id_ed25519

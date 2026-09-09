@@ -33,7 +33,21 @@ const TREES = [
 ];
 const src = TREES[0].from;
 
-const SKIP = new Set(['config.php']);
+/*
+ * Files the build never ships.
+ *
+ * config.php holds every production secret and lives only on the server; if it
+ * were copied here, a deploy would overwrite the live key with a blank one.
+ *
+ * check.php is the first-deployment diagnostic. It is safe — it prints no keys
+ * — but it describes the server's setup to anyone who finds it and has a
+ * button that sends email, so it has no business on a live site. It stays in
+ * the repository; when it is genuinely needed again, upload it by hand or run
+ * the build with INCLUDE_CHECK=1.
+ */
+const SKIP = new Set(
+  process.env.INCLUDE_CHECK === '1' ? ['config.php'] : ['config.php', 'check.php'],
+);
 
 function numbersFrom(text, re, label) {
   const found = [...text.matchAll(re)].map((m) => m[1]);
