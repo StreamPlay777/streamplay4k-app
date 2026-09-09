@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && vite build --ssr src/entry-server.tsx --outDir dist/server && node scripts/prerender.mjs && node scripts/bundle-api.mjs",
+    "build": "tsc && vite build && vite build --ssr src/entry-server.tsx --outDir dist/server && node scripts/prerender.mjs && node scripts/bundle-api.mjs && ./scripts/verify-build.sh",
     "build:client": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "verify": "./scripts/verify-build.sh"
   },
   "dependencies": {
     "@fontsource-variable/caveat": "^5.3.0",

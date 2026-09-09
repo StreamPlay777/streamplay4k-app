@@ -36,43 +36,12 @@ jobs:
         run: npm run build
 
       # ── The build must never contain a secret ────────────────────────
-      # A blocking check, not a warning. If a key ever reaches the built
-      # site it is on every visitor's machine within minutes of a deploy,
-      # so this stops the run rather than reporting and continuing.
+      # One script, run identically here and on a developer's machine
+      # (`npm run verify`). The previous version of this check lived inline
+      # here and separately in a local test; the two drifted, and the copy
+      # that was wrong was the one nobody ran until CI did.
       - name: Refuse to ship secrets
-        run: |
-          set -e
-          fail=0
-
-          if [ -f dist/api/config.php ]; then
-            echo "::error::dist/api/config.php exists — the live secrets file must never be built"
-            fail=1
-          fi
-
-          if grep -rIlE 'sk_(live|test)_[A-Za-z0-9]{20,}|whsec_[A-Za-z0-9]{24,}|key-[0-9a-f]{32}' dist 2>/dev/null | head; then
-            echo "::error::a credential-shaped string is in the build output"
-            fail=1
-          fi
-
-          # The browser bundle must not carry anything server-side.
-          if grep -rIlE 'mailgun_key|sheets_token|admin_password_hash|stripe_secret' dist/assets 2>/dev/null | head; then
-            echo "::error::a server-only setting name leaked into the browser bundle"
-            fail=1
-          fi
-
-          # The diagnostic page is not part of a normal deployment.
-          if [ -f dist/api/check.php ]; then
-            echo "::error::check.php is in the build — it must not ship to production"
-            fail=1
-          fi
-
-          # The one file that makes every page and the order form work.
-          if [ ! -f dist/.htaccess ]; then
-            echo "::error::dist/.htaccess is missing — the site would not route"
-            fail=1
-          fi
-
-          exit $fail
+        run: ./scripts/verify-build.sh dist
 
       - name: Summarise
         run: |
