@@ -6,6 +6,7 @@ import { site, heroStats, routes, trialUrl } from '../data/site';
 import { track } from '../lib/analytics';
 import Reveal from '../components/Reveal';
 import CountUp from '../components/CountUp';
+import ClosingCta from '../components/ClosingCta';
 import { useAutoScroll } from '../hooks/useAutoScroll';
 import ChannelFinder from '../components/ChannelFinder';
 import { TERMS, quote, money, savingsPerMonth, DEFAULT_TERM_ID, INVOICE_PAYMENT_METHODS } from '../data/pricing';
@@ -15,7 +16,7 @@ import { whySwitch, coverageChecklist } from '../data/marquees';
 import { platforms, platformRowA, platformRowB } from '../data/platforms';
 import PlatformTile from '../components/PlatformMarks';
 import { MAX_DEVICES } from '../data/pricing';
-import { logoRows, networkLogos } from '../data/logos';
+import { logoRows } from '../data/logos';
 import PosterWall from '../components/PosterWall';
 import SavingsSection from '../components/SavingsSection';
 import ShowcaseRow from '../components/ShowcaseRow';
@@ -45,7 +46,7 @@ export default function Home() {
       <DeviceCoverage />     {/* Device compatibility */}
       <WhySwitch />          {/* Not in the brief's list — flagged for a decision */}
       <FaqSection />
-      <ClosingCta />
+      <ClosingCta from="home-closing" />
     </>
   );
 }
@@ -224,12 +225,7 @@ function NetworkWall() {
             <LogoMarquee key={i} logos={logoRows[i]} direction={row.direction} duration={row.duration} />
           ))}
         </div>
-
-        <p className="mt-8 px-6 text-center text-[12px] leading-relaxed text-ink-5 sm:mt-10">
-          Showing {networkLogos.length} of the networks a subscription can reach. Network names and
-          logos belong to their owners and are shown for identification only.
-        </p>
-      </div>
+              </div>
     </section>
   );
 }
@@ -726,45 +722,3 @@ function FaqSection() {
   );
 }
 
-/* ── 1.12 Closing CTA ──────────────────────────────────────────────────────── */
-function ClosingCta() {
-  return (
-    <section className="section-lead relative overflow-hidden bg-bg text-center">
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ background: 'radial-gradient(ellipse 800px 400px at 50% 100%, rgba(255,43,42,.22), transparent 70%)' }}
-      />
-      <div className="relative mx-auto max-w-[720px]">
-        <h2 className="font-display font-extrabold leading-[1.02] text-ink" style={{ fontSize: 'clamp(34px, 5.5vw, 60px)' }}>
-          Ready for a Simpler
-          <br />
-          Way to Watch?
-        </h2>
-        <p className="mx-auto mt-6 max-w-[540px] text-[18px] leading-relaxed text-ink-3">
-          One subscription. Your favorite devices. Fast activation and support whenever you need it.
-        </p>
-        <div className="mt-9 flex flex-wrap justify-center gap-3">
-          <Link
-            to={routes.pricing}
-            onClick={() => track('view_pricing', { from: 'closing-cta' })}
-            className="btn-accent"
-          >
-            View plans →
-          </Link>
-          <a
-            href={trialUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => track('start_free_trial', { from: 'closing-cta' })}
-            className="btn-outline"
-          >
-            Start free trial
-          </a>
-        </div>
-        <p className="mx-auto mt-7 max-w-[520px] text-[13px] leading-relaxed text-ink-4">
-          {site.refundLabel} · Usually Ready in {site.activationWindow} · 24/7 Support
-        </p>
-      </div>
-    </section>
-  );
-}

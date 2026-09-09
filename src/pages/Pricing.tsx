@@ -4,6 +4,7 @@ import { pageSeo } from '../data/seo';
 import PricingOrder from '../components/pricing/PricingOrder';
 import SavingsSection from '../components/SavingsSection';
 import ComparisonTable from '../components/ComparisonTable';
+import ClosingCta from '../components/ClosingCta';
 import { SectionHeading } from '../components/ui';
 import Faq from '../components/Faq';
 
@@ -56,6 +57,12 @@ export default function Pricing() {
           </p>
         </div>
       </section>
+
+      <ClosingCta
+        from="pricing-closing"
+        title={<>Pick a plan.<br /><span className="text-grad">Start tonight.</span></>}
+        sub="One payment, no contract, and a login in your inbox within minutes."
+      />
     </>
   );
 }

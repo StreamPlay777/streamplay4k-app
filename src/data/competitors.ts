@@ -1,14 +1,18 @@
 import { TERMS, quote } from './pricing';
-import { site } from './site';
 
 /**
  * The cost-comparison basket — the stack a US household typically pays for.
  *
  * ⚠️ PUBLISHED LIST PRICES, AND THEY MOVE. These are the advertised US monthly
  * prices for each service at the date below. Streaming prices change several
- * times a year, and a comparison that drifts out of date stops being a fair
- * one — update `AS_OF` and the figures together, and keep the disclaimer
- * visible wherever this renders.
+ * times a year, so this comparison goes stale on its own — update `AS_OF` and
+ * the figures together, and re-check them before any campaign that leans on
+ * the savings number.
+ *
+ * The on-page footnote that carried the "as of" date and named the plan being
+ * compared was removed at the client's request. That note was the page's
+ * substantiation for a comparative price claim against named competitors, so
+ * keeping these figures current is now the only thing standing behind it.
  *
  * Each entry carries the brand's own colour and its short mark, which is how
  * the reference presents them: a coloured tile with initials, not the
@@ -60,7 +64,3 @@ export const receiptMeta = {
   barcodeRef: '4011 2026 8842 9',
 };
 
-export const smallPrint =
-  `Based on published US list prices for these services, ${AS_OF}. ` +
-  `Compared against a ${site.name} ${bestTerm.label.toLowerCase()} plan at one device. ` +
-  `Prices change — figures are illustrative.`;

@@ -3,7 +3,6 @@ import Receipt from './Receipt';
 import {
   basket, basketMonthlyCents, basketYearlyCents, paymentsPerYear,
   ourMonthlyCents, ourYearlyCents, savedMonthlyCents, savedYearlyCents,
-  smallPrint,
 } from '../data/competitors';
 import { site } from '../data/site';
 
@@ -109,7 +108,6 @@ export default function SavingsSection({ id = 'savings' }: { id?: string }) {
             Get {site.name} for {money(ourYearlyCents)} / year
           </Link>
 
-          <p className="mt-6 max-w-[540px] text-[12px] leading-relaxed text-ink-5">{smallPrint}</p>
         </div>
       </div>
     </section>

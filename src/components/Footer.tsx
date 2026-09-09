@@ -71,7 +71,7 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-line pt-6 text-[12.5px] text-ink-5 md:flex-row md:items-start md:justify-between">
+        <div className="mt-12 flex flex-col gap-4 border-t border-line pt-6 text-[12.5px] text-ink-5 md:flex-row md:items-center md:justify-between">
           <div>
             <p>© {site.year} {site.legalName}. All rights reserved.</p>
             {/* A postal address is the cheapest signal that there is a real
@@ -79,7 +79,6 @@ export default function Footer() {
                 things a cautious buyer notices. */}
             <address className="mt-1.5 not-italic">{site.address}</address>
           </div>
-          <p className="max-w-[560px] md:text-right">{site.disclaimer}</p>
         </div>
       </div>
     </footer>
