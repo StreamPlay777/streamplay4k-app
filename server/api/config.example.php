@@ -36,6 +36,22 @@ return [
        Create it in hPanel → File Manager and paste the full path here. */
     'orders_dir' => '',                                       // ← FULL PATH
 
+    /* ── One reusable payment link (optional) ────────────────────────────
+       For a Stripe payment link that accepts a CUSTOM AMOUNT — the customer
+       types the figure themselves. Paste it here and every order email gains
+       a Pay button with the exact amount printed above it at headline size,
+       plus the order reference to put in the description.
+
+       Trade-off, stated plainly: a link like this cannot tell us who paid or
+       how much, so nothing marks itself paid. You confirm each payment in
+       Stripe and set the order to paid in /admin/. That is fine at low volume
+       and it is why the amount and reference are repeated three times in the
+       email — a mistyped amount is your afternoon, not theirs.
+
+       Leave this blank AND stripe_secret blank and the email simply says the
+       invoice is on its way, which is a complete and honest shop. */
+    'payment_link' => '',
+
     /* ── Stripe (optional) ───────────────────────────────────────────────
        With these blank, the site still works exactly as before: the customer
        gets "your invoice is on its way" and you send payment details by hand.

@@ -94,13 +94,19 @@ foreach (sp_list_orders($cfg, 1000) as $order) {
         }
         if ($stage['needs'] === 'paid' && !$paid) continue;  // unpaid: nothing to check in about
 
-        /* A nudge needs a link that still works. */
+        /* A nudge needs a link that still works. A Checkout Session expires
+           after 24 hours, so it is reissued; a reusable payment link never
+           expires and is simply attached. */
         $fresh = $order;
-        if ($stage['needs'] === 'unpaid' && sp_stripe_enabled($cfg) && !$dry) {
-            $pay = sp_stripe_checkout($cfg, $order, $stage['key']);
-            if ($pay) {
-                $fresh['payUrl'] = $pay['url'];
-                sp_update_order($cfg, $order['id'], ['payUrl' => $pay['url']]);
+        if ($stage['needs'] === 'unpaid' && !$dry) {
+            if (sp_stripe_enabled($cfg)) {
+                $pay = sp_stripe_checkout($cfg, $order, $stage['key']);
+                if ($pay) {
+                    $fresh['payUrl'] = $pay['url'];
+                    sp_update_order($cfg, $order['id'], ['payUrl' => $pay['url']]);
+                }
+            } elseif (!empty($cfg['payment_link'])) {
+                $fresh['payLink'] = (string) $cfg['payment_link'];
             }
         }
 

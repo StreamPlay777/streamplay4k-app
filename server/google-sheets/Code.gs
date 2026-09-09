@@ -24,7 +24,7 @@ const SHARED_TOKEN = 'CHANGE-ME-TO-A-LONG-RANDOM-STRING';
 const SHEET_NAME = 'Orders';
 
 const HEADERS = [
-  'Order ID', 'Created (UTC)', 'Status', 'Plan', 'Months', 'Devices',
+  'Order ID', 'Created (UTC)', 'Status', 'Plan', 'Term', 'Months', 'Devices',
   'Total', 'Total (cents)', 'Phone', 'Email', 'Country', 'Source page',
   'Campaign', 'Paid at', 'Activated at', 'Notes',
 ];
@@ -50,6 +50,7 @@ function doPost(e) {
       o.id || '',
       o.createdAt || '',
       o.status || 'new',
+      o.planTier || '',
       o.planLabel || '',
       o.termMonths || '',
       o.devices || '',

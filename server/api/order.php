@@ -106,6 +106,7 @@ $order = [
     'createdAt'       => gmdate('c'),
     'planId'          => $q['term']['id'],
     'planLabel'       => $q['term']['label'],
+    'planTier'        => $q['term']['tier'],
     'termMonths'      => $q['term']['months'],
     'devices'         => $q['devices'],
     'baseCents'       => $q['baseCents'],
@@ -151,11 +152,25 @@ if ($mismatch) {
     sp_log($cfg, "PRICE MISMATCH {$id}: browser said {$clientTotal}, server charged {$q['totalCents']}");
 }
 
-/* ── A pay-now link, if Stripe is configured ──────────────────────────── */
-/* Created for the exact figure calculated above. If Stripe is off or the call
-   fails, $pay stays null and the customer email says an invoice is coming —
-   which is what it said before Stripe existed. Nothing here can fail the
-   order: it is already recorded. */
+/* ── A pay-now link, if one is configured ─────────────────────────────── */
+/*
+ * THREE WAYS THIS CAN GO, in the order they are tried:
+ *
+ *   1. stripe_secret set  — a Checkout Session for this exact order. The
+ *      amount is fixed, the payment reports itself back, the order marks
+ *      itself paid. Best, and the most setup.
+ *
+ *   2. payment_link set   — one reusable Stripe link the customer types the
+ *      amount into. No API key, nothing to maintain. The email states the
+ *      figure large and twice, because with a link like this the amount is
+ *      the customer's job to get right and a mistyped one is your afternoon.
+ *      Nothing reports back, so you mark orders paid in the dashboard.
+ *
+ *   3. neither            — the email says the invoice is on its way, and you
+ *      send it. This is the default and it is a complete, working shop.
+ *
+ * None of the three can fail an order: it is already on disk by this point.
+ */
 $pay = sp_stripe_checkout($cfg, $order);
 if ($pay) {
     $order['payUrl'] = $pay['url'];
@@ -166,6 +181,8 @@ if ($pay) {
     ]);
 } elseif (sp_stripe_enabled($cfg)) {
     sp_log($cfg, "{$id} stripe checkout FAILED — customer gets the invoice-coming email");
+} elseif (!empty($cfg['payment_link'])) {
+    $order['payLink'] = (string) $cfg['payment_link'];
 }
 
 /* This person is no longer an abandoned lead. */

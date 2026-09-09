@@ -190,7 +190,7 @@ export default function PricingOrder() {
                         // Explicit, so the name reads "12 Months, $99.99, best
                         // value" rather than leading with the badge, which sits
                         // first in the DOM because it is positioned.
-                        aria-label={`${t.label}, ${money(t.baseCents)}, ${money(termMonthly[t.id])} per month${
+                        aria-label={`${t.tier}, ${t.label}, ${money(t.baseCents)}, ${money(termMonthly[t.id])} per month${
                           best ? ', best value' : ''
                         }`}
                         className={`term-tile relative rounded-xl border p-4 pt-5 text-left ${
@@ -212,7 +212,11 @@ export default function PricingOrder() {
                             <Check />
                           </span>
                         )}
-                        <span className="block font-display text-[14px] font-bold text-ink">{t.label}</span>
+                        {/* The plan's name leads; the length is the detail
+                            under it. "Premium" is what a customer says on
+                            WhatsApp — "12 Months" is what they bought. */}
+                        <span className="block font-display text-[14px] font-bold text-ink">{t.tier}</span>
+                        <span className="mt-0.5 block text-[11.5px] text-ink-4">{t.label}</span>
                         <span className="nums mt-1.5 block font-display text-[25px] font-extrabold leading-none text-ink">
                           {money(t.baseCents)}
                         </span>

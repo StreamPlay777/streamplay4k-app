@@ -27,7 +27,17 @@ function sp_followup_email(string $stage, array $o, array $cfg): ?array
     $window  = sp_esc($cfg['activation_window']);
     $refund  = sp_esc($cfg['refund_label']);
     $setup   = sp_esc(rtrim($cfg['site_url'], '/') . '/setup-guide/');
-    $pay     = isset($o['payUrl']) && $o['payUrl'] !== '' ? sp_esc((string) $o['payUrl']) : '';
+    /* Either kind of pay link. A per-order checkout carries its own amount;
+       a reusable one does not, so the nudge has to say the figure out loud. */
+    $pay      = isset($o['payUrl'])  && $o['payUrl']  !== '' ? sp_esc((string) $o['payUrl'])  : '';
+    $payLink  = isset($o['payLink']) && $o['payLink'] !== '' ? sp_esc((string) $o['payLink']) : '';
+    $payHref  = $pay ?: $payLink;
+    $payHrefRaw = $pay ? (string) $o['payUrl'] : (string) ($o['payLink'] ?? '');
+    $payNote  = $payLink && !$pay
+        ? '<p style="margin:10px 0 0;color:#656a78;font-size:12.5px;line-height:1.6;">'
+          . "Enter <strong style=\"color:#111114;\">{$total}</strong> as the amount and add reference "
+          . "<strong style=\"color:#111114;\">{$ref}</strong>.</p>"
+        : '';
 
     $button = function (string $href, string $label, string $bg = '#ff2b20'): string {
         return '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:4px 0 8px;">'
@@ -44,8 +54,8 @@ function sp_followup_email(string $stage, array $o, array $cfg): ?array
 
         /* ── +6h, unpaid ──────────────────────────────────────────────── */
         case 'nudge1': {
-            $cta = $pay
-                ? $button($pay, "Pay {$total} and finish &rarr;")
+            $cta = $payHref
+                ? $button($payHref, "Pay {$total} and finish &rarr;") . $payNote
                 : $button($wa, 'Get your invoice on WhatsApp &rarr;', '#25D366');
             $html = $shell('Your order is still waiting', <<<H
               <h1 style="margin:0 0 10px;color:#111114;font-size:22px;font-weight:800;line-height:1.3;">Your order is still waiting</h1>
@@ -58,13 +68,15 @@ function sp_followup_email(string $stage, array $o, array $cfg): ?array
                 <a href="{$wa}" style="color:#c41f0f;text-decoration:none;">just reply or message us on WhatsApp</a>. A person answers.
               </p>
 H);
-            $link = $pay ? (string) $o['payUrl'] : $cfg['whatsapp_url'];
+            $link = $payHrefRaw ?: $cfg['whatsapp_url'];
             return [
                 'subject' => "Still want {$o['planLabel']}? Your order is waiting",
                 'html'    => $html,
                 'text'    => "Your order is still waiting\n\n"
                     . "We're holding {$o['planLabel']} on {$devices} {$word} for you — {$o['totalFormatted']}.\n"
-                    . "Finish here: {$link}\n\n"
+                    . "Finish here: {$link}\n"
+                    . ($payLink && !$pay ? "Enter {$o['totalFormatted']} as the amount and add reference {$o['id']}.\n" : '')
+                    . "\n"
                     . "Reference {$o['id']}. Questions? {$cfg['whatsapp_url']}\n\n"
                     . "{$cfg['brand_name']} · {$cfg['site_url']}\n{$cfg['postal_address']}\n",
             ];
@@ -72,7 +84,7 @@ H);
 
         /* ── +24h, unpaid. The last one about money. ──────────────────── */
         case 'nudge2': {
-            $cta = $pay ? $button($pay, "Pay {$total} &rarr;") : '';
+            $cta = $payHref ? $button($payHref, "Pay {$total} &rarr;") . $payNote : '';
             $html = $shell('Anything we can help with?', <<<H
               <h1 style="margin:0 0 10px;color:#111114;font-size:22px;font-weight:800;line-height:1.3;">Anything we can help with?</h1>
               <p style="margin:0 0 18px;color:#4b4f5a;font-size:15px;line-height:1.65;">
@@ -91,7 +103,7 @@ H);
                 'html'    => $html,
                 'text'    => "Anything we can help with?\n\n"
                     . "Your order for {$o['planLabel']} is still open. Questions of any kind: {$cfg['whatsapp_url']}\n"
-                    . ($pay ? "Or pay here: {$o['payUrl']}\n" : '')
+                    . ($payHrefRaw ? "Or pay here: {$payHrefRaw}\n" : '')
                     . "\n{$cfg['refund_label']}. This is the last email about order {$o['id']}.\n\n"
                     . "{$cfg['brand_name']} · {$cfg['site_url']}\n{$cfg['postal_address']}\n",
             ];

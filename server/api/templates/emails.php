@@ -76,26 +76,43 @@ function sp_customer_email(array $o, array $cfg): array
        the two versions differ in more than a button: the opening line, the
        three steps and the subject all change to match what the reader can
        actually do right now. */
-    $pay = isset($o['payUrl']) && $o['payUrl'] !== '' ? sp_esc((string) $o['payUrl']) : '';
+    /* Three shapes, matching the three ways order.php can be configured: a
+       fixed-amount checkout, one reusable link the customer types the amount
+       into, or no link at all. */
+    $pay  = isset($o['payUrl'])  && $o['payUrl']  !== '' ? sp_esc((string) $o['payUrl'])  : '';
+    $link = isset($o['payLink']) && $o['payLink'] !== '' ? sp_esc((string) $o['payLink']) : '';
+    $anyPay = $pay !== '' || $link !== '';
 
-    $headline = $pay ? 'One step left' : 'We have your order';
-
-    $lede = $pay
-        ? 'Thanks — your order is reserved. One step left: complete payment below and your login is on its way.'
-        : 'Thanks — your order reached us and nothing more is needed from you right now. '
-          . 'Your invoice and payment instructions are on their way.';
-
-    $steps = $pay
-        ? [
+    if ($pay) {
+        $headline = 'One step left';
+        $lede = 'Thanks — your order is reserved. One step left: complete payment below and your login is on its way.';
+        $steps = [
             'Pay securely — card, Apple Pay or Google Pay.',
             'We activate your account the moment payment clears.',
             "Your login arrives, usually {$window} later. Then you are watching.",
-          ]
-        : [
-            'We send your invoice with payment instructions.',
+        ];
+    } elseif ($link) {
+        /* The link takes any amount, so paying is offered rather than
+           demanded — someone unsure about typing a figure into a payment page
+           can wait for the invoice instead, and both routes are stated. */
+        $headline = 'One step left';
+        $lede = 'Thanks — your order is reserved. You can pay now with the link below, '
+              . 'or wait for the invoice we are preparing. Either works.';
+        $steps = [
+            "Pay {$o['totalFormatted']} using the link above, or wait for your invoice.",
+            'We activate your account as soon as your payment reaches us.',
+            "Your login arrives, usually {$window} later. Then you are watching.",
+        ];
+    } else {
+        $headline = 'We have your order';
+        $lede = 'Thanks — your order reached us and nothing more is needed from you right now. '
+              . 'We are preparing your invoice and will send it to this address shortly, and on WhatsApp.';
+        $steps = [
+            'We prepare your invoice and send it here and on WhatsApp.',
             'You pay using whichever method suits you.',
             "Your login arrives, usually {$window} after payment is confirmed. Then you are watching.",
-          ];
+        ];
+    }
 
     $stepRows = '';
     foreach ($steps as $i => $step) {
@@ -107,7 +124,8 @@ function sp_customer_email(array $o, array $cfg): array
     /* The pay button sits ABOVE the order summary, not below the fold. A
        customer who has decided to pay should not have to scroll past a table
        to find out how. */
-    $payBlock = $pay ? <<<PAY
+    if ($pay) {
+        $payBlock = <<<PAY
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 10px;">
         <tr><td style="background:#ff2b20;border-radius:10px;">
           <a href="{$pay}" style="display:inline-block;padding:15px 30px;color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;">Pay {$total} now &rarr;</a>
@@ -116,7 +134,39 @@ function sp_customer_email(array $o, array $cfg): array
       <p style="margin:0 0 22px;color:#656a78;font-size:12.5px;line-height:1.6;">
         Secure checkout by Stripe. Card, Apple Pay or Google Pay. This link is valid for 24 hours &mdash; we&rsquo;ll send a fresh one if it expires.
       </p>
-PAY : '';
+PAY;
+    } elseif ($link) {
+        /* A reusable link asks the customer to type the amount, which makes
+           the amount the one thing that can go wrong — and a wrong one is your
+           afternoon, not theirs. So it is set at headline size directly above
+           the button, repeated in the sentence under it, and stated a third
+           time in the order summary below. Nobody should have to hunt for the
+           number they are about to type. The reference goes in the same block
+           for the same reason: without it a payment from a generic link is
+           just an amount and a name to match by hand. */
+        $payBlock = <<<PAY
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f7fa;border:1px solid #e8e8ee;border-radius:12px;margin:0 0 10px;">
+        <tr><td style="padding:18px 20px 20px;">
+          <p style="margin:0 0 2px;color:#656a78;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;">Amount to enter</p>
+          <p style="margin:0 0 16px;color:#111114;font-size:32px;font-weight:800;line-height:1.15;">{$total}</p>
+          <table role="presentation" cellpadding="0" cellspacing="0">
+            <tr><td style="background:#ff2b20;border-radius:10px;">
+              <a href="{$link}" style="display:inline-block;padding:14px 28px;color:#ffffff;font-size:15.5px;font-weight:700;text-decoration:none;">Open secure payment page &rarr;</a>
+            </td></tr>
+          </table>
+          <p style="margin:13px 0 0;color:#4b4f5a;font-size:13px;line-height:1.6;">
+            Enter <strong style="color:#111114;">{$total}</strong> as the amount, and add your reference
+            <strong style="color:#111114;">{$ref}</strong> so we can match your payment straight away.
+          </p>
+        </td></tr>
+      </table>
+      <p style="margin:0 0 22px;color:#656a78;font-size:12.5px;line-height:1.6;">
+        Secure checkout by Stripe &mdash; card, Apple Pay or Google Pay. Would rather have an invoice? Sit tight, one is on its way.
+      </p>
+PAY;
+    } else {
+        $payBlock = '';
+    }
 
     $inner = <<<HTML
     <tr><td style="background:#ffffff;padding:30px 28px 6px;">
@@ -157,7 +207,12 @@ HTML;
     $text = $headline . "\n\n"
         . ($pay
             ? "Your order is reserved. One step left — pay here:\n{$o['payUrl']}\n\n"
-            : "Thanks — your order reached us and nothing more is needed from you right now.\n\n")
+            : ($link
+                ? "Your order is reserved. Pay here:\n{$o['payLink']}\n"
+                  . "Enter {$o['totalFormatted']} as the amount and add reference {$o['id']}.\n"
+                  . "Or wait for the invoice we are preparing — either works.\n\n"
+                : "Thanks — your order reached us and nothing more is needed from you right now.\n"
+                  . "We are preparing your invoice and will send it here and on WhatsApp shortly.\n\n"))
         . "YOUR ORDER\n{$o['planLabel']} · {$devices} {$deviceWord}\n{$o['totalFormatted']}\nReference {$o['id']}\n\n"
         . "WHAT HAPPENS NEXT\n" . $textSteps . "\n"
         . "Questions? Message us on WhatsApp: {$cfg['whatsapp_url']}\n"
@@ -167,7 +222,7 @@ HTML;
     return [
         /* The subject is the first thing that decides whether this gets opened
            at all, so it says what to do rather than what happened. */
-        'subject' => $pay
+        'subject' => $anyPay
             ? "Complete your order — {$o['planLabel']}, {$o['totalFormatted']}"
             : "We have your order — {$o['planLabel']}, {$o['totalFormatted']}",
         'html'    => sp_email_shell($headline, $inner, $cfg),

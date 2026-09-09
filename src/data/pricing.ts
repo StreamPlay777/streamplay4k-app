@@ -16,15 +16,24 @@ export interface Term {
   id: string;
   months: number;
   label: string;
+  /**
+   * The plan's name, as we call it when talking to a customer.
+   *
+   * Display only. The term is still what is sold and `label` is still what
+   * appears wherever the length is the point; this is the word that goes on
+   * the tile, in the order record and in the spreadsheet column, so "which
+   * plan did they buy" has a one-word answer. Nothing in quote() reads it.
+   */
+  tier: string;
   /** Base price in cents, for one device. */
   baseCents: number;
 }
 
 /** LOCKED — see spec §4 and §26. Do not edit without explicit approval. */
 export const TERMS: Term[] = [
-  { id: '3m', months: 3, label: '3 Months', baseCents: 3999 },
-  { id: '6m', months: 6, label: '6 Months', baseCents: 6999 },
-  { id: '12m', months: 12, label: '12 Months', baseCents: 9999 },
+  { id: '3m', months: 3, label: '3 Months', tier: 'Basic', baseCents: 3999 },
+  { id: '6m', months: 6, label: '6 Months', tier: 'Standard', baseCents: 6999 },
+  { id: '12m', months: 12, label: '12 Months', tier: 'Premium', baseCents: 9999 },
 ];
 
 /** LOCKED — one device is included; each extra adds 50% of the base price. */

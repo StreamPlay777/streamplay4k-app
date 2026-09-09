@@ -176,7 +176,7 @@ $rows = array_values(array_filter($orders, function ($o) use ($q, $filter) {
         if ($filter === 'unpaid' ? in_array($s, ['paid', 'activated', 'cancelled'], true) : $s !== $filter) return false;
     }
     if ($q === '') return true;
-    $hay = mb_strtolower(implode(' ', [$o['id'] ?? '', $o['email'] ?? '', $o['phone'] ?? '', $o['planLabel'] ?? '', $o['campaign'] ?? '']));
+    $hay = mb_strtolower(implode(' ', [$o['id'] ?? '', $o['email'] ?? '', $o['phone'] ?? '', $o['planTier'] ?? '', $o['planLabel'] ?? '', $o['campaign'] ?? '']));
     return str_contains($hay, mb_strtolower($q));
 }));
 
@@ -336,7 +336,10 @@ $csrf = (string) ($_SESSION['csrf'] ?? '');
         <tr>
           <td class="id"><?= e($o['id']) ?><?php if (!empty($o['priceMismatch'])): ?><br><span style="color:var(--warn);font-size:11px;">price mismatch</span><?php endif; ?></td>
           <td class="muted" title="<?= e($o['createdAt']) ?>"><?= e(ago((string) $o['createdAt'])) ?></td>
-          <td><?= e($o['planLabel']) ?><br><span class="muted"><?= (int) $o['devices'] ?> <?= (int) $o['devices'] === 1 ? 'device' : 'devices' ?></span></td>
+          <td>
+            <?= e($o['planTier'] ?? $o['planLabel']) ?><br>
+            <span class="muted"><?= e($o['planLabel']) ?> · <?= (int) $o['devices'] ?> <?= (int) $o['devices'] === 1 ? 'device' : 'devices' ?></span>
+          </td>
           <td class="amt"><?= e($o['totalFormatted']) ?></td>
           <td style="min-width:190px;">
             <a href="mailto:<?= e($o['email']) ?>"><?= e($o['email']) ?></a><br>
@@ -384,7 +387,7 @@ $csrf = (string) ($_SESSION['csrf'] ?? '');
             <?php /* The raw id "12m" reads as twelve minutes sitting next to
                      "1m ago" in the very next column. Use the label. */
                   $t = TERMS[$l['term']] ?? null; ?>
-            <td><?= e($t ? $t['label'] : ($l['term'] ?: '—')) ?><?php if (!empty($l['devices'])): ?> · <?= (int) $l['devices'] ?>&nbsp;<?= (int) $l['devices'] === 1 ? 'device' : 'devices' ?><?php endif; ?></td>
+            <td><?= e($t ? $t['tier'] . ' · ' . $t['label'] : ($l['term'] ?: '—')) ?><?php if (!empty($l['devices'])): ?> · <?= (int) $l['devices'] ?>&nbsp;<?= (int) $l['devices'] === 1 ? 'device' : 'devices' ?><?php endif; ?></td>
             <td class="muted"><?= e(ago((string) $l['lastSeen'])) ?></td>
             <td class="muted"><?= (int) ($l['times'] ?? 1) ?></td>
             <td class="muted" style="max-width:190px;"><?= e($l['sourcePage'] ?? '') ?><?php if (!empty($l['campaign'])): ?><br><?= e($l['campaign']) ?><?php endif; ?></td>

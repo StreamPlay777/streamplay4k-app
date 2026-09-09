@@ -15,9 +15,9 @@
 declare(strict_types=1);
 
 const TERMS = [
-    '3m'  => ['id' => '3m',  'months' => 3,  'label' => '3 Months',  'baseCents' => 3999],
-    '6m'  => ['id' => '6m',  'months' => 6,  'label' => '6 Months',  'baseCents' => 6999],
-    '12m' => ['id' => '12m', 'months' => 12, 'label' => '12 Months', 'baseCents' => 9999],
+    '3m'  => ['id' => '3m',  'months' => 3,  'label' => '3 Months',  'tier' => 'Basic',    'baseCents' => 3999],
+    '6m'  => ['id' => '6m',  'months' => 6,  'label' => '6 Months',  'tier' => 'Standard', 'baseCents' => 6999],
+    '12m' => ['id' => '12m', 'months' => 12, 'label' => '12 Months', 'tier' => 'Premium',  'baseCents' => 9999],
 ];
 
 const EXTRA_DEVICE_RATE = 0.5;

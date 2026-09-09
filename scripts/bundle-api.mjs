@@ -46,11 +46,11 @@ async function assertPricesAgree() {
   const php = await fs.readFile(path.join(src, 'lib', 'pricing.php'), 'utf8');
 
   // { id: '3m', months: 3, label: '3 Months', baseCents: 3999 }
-  const tsTerms = [...ts.matchAll(/id:\s*'([^']+)',\s*months:\s*(\d+),[^}]*?baseCents:\s*(\d+)/g)]
-    .map((m) => `${m[1]}/${m[2]}/${m[3]}`);
+  const tsTerms = [...ts.matchAll(/id:\s*'([^']+)',\s*months:\s*(\d+),[^}]*?tier:\s*'([^']+)',[^}]*?baseCents:\s*(\d+)/g)]
+    .map((m) => `${m[1]}/${m[2]}/${m[3]}/${m[4]}`);
   // '3m' => ['id' => '3m', 'months' => 3, ..., 'baseCents' => 3999]
-  const phpTerms = [...php.matchAll(/'id'\s*=>\s*'([^']+)',\s*'months'\s*=>\s*(\d+),[^\]]*?'baseCents'\s*=>\s*(\d+)/g)]
-    .map((m) => `${m[1]}/${m[2]}/${m[3]}`);
+  const phpTerms = [...php.matchAll(/'id'\s*=>\s*'([^']+)',\s*'months'\s*=>\s*(\d+),[^\]]*?'tier'\s*=>\s*'([^']+)',[^\]]*?'baseCents'\s*=>\s*(\d+)/g)]
+    .map((m) => `${m[1]}/${m[2]}/${m[3]}/${m[4]}`);
 
   const problems = [];
   if (!tsTerms.length || !phpTerms.length) {

@@ -15,7 +15,8 @@ number and an email address. No payment is taken on the site. On submit:
    compared, never trusted. If they disagree, the server's number wins and the
    mismatch is written to the log.
 3. The order is **written to disk first**, above the web root.
-4. If Stripe is configured, a checkout link is created for that exact amount.
+4. If a payment link is configured, it is attached (see section 6). By
+   default none is, and the email simply says an invoice is coming.
 5. The order is mirrored into your Google Sheet, if one is set up.
 6. Only then are two emails sent through Mailgun:
    - one to your inbox: the order, with a one-tap WhatsApp link to the customer;
@@ -23,10 +24,9 @@ number and an email address. No payment is taken on the site. On submit:
 7. The browser gets `{ ok: true, orderId: "SP-20260909-A1B2C3" }` and the
    customer lands on `/thank-you/` with that reference.
 
-Steps 4 and 5 are optional and independent. With neither configured the shop
-works exactly as it did before them: the customer is told an invoice is coming,
-and you send one. Nothing in either step can fail an order — it is already on
-disk by then.
+Steps 4 and 5 are optional and independent, and nothing in either can fail an
+order — it is on disk by then. With neither configured you have a complete
+shop: the customer is told an invoice is on its way, and you send it.
 
 Storing before sending is the part that matters. Mailgun will have a bad
 minute eventually. When it does, the order is already on disk and you can still
@@ -72,9 +72,20 @@ values:
 
 ```php
 'mailgun_key'  => 'the key from step 2',
-'orders_inbox' => 'the inbox where you want new orders',   // yours, not public
+'orders_inbox' => 'your-personal-address@gmail.com',       // yours, not public
 'orders_dir'   => '/home/uXXXXXXX/streamplay4k-orders',    // from step 1
 ```
+
+`orders_inbox` is where every new-order notification lands. It is read by PHP
+on the server and never appears in the site's HTML, JavaScript or this
+repository — which is why it is not written out here. Put your real address in
+`config.php` and nowhere else: an address committed to a repo gets scraped, and
+the one you are giving out is a personal inbox.
+
+`mail_reply_to` is different — that one *is* public, because it is where a
+customer's reply goes. Leave it as `support@streamplay4k.com`, and make sure
+that inbox actually receives mail. A confirmation whose replies bounce is worse
+than one with no reply address at all.
 
 Leave the rest as it is — the domain, region base URL and brand facts are
 already correct.
@@ -205,13 +216,43 @@ for l in sys.stdin:
 
 ---
 
-## 6. Stripe — turn the confirmation email into a checkout
+## 6. Payment — three options, pick one
 
-Optional, and the single highest-value thing you can switch on. Without it,
-every order waits for you to type an invoice; with it, the customer can pay in
-one tap while they still want to.
+The site works with **none** of these configured. That is the default: the
+customer is told an invoice is on its way, and you send it.
 
-**Get two values.**
+### Option A — nothing (the default)
+
+Leave `payment_link` and `stripe_secret` blank. The confirmation email says:
+
+> Thanks — your order reached us and nothing more is needed from you right now.
+> We are preparing your invoice and will send it to this address shortly, and
+> on WhatsApp.
+
+Honest, complete, and every order waits on you.
+
+### Option B — one reusable payment link (custom amount)
+
+If you have a single Stripe payment link the customer types the amount into:
+
+```php
+'payment_link' => 'https://buy.stripe.com/…',
+```
+
+The email gains a panel with **the amount at headline size**, a Pay button, and
+the order reference to put in the description. The figure appears three times,
+because with a link like this the amount is the customer's job to get right and
+a mistyped one is your afternoon, not theirs.
+
+⚠️ **Nothing reports back.** A reusable link cannot tell the site who paid or
+how much, so orders never mark themselves paid — you confirm each payment in
+Stripe and set the order to **paid** in `/admin/`. Fine at low volume; it stops
+being fine when you are doing tens a day.
+
+### Option C — Stripe Checkout, per order
+
+The amount is fixed, the payment reports itself back, and the order marks
+itself paid without you touching it. Two values:
 
 1. **Developers → API keys → Secret key** (`sk_live_…`). Treat it exactly like
    the Mailgun key: `config.php` only.
@@ -231,7 +272,7 @@ which is the correct default, because an unverified webhook endpoint is a
 button anyone can press to mark an order paid. You would take payments and
 never hear about them.
 
-**What changes.** The confirmation email becomes the checkout: subject
+**What Option C changes.** The confirmation email becomes the checkout: subject
 "Complete your order", a **Pay $149.99 now** button above the fold, and three
 steps that describe paying rather than waiting. When the payment clears, the
 order marks itself paid, the customer gets "Payment received — setting up your
@@ -250,9 +291,23 @@ and use card `4242 4242 4242 4242`. Confirm the order flips to paid in
 
 ## 7. Google Sheets
 
-`server/google-sheets/README.md` walks through it — five minutes, no API key.
-Two values land in `config.php`. The sheet is a mirror: orders are on disk
-first, and a sheet outage never touches the customer.
+**You do not have to build the sheet.**
+`server/google-sheets/StreamPlay4K-orders.xlsx` is the finished thing — three
+tabs, the right columns, a status dropdown and a Summary tab whose totals keep
+themselves current. Drag it into Google Drive, open it with Google Sheets, then
+**File → Save as Google Sheets**.
+
+Connecting it takes three more minutes and needs no API key:
+`server/google-sheets/README.md` has every click.
+
+Each row carries the plan by name — **Basic**, **Standard**, **Premium** — as
+well as the term, the full contact details, the source page and the campaign.
+Rows update in place, so an order you later mark paid changes the row it
+already has rather than adding a second one.
+
+The sheet is a mirror. Orders reach your server first, and a failed push is
+queued for the hourly cron — a Google outage cannot cost you an order or leave
+a hole in the sheet.
 
 ---
 
@@ -325,10 +380,6 @@ Directories** on `/admin/` adds a browser prompt in front of it.
 ---
 
 ## Still to decide
-
-**How you take payment if you are not using Stripe.** Skip section 6 and the
-customer email keeps saying an invoice is coming — true, and it works, but
-every order then waits on you.
 
 **Whether you want a database.** Orders are one JSON file each plus a monthly
 NDJSON log. That is the right amount of machinery at this volume, and only four
