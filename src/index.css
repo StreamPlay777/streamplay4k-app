@@ -351,6 +351,32 @@
            text-[15px] text-ink placeholder:text-ink-5 outline-none
            transition-colors focus:border-accent;
   }
+
+  /*
+   * A <select>'s drop-down list is painted by the operating system, not by
+   * this stylesheet — the classes above reach the closed control and stop
+   * there. On the dark theme that left a white list of grey options hanging
+   * off a dark field.
+   *
+   * `color-scheme` is the one property the OS widget does read. It is already
+   * declared on :root, but a select does not inherit it in Chrome, so it has
+   * to be restated here. The explicit <option> colours are the belt to that
+   * pair of braces: Firefox and Windows Chrome honour them, Safari ignores
+   * them and follows color-scheme instead, and between the two every browser
+   * ends up with a list that matches the field it dropped out of.
+   */
+  select.field {
+    color-scheme: inherit;
+    /* Room for the arrow the OS draws on the right. */
+    @apply pr-10;
+  }
+  select.field option {
+    background-color: var(--surface);
+    color: var(--ink);
+  }
+  select.field option:checked {
+    background-color: var(--raise-3);
+  }
 }
 
 @layer utilities {
