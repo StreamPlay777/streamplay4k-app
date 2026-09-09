@@ -5,7 +5,8 @@ import {
   PLAN_HIGHLIGHTS, PLAN_FEATURES, TRUST_POINTS, INVOICE_PAYMENT_METHODS,
 } from '../../data/pricing';
 import { track } from '../../lib/analytics';
-import OrderFlow from './OrderFlow';
+import OrderFlow, { type OrderDraft } from './OrderFlow';
+import { DEFAULT_DIAL_ISO } from '../../data/dialCodes';
 import OrderBar from './OrderBar';
 import Check from './Check';
 import PaymentMarks from '../PaymentMarks';
@@ -31,6 +32,15 @@ export default function PricingOrder() {
   const [termId, setTermId] = useState(DEFAULT_TERM_ID);
   const [devices, setDevices] = useState(DEFAULT_DEVICES);
   const [ordering, setOrdering] = useState(false);
+  /* Held here, not inside OrderFlow. Going Back to the plan unmounts that
+     panel, and state that lives inside it dies with it — which meant anyone
+     stepping back to add a device had to retype their number and email.
+     Retyping is where people give up. */
+  const [draft, setDraft] = useState<OrderDraft>({
+    dialIso: DEFAULT_DIAL_ISO,
+    national: '',
+    email: '',
+  });
   /**
    * Phones only. While the order form is open the configurator is folded away
    * so the fields are reachable without scrolling past it; tapping the plan
@@ -91,18 +101,6 @@ export default function PricingOrder() {
 
   /** Total for n devices on the current term — the engine, not a copy of it. */
   const totalFor = (n: number) => quote(termId, n).totalCents;
-
-  /**
-   * What a term saves against buying the same months in the shortest term,
-   * e.g. 12 months at $99.99 against four 3-month plans at $159.96. Straight
-   * arithmetic on the published prices — no invented "was" price, no monthly
-   * subscription we do not sell.
-   */
-  const shortest = useMemo(() => TERMS.reduce((a, t) => (t.months < a.months ? t : a), TERMS[0]), []);
-  const savingVsShortest = useMemo(() => Object.fromEntries(TERMS.map((t) => {
-    const same = Math.round(t.months / shortest.months) * shortest.baseCents;
-    return [t.id, t.months > shortest.months ? same - t.baseCents : 0];
-  })), [shortest]);
 
   const pickTerm = (id: string) => { setTermId(id); track('select_plan', { term: id, devices }); };
   const pickDevices = (n: number) => { setDevices(n); track('select_devices', { term: termId, devices: n }); };
@@ -193,10 +191,8 @@ export default function PricingOrder() {
                         // value" rather than leading with the badge, which sits
                         // first in the DOM because it is positioned.
                         aria-label={`${t.label}, ${money(t.baseCents)}, ${money(termMonthly[t.id])} per month${
-                          savingVsShortest[t.id] > 0
-                            ? `, saves ${money(savingVsShortest[t.id])} against ${shortest.label.toLowerCase()}`
-                            : ''
-                        }${best ? ', best value' : ''}`}
+                          best ? ', best value' : ''
+                        }`}
                         className={`term-tile relative rounded-xl border p-4 pt-5 text-left ${
                           on ? 'term-tile-on border-accent' : 'border-line-2 bg-raise hover:border-line-3'
                         }`}
@@ -223,11 +219,6 @@ export default function PricingOrder() {
                         <span className="nums mt-1.5 block text-[12px] text-ink-4">
                           {money(termMonthly[t.id])}/mo
                         </span>
-                        {savingVsShortest[t.id] > 0 && (
-                          <span className="nums mt-2.5 inline-block rounded-md bg-success/[.13] px-1.5 py-[3px] text-[10.5px] font-bold text-success">
-                            Save {money(savingVsShortest[t.id])}
-                          </span>
-                        )}
                       </button>
                     );
                   })}
@@ -325,7 +316,7 @@ export default function PricingOrder() {
           <div className="config-panel p-5 sm:p-7 lg:p-8">
             {ordering ? (
               <div className="flex h-full flex-col">
-                <OrderFlow q={q} onCancel={() => setOrdering(false)} />
+                <OrderFlow q={q} draft={draft} onDraftChange={setDraft} onCancel={() => setOrdering(false)} />
                 <Assurances className="mt-auto pt-7" />
               </div>
             ) : (

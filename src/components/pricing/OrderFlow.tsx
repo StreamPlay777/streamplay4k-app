@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money, type Quote } from '../../data/pricing';
 import { track } from '../../lib/analytics';
-import { buildPayload, submitOrder, stashOrder, IS_MOCK } from '../../lib/orderService';
+import { buildPayload, submitOrder, stashOrder } from '../../lib/orderService';
 import { isValidPhone, isValidEmail, phoneError, emailError } from './validation';
+import { DIAL_CODES, composePhone, dialCodeFor } from '../../data/dialCodes';
 import Check from './Check';
 
 /**
@@ -26,16 +27,49 @@ import Check from './Check';
  * focus the instant validation passes would cut people off mid-number. The
  * hand-off waits 700ms of quiet; Enter moves immediately.
  *
+ * DRAFT LIVES ABOVE THIS COMPONENT. Back to the plan unmounts this panel, so
+ * holding the typed details in local state threw them away — someone who went
+ * back to add a device had to retype their number and email. The draft is
+ * owned by PricingOrder and passed in; nothing else about the flow changes.
+ *
+ * THE NUMBER IS TWO CONTROLS, one string. The country code is chosen, not
+ * typed, so nobody has to know their own prefix and nobody sends us a number
+ * we cannot dial. Validation, the payload and the confirm step all read the
+ * composed value — the national part alone is never treated as the number.
+ *
  * UNCHANGED: validation rules, the submitOrder/buildPayload call, the stashed
  * order shape, the /thank-you redirect, and every analytics event.
  * phone_validated fires once, when the email field is first revealed.
  */
-export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => void }) {
+export interface OrderDraft {
+  /** ISO code of the chosen calling code, not the code itself: +1 is four countries. */
+  dialIso: string;
+  /** What was typed in the number field — no country prefix. */
+  national: string;
+  email: string;
+}
+
+export default function OrderFlow({
+  q,
+  draft,
+  onDraftChange,
+  onCancel,
+}: {
+  q: Quote;
+  draft: OrderDraft;
+  onDraftChange: (next: OrderDraft) => void;
+  onCancel: () => void;
+}) {
   const navigate = useNavigate();
   /** 'details' = step 2 of 3, 'confirm' = step 3 of 3. */
   const [stage, setStage] = useState<'details' | 'confirm'>('details');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
+  const { dialIso, national, email } = draft;
+  const country = dialCodeFor(dialIso);
+  /** The one true number. Everything downstream reads this, never `national`. */
+  const phone = composePhone(dialIso, national);
+  const setPhoneIso = (v: string) => onDraftChange({ ...draft, dialIso: v });
+  const setNational = (v: string) => onDraftChange({ ...draft, national: v });
+  const setEmail = (v: string) => onDraftChange({ ...draft, email: v });
   const [phoneErr, setPhoneErr] = useState<string | null>(null);
   const [emailErr, setEmailErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -182,44 +216,73 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
             </div>
           </dl>
 
+          {/* Says what the two fields are for before either is asked for.
+              "Why do you want my phone number?" is the hesitation that stalls
+              this step, and one sentence answers it. */}
+          <p className="mb-5 text-[13px] leading-relaxed text-ink-3">
+            We&apos;ll use these details to send your invoice and activation information.
+          </p>
+
           <label htmlFor="order-phone" className="block text-[13px] font-semibold text-ink-2">
             Phone / WhatsApp
           </label>
-          <div className="relative mt-2">
-            <input
-              ref={phoneRef}
-              id="order-phone"
-              name="phone"
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel"
-              value={phone}
-              onChange={(e) => { setPhone(e.target.value); setPhoneErr(null); }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  if (phoneOk) emailRef.current?.focus();
-                  else setPhoneErr(phoneError(phone));
-                }
-              }}
-              aria-invalid={!!phoneErr}
-              aria-describedby={phoneErr ? 'order-phone-err' : 'order-phone-hint'}
-              placeholder="+1 555 000 0000"
-              className={`field min-h-[48px] pr-10 ${phoneErr ? '!border-accent' : ''}`}
-            />
-            {phoneOk && (
-              <span className="field-check absolute right-3 top-1/2 -translate-y-1/2 text-success" aria-hidden="true">
-                <Check />
-              </span>
-            )}
+          {/* Country code is picked, not typed. The prefix is the part people
+              get wrong or leave off, and a wrong prefix is an order we cannot
+              deliver to. Stacked below 380px so neither control is squeezed. */}
+          <div className="mt-2 flex flex-wrap gap-2 min-[380px]:flex-nowrap">
+            <div className="relative w-full min-[380px]:w-[104px] min-[380px]:flex-none">
+              <label htmlFor="order-dial" className="sr-only">Country calling code</label>
+              <select
+                id="order-dial"
+                name="dialCode"
+                value={dialIso}
+                onChange={(e) => { setPhoneIso(e.target.value); setPhoneErr(null); }}
+                className="field min-h-[48px] !pr-8"
+              >
+                {DIAL_CODES.map((c) => (
+                  <option key={c.iso} value={c.iso}>{`${c.flag} ${c.dial}`}</option>
+                ))}
+              </select>
+            </div>
+            <div className="relative min-w-0 flex-1">
+              <input
+                ref={phoneRef}
+                id="order-phone"
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel-national"
+                value={national}
+                onChange={(e) => { setNational(e.target.value); setPhoneErr(null); }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (phoneOk) emailRef.current?.focus();
+                    else setPhoneErr(phoneError(phone));
+                  }
+                }}
+                aria-invalid={!!phoneErr}
+                aria-describedby={phoneErr ? 'order-phone-err' : 'order-phone-hint'}
+                placeholder="Your phone number"
+                className={`field min-h-[48px] pr-10 ${phoneErr ? '!border-accent' : ''}`}
+              />
+              {phoneOk && (
+                <span className="field-check absolute right-3 top-1/2 -translate-y-1/2 text-success" aria-hidden="true">
+                  <Check />
+                </span>
+              )}
+            </div>
           </div>
           {phoneErr ? (
             <p id="order-phone-err" role="alert" className="mt-2 flex items-center gap-1.5 text-[12.5px] text-accent-ink">
               <span aria-hidden="true">✕</span> {phoneErr}
             </p>
           ) : (
-            <p id="order-phone-hint" className="mt-2 text-[12px] text-ink-4">
-              Include your country code. Any country is fine.
+            /* The country in words. The closed select shows a flag and a
+               number, which on Windows degrades to letters — this line is
+               where the choice is unambiguous either way. */
+            <p id="order-phone-hint" className="mt-2 text-[12px] text-ink-3">
+              {country.name} ({country.dial}) — change it above if you&apos;re elsewhere.
             </p>
           )}
 
@@ -307,12 +370,6 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
             <strong className="font-semibold text-ink">No payment is taken on this page.</strong>{' '}
             We&apos;ll send your invoice and payment instructions by email and WhatsApp.
           </p>
-
-          {IS_MOCK && (
-            <p className="mt-3 rounded-lg border border-line-2 bg-raise px-3 py-2 text-center text-[11.5px] text-ink-4">
-              Development mode — no order endpoint configured, so nothing is sent.
-            </p>
-          )}
         </div>
       )}
     </form>

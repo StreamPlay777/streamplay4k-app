@@ -76,8 +76,18 @@ export function buildPayload(
 
 const ENDPOINT = import.meta.env.VITE_ORDER_ENDPOINT ?? '/api/order';
 
-/** True while no real endpoint is configured — the UI surfaces this. */
-export const IS_MOCK = !import.meta.env.VITE_ORDER_ENDPOINT;
+/**
+ * True while no real endpoint is configured — development only.
+ *
+ * `import.meta.env.PROD` is the second half of the condition, and the
+ * important half. A production build with VITE_ORDER_ENDPOINT accidentally
+ * unset would otherwise fall into the mock, tell every customer their order
+ * was received, and send nothing — a shop that looks like it is working while
+ * taking no orders, which is the worst failure this file can have. In a
+ * production build the mock branch is not merely skipped, it is compiled out:
+ * PROD is a literal, so the bundler drops the whole block.
+ */
+export const IS_MOCK = import.meta.env.DEV && !import.meta.env.VITE_ORDER_ENDPOINT;
 
 export async function submitOrder(payload: OrderPayload): Promise<OrderResult> {
   // Development / preview: acknowledge locally and say so. Never presented as
@@ -92,17 +102,44 @@ export async function submitOrder(payload: OrderPayload): Promise<OrderResult> {
     return { ok: true, orderId: `DEV-${Date.now().toString(36).toUpperCase()}`, mock: true };
   }
 
+  /*
+   * SUCCESS IS SOMETHING THE SERVER SAYS, not something we assume.
+   *
+   * Everything below is a way of not reaching the thank-you page unless the
+   * order was actually recorded. The failure that matters is the quiet one: a
+   * misrouted /api/order answers with the SPA's index.html, which is a 200
+   * carrying HTML. Reading it as JSON throws, and the throw has to be a
+   * failure — treating an unreadable body as "probably fine" would send the
+   * customer to a confirmation for an order nobody has.
+   */
   try {
     const res = await fetch(ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      // Without this a stalled connection leaves the button on "Sending…"
+      // forever, and the customer resubmits or leaves.
+      signal: AbortSignal.timeout(20_000),
     });
-    if (!res.ok) return { ok: false, error: `Server responded ${res.status}` };
-    const data = (await res.json()) as { orderId?: string };
+
+    // Parsed before the status is judged, because the useful message for a
+    // 422 or a 429 is in the body.
+    const data = (await res.json().catch(() => null)) as
+      | { ok?: boolean; orderId?: string; error?: string; errors?: Record<string, string> }
+      | null;
+
+    if (!res.ok || !data || data.ok === false) {
+      const field = data?.errors && Object.values(data.errors)[0];
+      if (field) return { ok: false, error: field };
+      if (res.status === 429) {
+        return { ok: false, error: 'Too many attempts just now. Please try again in a few minutes, or message us on WhatsApp.' };
+      }
+      return { ok: false, error: 'We could not record your order. Please try again, or message us on WhatsApp.' };
+    }
+
     return { ok: true, orderId: data.orderId ?? '', mock: false };
   } catch {
-    return { ok: false, error: 'Could not reach the server. Please try again.' };
+    return { ok: false, error: 'Could not reach the server. Please try again, or message us on WhatsApp.' };
   }
 }
 

@@ -22,9 +22,11 @@ export default function Footer() {
         <div className="grid gap-11 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
           {/* Brand column */}
           <div>
-            <Link to={routes.home} className="flex items-center gap-1.5">
+            {/* The wordmark stands alone, as it now does in the navbar. The
+                separate red "4K" beside it never matched the mark's own
+                weight or baseline, and the two headers disagreed. */}
+            <Link to={routes.home} className="flex items-center" aria-label={`${site.name} home`}>
               <Wordmark className="h-7 w-auto" />
-              <span className="font-display text-[16px] font-extrabold text-accent-ink">4K</span>
             </Link>
             <p className="mt-4 max-w-[320px] text-[14px] leading-relaxed text-ink-4">{site.description}</p>
 

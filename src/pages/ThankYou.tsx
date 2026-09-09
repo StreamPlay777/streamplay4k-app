@@ -21,7 +21,7 @@ export default function ThankYou() {
 
   const steps = [
     'We review your order.',
-    'Your invoice and payment instructions are sent shortly by email and WhatsApp.',
+    'Your invoice and payment instructions arrive by email and on WhatsApp.',
     `After payment, your account details are usually delivered within ${site.activationWindow}.`,
   ];
 
@@ -30,14 +30,23 @@ export default function ThankYou() {
       <Seo seo={pageSeo[routes.thankYou]} />
       <section className="section bg-bg">
       <div className="mx-auto max-w-[720px]">
-        <p className="text-[12px] font-bold uppercase tracking-[.18em] text-accent-bright">Order confirmed</p>
+        {/* "Order confirmed / You're all set" read as *paid*. Nothing has been
+            charged yet, and a customer who thinks it has will not look for the
+            invoice. This says what happened and what is still to come. */}
+        <p className="text-[12px] font-bold uppercase tracking-[.18em] text-accent-bright">
+          No payment taken yet
+        </p>
         <h1
           className="mt-4 font-display font-extrabold leading-none text-ink"
           style={{ fontSize: 'clamp(38px, 6.5vw, 60px)' }}
         >
-          You're all set.
+          Order received!
         </h1>
-        <p className="mt-5 text-[18px] text-ink-3">We'll be in touch shortly.</p>
+        <p className="mt-5 text-[18px] leading-relaxed text-ink-3">
+          Your invoice and payment instructions are on their way — we&apos;ll send them
+          {' '}<strong className="font-semibold text-ink-2">by email and on WhatsApp</strong>, so
+          reply wherever suits you.
+        </p>
 
         {order ? (
           <dl className="mt-9 rounded-2xl border border-line-2 bg-raise p-5 text-[14.5px] sm:p-6">
@@ -57,12 +66,20 @@ export default function ThankYou() {
               <dd className="nums font-display text-[19px] font-extrabold text-ink">{order.total}</dd>
             </div>
             {order.orderId && (
-              <p className="mt-4 text-[12.5px] text-ink-5">Reference {order.orderId}</p>
-            )}
-            {order.mock && (
-              <p className="mt-3 rounded-lg border border-line-2 bg-raise px-3 py-2 text-[12px] text-ink-4">
-                Development mode — this order was not actually submitted.
-              </p>
+              /* This is the number we ask for when they message us, so it is
+                 set out to be read and copied rather than buried in 12px grey
+                 under the total. */
+              <div className="mt-5 rounded-xl border border-accent/30 bg-accent/[.07] px-4 py-3.5">
+                <p className="text-[10.5px] font-bold uppercase tracking-[.16em] text-accent-ink">
+                  Your order reference
+                </p>
+                <p className="nums mt-1.5 select-all font-display text-[21px] font-extrabold leading-none tracking-[.01em] text-ink sm:text-[23px]">
+                  {order.orderId}
+                </p>
+                <p className="mt-2 text-[12.5px] leading-relaxed text-ink-3">
+                  Quote this if you message us — it is also in your confirmation email.
+                </p>
+              </div>
             )}
           </dl>
         ) : (
