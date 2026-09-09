@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { site, heroStats, routes, trialUrl } from '../data/site';
 import { track } from '../lib/analytics';
 import Reveal from '../components/Reveal';
+import CountUp from '../components/CountUp';
 import { useAutoScroll } from '../hooks/useAutoScroll';
 import ChannelFinder from '../components/ChannelFinder';
 import { TERMS, quote, money, savingsPerMonth, DEFAULT_TERM_ID, INVOICE_PAYMENT_METHODS } from '../data/pricing';
@@ -171,12 +172,12 @@ function StatBar() {
             <dt className="mt-2.5 font-display text-[11px] font-bold uppercase tracking-[.18em] text-ink-3 sm:text-[11.5px]">
               {s.label}
             </dt>
-            <dd
+            <CountUp
+              as="dd"
+              value={s.value}
               className="nums text-grad font-display font-extrabold leading-[.95]"
               style={{ fontSize: 'clamp(28px, 4.4vw, 42px)' }}
-            >
-              {s.value}
-            </dd>
+            />
           </div>
         ))}
       </dl>
@@ -665,9 +666,11 @@ function Reviews() {
         <dl className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line-2 bg-raise-2 lg:grid-cols-4">
           {stats.map((s) => (
             <div key={s.label} className="bg-surface px-4 py-5 sm:px-6 sm:py-7">
-              <dt className="font-display text-[24px] font-extrabold leading-none text-ink sm:text-[30px] lg:text-[34px]">
-                {s.value}
-              </dt>
+              <CountUp
+                as="dt"
+                value={s.value}
+                className="font-display text-[24px] font-extrabold leading-none text-ink sm:text-[30px] lg:text-[34px]"
+              />
               <dd className="mt-2 text-[10.5px] font-bold uppercase tracking-[.13em] text-ink-4 sm:text-[11px]">
                 {s.label}
               </dd>

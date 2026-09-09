@@ -161,6 +161,27 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
 
       {details ? (
         <div className="mt-5">
+          {/* Your order, stated before anything is asked of you.
+              It used to appear only once both fields were valid, which meant
+              someone typing their phone number had no reminder on screen of
+              what they were buying or what it costs — the two facts most
+              likely to make them hesitate. It is live: change the term or the
+              device count on the left and these figures follow. */}
+          <dl className="order-summary mb-6 rounded-xl border border-line-2 bg-raise-2 px-4 py-3.5">
+            <div className="flex items-baseline justify-between gap-4">
+              <dt className="text-[11px] font-bold uppercase tracking-[.14em] text-ink-5">Your order</dt>
+              <dd className="nums text-[12px] text-ink-4">≈ {money(q.perMonthCents)}/mo</dd>
+            </div>
+            <div className="mt-2 flex items-end justify-between gap-4">
+              <dd className="font-display text-[14.5px] font-bold text-ink">
+                {q.term.label} · {q.devices} {q.devices === 1 ? 'device' : 'devices'}
+              </dd>
+              <dd className="nums font-display text-[22px] font-extrabold leading-none text-ink">
+                {money(q.totalCents)}
+              </dd>
+            </div>
+          </dl>
+
           <label htmlFor="order-phone" className="block text-[13px] font-semibold text-ink-2">
             Phone / WhatsApp
           </label>
@@ -235,24 +256,12 @@ export default function OrderFlow({ q, onCancel }: { q: Quote; onCancel: () => v
             </div>
           )}
 
-          {/* Summary and Continue appear once both fields are done, so the
-              panel only ever shows the next thing to do. */}
+          {/* Continue still waits for both fields — the summary above already
+              carries the figures, so repeating them here would just be the
+              same card twice on one short panel. */}
           {emailShown && (
           <div className={emailOk ? 'field-unfold' : 'opacity-50'}>
-          <dl className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-line bg-raise px-4 py-3.5">
-            <div>
-              <dt className="sr-only">Selection</dt>
-              <dd className="font-display text-[14px] font-bold text-ink">
-                {q.term.label} · {q.devices} {q.devices === 1 ? 'device' : 'devices'}
-              </dd>
-            </div>
-            <div className="text-right">
-              <dt className="sr-only">Total</dt>
-              <dd className="nums font-display text-[19px] font-extrabold text-ink">{money(q.totalCents)}</dd>
-            </div>
-          </dl>
-
-          <button type="submit" className="btn-accent group mt-5 w-full">
+          <button type="submit" className="btn-accent group mt-6 w-full">
             Continue
             <span className="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden="true">
               →

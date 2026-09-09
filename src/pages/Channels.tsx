@@ -2,6 +2,7 @@ import Seo from '../components/Seo';
 import { pageSeo } from '../data/seo';
 import { site, routes } from '../data/site';
 import ChannelBrowser from '../components/ChannelBrowser';
+import CountUp from '../components/CountUp';
 import { channelStats } from '../data/channelStats';
 
 /**
@@ -14,7 +15,7 @@ import { channelStats } from '../data/channelStats';
 export default function Channels() {
   // Every figure is counted from the shipped catalogue rather than asserted.
   const stats = [
-    { value: channelStats.total.toLocaleString('en-US'), label: 'Live channels' },
+    { value: site.channels, label: 'Live channels' },
     { value: String(channelStats.regions), label: 'Countries & regions' },
     { value: site.vod, label: 'Movies & series' },
   ];
@@ -43,7 +44,7 @@ export default function Channels() {
         <div className="mx-auto grid max-w-shell gap-4 sm:grid-cols-3">
           {stats.map((s) => (
             <div key={s.label} className="card px-6 py-7">
-              <div className="font-display text-[36px] font-extrabold leading-none text-ink">{s.value}</div>
+              <CountUp as="div" value={s.value} className="font-display text-[36px] font-extrabold leading-none text-ink" />
               <div className="mt-2.5 text-[14px] text-ink-3">{s.label}</div>
             </div>
           ))}
@@ -54,9 +55,9 @@ export default function Channels() {
       <section className="px-7 pb-[110px]">
         <ChannelBrowser />
         <p className="mx-auto mt-5 max-w-shell nums text-[10.5px] text-ink-6">
-          {channelStats.total.toLocaleString('en-US')} channels across {channelStats.regions} countries and
-          regions, from the current line-up ({channelStats.generated}). Channel names and logos belong to
-          their owners and are shown for identification only.
+          Browse the live line-up across {channelStats.regions} countries and regions, updated{' '}
+          {channelStats.generated}. Channel names belong to their owners and are shown for
+          identification only.
         </p>
       </section>
     </>

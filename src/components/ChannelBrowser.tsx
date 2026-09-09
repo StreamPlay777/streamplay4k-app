@@ -14,7 +14,7 @@ const GROUPS: Group[] = ['sports', 'movies', 'news', 'entertainment', 'kids', 'u
 const PAGE = 300;
 
 /**
- * The full channel catalogue — 46,758 rows, searchable.
+ * The full channel catalogue, searchable.
  *
  * LOADING
  * The catalogue is fetched on mount rather than bundled, so the page shell,
@@ -23,8 +23,8 @@ const PAGE = 300;
  * page never shows a zero it later corrects.
  *
  * FILTERING
- * Every keystroke re-runs one pass over 46,758 rows, which measures at about
- * 8ms — fast enough that debouncing would only add latency. The rows already
+ * Every keystroke re-runs one pass over the whole catalogue, which measures at
+ * about 8ms — fast enough that debouncing would only add latency. Rows already
  * carry a lowercased haystack and precomputed group flags from the build step;
  * without those this would be far too slow to do synchronously.
  *
@@ -67,6 +67,9 @@ export default function ChannelBrowser() {
    * answering a different question than the one they asked. Once any control
    * is touched before the fetch returns, the spinner is the honest answer.
    */
+  // Something is narrowing the list, so a "of N" total describes a search
+  // result rather than the size of the catalogue.
+  const narrowed = Boolean(text.trim() || group);
   const untouched = !text.trim() && !group && region === 'US' && !adult;
   const rows = result
     ? result.channels
@@ -90,7 +93,6 @@ export default function ChannelBrowser() {
   }, [cat, regionQuery]);
 
   const activeRegion = cat?.regions.find((r) => r.code === region);
-  const total = channelStats.total;
 
   return (
     <div className="mx-auto max-w-shell overflow-hidden rounded-[18px] border border-line bg-surface">
@@ -102,7 +104,7 @@ export default function ChannelBrowser() {
             ref={searchRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={`Search all ${total.toLocaleString('en-US')} channels — sport, news, films, local…`}
+            placeholder="Search the channel line-up — sport, news, films, local…"
             aria-label="Search channels"
             className="field !py-2.5 !pr-10"
           />
@@ -143,9 +145,7 @@ export default function ChannelBrowser() {
               <span className={`flex-1 text-[14.5px] font-semibold ${region === null ? 'text-white' : 'text-ink-2'}`}>
                 Everywhere
               </span>
-              <span className={`nums text-[11.5px] ${region === null ? 'text-white/80' : 'text-ink-4'}`}>
-                {total.toLocaleString('en-US')}
-              </span>
+
             </button>
             {regions.map((r) => {
               const on = r.code === region;
@@ -208,15 +208,28 @@ export default function ChannelBrowser() {
             <p className="text-[14px] text-ink-3" aria-live="polite">
               {result || rows ? (
                 <>
+                  {/* "300 of N matches" only while something is actually
+                      narrowing the list. With no search and no category, N
+                      would BE the catalogue's row count — printing it next to
+                      the line-up figure the site advertises reads as the site
+                      contradicting itself, so unfiltered views just say how
+                      many are on screen. */}
                   Showing{' '}
                   <strong className="font-semibold text-ink">
                     {(result ? result.channels.length : rows!.length).toLocaleString('en-US')}
-                  </strong>{' '}
-                  of{' '}
-                  <strong className="font-semibold text-ink">
-                    {(result ? result.matched : channelStats.topRegions.find((r) => r[0] === 'US')?.[3] ?? channelStats.total).toLocaleString('en-US')}
                   </strong>
-                  {result ? (activeRegion ? ` in ${activeRegion.name}` : ' channels') : ' in United States'}
+                  {narrowed && result ? (
+                    <>
+                      {' '}of{' '}
+                      <strong className="font-semibold text-ink">
+                        {result.matched.toLocaleString('en-US')}
+                      </strong>{' '}
+                      matches
+                    </>
+                  ) : (
+                    ' channels'
+                  )}
+                  {activeRegion ? ` in ${activeRegion.name}` : ''}
                 </>
               ) : failed ? (
                 'The channel list could not be loaded.'
@@ -230,30 +243,50 @@ export default function ChannelBrowser() {
           {/* Grid */}
           {rows ? (
             <>
-              <ul className="mt-4 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+              {/* Dense tile grid. Six across at the widest, not the seven the
+                  reference uses — at seven, names like "24/7: AMAZING STORIES"
+                  truncate to "24/7: AMAZING.." on almost every tile, and a grid
+                  where most labels end in an ellipsis stops being a list you
+                  can read.
+
+                  The reference repeats one generic TV glyph on every tile. A
+                  monogram of the channel's own initials carries the same
+                  weight visually and actually distinguishes one tile from the
+                  next, so the grid scans instead of shimmering. */}
+              <ul className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                 {rows.map((ch, i) => {
                   const mark = logoFor(ch.name);
                   return (
-                    <li
-                      key={`${ch.name}-${i}`}
-                      className="rounded-[11px] border border-line bg-raise px-[15px] py-3.5 transition-colors hover:border-accent/40 hover:bg-accent/[.05]"
-                    >
-                      <div className="flex items-start gap-2.5">
-                        {mark ? (
-                          <span className="logo-plate grid h-8 w-8 flex-none place-items-center overflow-hidden rounded-md p-1">
-                            <img src={mark} alt="" loading="lazy" className="max-h-full max-w-full object-contain" />
-                          </span>
-                        ) : (
-                          <span className="grid h-8 w-8 flex-none place-items-center rounded-md border border-line bg-raise-2 text-[10.5px] font-bold text-ink-3">
-                            {channelInitials(ch.name)}
-                          </span>
-                        )}
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate font-display text-[14.5px] font-bold text-ink">{ch.name}</span>
-                          <span className="mt-0.5 block truncate text-[11.5px] uppercase tracking-[.08em] text-ink-4">
-                            {ch.flag} {ch.category}
+                    <li key={`${ch.name}-${i}`}>
+                      <div className="ch-tile group h-full rounded-xl border border-line bg-raise p-3 text-center">
+                        <span className="relative mx-auto block h-11 w-11">
+                          {mark ? (
+                            <span className="logo-plate grid h-11 w-11 place-items-center overflow-hidden rounded-lg p-1.5">
+                              <img src={mark} alt="" loading="lazy" className="max-h-full max-w-full object-contain" />
+                            </span>
+                          ) : (
+                            <span className="ch-mono grid h-11 w-11 place-items-center rounded-lg font-display text-[13px] font-extrabold">
+                              {channelInitials(ch.name)}
+                            </span>
+                          )}
+                          {/* Flag rides the corner of the mark rather than
+                              taking a row of its own — it is a qualifier, not
+                              a field. */}
+                          <span
+                            className="absolute -bottom-1 -right-1 grid h-[18px] w-[18px] place-items-center rounded-full bg-surface text-[10px] ring-1 ring-line"
+                            title={ch.regionName}
+                            aria-hidden="true"
+                          >
+                            {ch.flag}
                           </span>
                         </span>
+
+                        <p className="ch-name mt-2.5 text-[12.5px] font-semibold leading-[1.3] text-ink-2">
+                          {ch.name}
+                        </p>
+                        <p className="mt-1 truncate text-[10.5px] uppercase tracking-[.08em] text-ink-5">
+                          {ch.category}
+                        </p>
                       </div>
                     </li>
                   );

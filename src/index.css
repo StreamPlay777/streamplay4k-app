@@ -278,10 +278,55 @@
   .btn-accent {
     @apply btn bg-accent text-white rounded-xl px-7 py-[15px] text-[15.5px]
            shadow-cta hover:bg-accent-hover;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  /* A light sweeps across the button on hover, once.
+     ::before rather than a background-position animation: the sheen has to
+     travel independently of the button's own fill, and a transform on a
+     pseudo-element is composited, so a row of these costs nothing to paint.
+     It is a single pass, not a loop — a button that shines forever reads as a
+     banner ad rather than a control. */
+  .btn-accent::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / .28) 50%, transparent 65%);
+    transform: translateX(-120%);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-accent:hover::before { animation: btn-sheen .62s cubic-bezier(.3, .7, .4, 1); }
+  }
+  @keyframes btn-sheen {
+    to { transform: translateX(120%); }
   }
   .btn-outline {
     @apply btn rounded-xl px-7 py-[15px] text-[15.5px] text-ink border
            border-line-2 bg-raise hover:border-accent hover:text-white;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  /* The accent fills in from the left instead of the border merely changing
+     colour, so the secondary button has somewhere to go on hover too. */
+  .btn-outline::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, var(--grad-from), var(--grad-to));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .34s cubic-bezier(.22, 1, .36, 1);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-outline:hover::before { transform: scaleX(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-accent:hover::before { animation: none; }
+    .btn-outline::before { transition: none; }
   }
   .btn-sm {
     @apply btn rounded-[9px] px-4 py-2 text-[13.5px];
@@ -470,10 +515,14 @@
 
 .js .reveal:not(.is-in) {
   opacity: 0;
-  transform: translate3d(0, var(--reveal-shift, 22px), 0);
+  /* A hair of scale under the rise. On its own the translate reads as content
+     sliding into position; with the scale it reads as the block settling, which
+     is the difference between a page that moves and a page that feels alive.
+     Kept at .985 — anything more and text visibly resamples as it lands. */
+  transform: translate3d(0, var(--reveal-shift, 22px), 0) scale(var(--reveal-scale, .985));
 }
 
-.reveal.is-in { opacity: 1; transform: none; }
+.reveal.is-in { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 
 /* Once revealed there is nothing left to composite. */
 .reveal.is-in { will-change: auto; }
@@ -726,6 +775,49 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .wa-dot { animation: none; }
+}
+
+/* The order summary announces itself once when the details step opens, then
+   holds still — a card that re-animated on every price change would flicker
+   while someone is adjusting devices. */
+.order-summary { animation: field-unfold .26s cubic-bezier(.22, 1, .36, 1) both; }
+@media (prefers-reduced-motion: reduce) { .order-summary { animation: none; } }
+
+/* ── Channel tiles ─────────────────────────────────────────────────────────
+   A grid of several hundred tiles, so everything here has to be cheap. The
+   hover is transform and colour only — both composited — and there is no
+   shadow animation, which would repaint the whole grid on a mouse sweep. */
+.ch-tile {
+  transition: transform .18s cubic-bezier(.22, 1, .36, 1), border-color .18s ease, background-color .18s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ch-tile:hover {
+    transform: translateY(-2px);
+    border-color: rgb(255 43 32 / .38);
+    background: rgb(255 43 32 / .05);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch-tile { transition: none; }
+  .ch-tile:hover { transform: none; }
+}
+
+/* Initials plate. Tinted rather than grey so a wall of them still reads as
+   part of the brand instead of as missing images. */
+.ch-mono {
+  color: var(--accent-ink);
+  background: linear-gradient(150deg, rgb(255 43 32 / .16), rgb(255 122 24 / .07));
+  box-shadow: inset 0 0 0 1px rgb(255 43 32 / .2);
+}
+
+/* Two lines, then ellipsis — a fixed height so tiles in a row stay aligned
+   whether the name wraps once or not at all. */
+.ch-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6em;
 }
 
 /* Seasonal offer bar. Solid brand fill in both themes: it sits above the

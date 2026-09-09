@@ -224,7 +224,7 @@ export default function ChannelFinder() {
                 ) : (
                   <p className="px-3 py-3 text-[14px] text-ink-4">
                     {cat
-                      ? <>Nothing in the {channelStats.total.toLocaleString('en-US')}-channel line-up matches that. </>
+                      ? <>Nothing in the line-up matches that. </>
                       : <>No match in the quick list — the full line-up is still loading. </>}
                     <Link to={routes.contact} className="text-accent-link hover:underline">Ask us</Link>{' '}
                     and we will check it for you.
@@ -240,8 +240,7 @@ export default function ChannelFinder() {
 
           {!open && (
             <p className="mt-3 px-1 text-[12.5px] text-ink-5">
-              Search {channelStats.total.toLocaleString('en-US')} channels across{' '}
-              {channelStats.regions} countries and regions. Start typing.
+              Search the full line-up across {channelStats.regions} countries and regions. Start typing.
             </p>
           )}
         </div>
