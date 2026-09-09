@@ -19,6 +19,19 @@ RewriteCond %{REQUEST_FILENAME} -d
 RewriteCond %{REQUEST_URI} !/$
 RewriteRule ^(.*)$ /$1/ [R=301,L]
 
+# ── API ───────────────────────────────────────────────────────────────────────
+# /api/order has no extension and no file on disk under that exact name, so the
+# SPA fallback below would match it first and hand the browser index.html — a
+# 200 with an HTML body, which fetch() parses as a failed JSON response. This
+# rule must stay ABOVE the fallback.
+RewriteRule ^api/order/?$ /api/order.php [L]
+
+# Nothing else under /api/ is meant to be reachable. lib/ and templates/ are
+# includes, config.php holds the Mailgun key. Deny them outright rather than
+# relying on PHP to refuse to output anything useful.
+RewriteRule ^api/(lib|templates)/ - [F,L]
+RewriteRule ^api/config(\.example)?\.php$ - [F,L]
+
 # ── SPA fallback ──────────────────────────────────────────────────────────────
 # Only for URLs with nothing on disk: campaign routes not yet pre-rendered,
 # /blog/<slug>/ for a post added after deploy, and client-side navigation.

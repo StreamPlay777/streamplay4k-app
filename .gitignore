@@ -3,3 +3,8 @@ dist
 .env
 .env.local
 *.local
+
+# Server-side secrets. config.php holds the Mailgun sending key and the
+# internal orders inbox; it is created from config.example.php on the server
+# and must never be committed.
+server/api/config.php
