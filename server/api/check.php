@@ -130,6 +130,88 @@ if ($hasConfig && !$phpOk) {
     }
 }
 
+/* ── Mailgun, tested against Mailgun ───────────────────────────────
+   "Filled in" is not the same as "works". The three ways this goes wrong —
+   an SMTP password pasted where an API key belongs, a key from the EU region
+   against a US base URL, and a domain that was never verified — all look
+   identical in the config file and all fail silently at the first order.
+   One authenticated GET tells them apart. It sends no email. */
+if ($hasConfig && $phpOk && $curl && !empty($cfg['mailgun_key']) && !empty($cfg['mailgun_domain'])) {
+    $base = isset($cfg['mailgun_base']) ? rtrim($cfg['mailgun_base'], '/') : 'https://api.mailgun.net/v3';
+    $ch = curl_init($base . '/domains/' . rawurlencode($cfg['mailgun_domain']));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERPWD, 'api:' . $cfg['mailgun_key']);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 12);
+    $mgBody = curl_exec($ch);
+    $mgCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $mgErr = curl_error($ch);
+    curl_close($ch);
+
+    if ($mgCode === 200) {
+        $state = '';
+        $d = json_decode((string) $mgBody, true);
+        if (is_array($d) && isset($d['domain']['state'])) $state = $d['domain']['state'];
+        $verified = ($state === '' || $state === 'active');
+        $checks[] = array(
+            'ok'   => $verified,
+            'name' => 'Mailgun key works',
+            'got'  => $verified ? 'yes — domain active' : ('domain state: ' . $state),
+            'fix'  => 'Mailgun accepted the key but the domain is not active yet. Finish the DNS records '
+                    . 'under Send &rarr; Domain settings &rarr; DNS records, then click Verify.',
+        );
+    } else {
+        $why = 'Mailgun refused the request (HTTP ' . $mgCode . ').';
+        if ($mgCode === 401) {
+            $why = 'Mailgun says the key is wrong (401). Two things this usually is: you pasted the '
+                 . '<b>SMTP password</b> instead of an API key &mdash; they are different, and only an API '
+                 . 'key works here; or the key is from the wrong region. Your domain is US, so '
+                 . 'mailgun_base must stay <code>https://api.mailgun.net/v3</code> (EU accounts use '
+                 . 'api.eu.mailgun.net). Get a key at Send &rarr; Domain settings &rarr; Sending API keys.';
+        } elseif ($mgCode === 404) {
+            $why = 'The key works but Mailgun has no domain called <code>'
+                 . htmlspecialchars($cfg['mailgun_domain'], ENT_QUOTES, 'UTF-8')
+                 . '</code>. Check the spelling, and that you are looking at the same Mailgun account.';
+        } elseif ($mgCode === 0) {
+            $why = 'Could not reach Mailgun at all' . ($mgErr ? ' (' . htmlspecialchars($mgErr, ENT_QUOTES, 'UTF-8') . ')' : '')
+                 . '. If this persists, ask Hostinger whether outbound HTTPS is blocked.';
+        }
+        $checks[] = array('ok' => false, 'name' => 'Mailgun key works', 'got' => 'HTTP ' . $mgCode, 'fix' => $why);
+    }
+}
+
+/* ── Optionally, actually send one ────────────────────────────────── */
+/* Only ever to orders_inbox from the config — never to an address supplied in
+   the request. The worst anyone who finds this page can do is mail its owner,
+   and the page is meant to be deleted once setup is done. */
+$sent = null;
+if (isset($_POST['sendtest']) && $hasConfig && $phpOk && $curl && !empty($cfg['mailgun_key']) && !empty($cfg['orders_inbox'])) {
+    $base = isset($cfg['mailgun_base']) ? rtrim($cfg['mailgun_base'], '/') : 'https://api.mailgun.net/v3';
+    $ch = curl_init($base . '/' . rawurlencode($cfg['mailgun_domain']) . '/messages');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_USERPWD, 'api:' . $cfg['mailgun_key']);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+        'from'    => $cfg['mail_from'],
+        'to'      => $cfg['orders_inbox'],
+        'subject' => 'StreamPlay4K test — your order emails are working',
+        'text'    => "This is the test from api/check.php on your server.
+
+"
+                   . "If you are reading it, Mailgun is configured correctly and real order
+"
+                   . "confirmations will reach your customers.
+
+"
+                   . "Remember to delete api/check.php now that setup is done.
+",
+    )));
+    $tBody = curl_exec($ch);
+    $tCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    $sent = array('ok' => ($tCode >= 200 && $tCode < 300), 'code' => $tCode, 'body' => (string) $tBody);
+}
+
 /* ── The rewrite rule, tested by actually asking for the URL ──────── */
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
@@ -201,6 +283,10 @@ foreach ($checks as $c) {
   footer{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);
          font-size:13px;color:var(--mut)}
   code{font-family:ui-monospace,Menlo,monospace;font-size:.92em}
+  .btn{font:600 14px/1 inherit;background:#FF2B20;color:#fff;border:0;border-radius:8px;
+       padding:12px 18px;cursor:pointer}
+  .btn:hover{filter:brightness(1.08)}
+  .btn-note{font-size:13px;color:var(--mut);margin-left:12px}
 </style>
 </head><body><div class="w">
 
@@ -213,6 +299,25 @@ foreach ($checks as $c) {
 <?php else: ?>
   <div class="verdict v-bad">✗ <?php echo $fails; ?> problem<?php echo $fails === 1 ? '' : 's'; ?> to fix.
     Orders will not work correctly until <?php echo $fails === 1 ? 'it is' : 'they are'; ?> sorted.</div>
+<?php endif; ?>
+
+<?php if ($sent !== null): ?>
+  <div class="verdict <?php echo $sent['ok'] ? 'v-ok' : 'v-bad'; ?>">
+    <?php if ($sent['ok']): ?>
+      ✓ Test email sent to <?php echo htmlspecialchars($cfg['orders_inbox'], ENT_QUOTES, 'UTF-8'); ?>.
+      Check the inbox — and the spam folder, since it is the first mail from this domain.
+    <?php else: ?>
+      ✗ Mailgun refused it (HTTP <?php echo (int) $sent['code']; ?>).
+      <?php echo htmlspecialchars(substr($sent['body'], 0, 200), ENT_QUOTES, 'UTF-8'); ?>
+    <?php endif; ?>
+  </div>
+<?php endif; ?>
+
+<?php if ($hasConfig && $phpOk && !empty($cfg['mailgun_key']) && !empty($cfg['orders_inbox'])): ?>
+  <form method="post" style="margin:0 0 26px">
+    <button type="submit" name="sendtest" value="1" class="btn">Send a test email to my inbox</button>
+    <span class="btn-note">Goes to <?php echo htmlspecialchars($cfg['orders_inbox'], ENT_QUOTES, 'UTF-8'); ?> only.</span>
+  </form>
 <?php endif; ?>
 
 <?php foreach ($checks as $c):
