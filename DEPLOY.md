@@ -292,17 +292,21 @@ and use card `4242 4242 4242 4242`. Confirm the order flips to paid in
 
 ## 7. Google Sheets
 
-**Start from a blank sheet, not a file.** Go to
-**[sheets.new](https://sheets.new)**, paste `server/google-sheets/Code.gs` into
-**Extensions → Apps Script**, set your token, and run **setup** once. The script
-builds both tabs, the formatting and the colours itself.
+**The sheet is already built.** `server/google-sheets/StreamPlay4K-orders.xlsx`
+has the columns, the colours, the status dropdown, the conditional formatting
+and the summary formulas in it, and the setup steps written on its first tab.
 
-> Do not upload a spreadsheet file to Drive for this. An uploaded file stays an
-> *Excel* file, and Excel files have no **Extensions** menu — so Apps Script is
-> nowhere to be found. A blank Google Sheet has it from the start.
+Upload it to [drive.google.com](https://drive.google.com), open it, then
+**File → Save as Google Sheets**.
 
-Every click is written out in `server/google-sheets/README.md`. Two values end
-up in `config.php`.
+> ⚠️ Do not skip that. An uploaded spreadsheet stays an *Excel* file until you
+> convert it, and Excel files have no **Extensions** menu — so Apps Script
+> cannot be found. Converting is what makes it a real Google Sheet.
+
+Then paste `server/google-sheets/Code.gs` into **Extensions → Apps Script**,
+set your token, run it once for permission, and deploy it as a web app. Every
+click is in `server/google-sheets/README.md`, and two values end up in
+`config.php`.
 
 **Twelve columns:** Order · Date · Status · Plan · Devices · Total · Email ·
 Phone · Country · Paid · Activated · Notes.

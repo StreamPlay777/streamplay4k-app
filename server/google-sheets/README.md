@@ -1,29 +1,33 @@
 # Connect your orders to a Google Sheet
 
-**About 6 minutes.** No API key, no downloads, no Excel file. You start with a
-blank Google Sheet and the script builds everything else.
+**About 6 minutes.** No API key, no downloads beyond the file already in this
+folder.
 
-> Ignore any earlier `.xlsx` file. Uploading a spreadsheet to Drive leaves it as
-> an *Excel* file, and Excel files have no **Extensions** menu — which is why
-> Apps Script was nowhere to be found. Starting from a blank Google Sheet
-> avoids that entirely.
-
----
-
-## Step 1 — Make a blank sheet
-
-Go to **[sheets.new](https://sheets.new)**
-
-That's it. A new, empty Google Sheet opens. Give it a name in the top-left —
-*StreamPlay4K orders*.
-
-✅ Check: the menu bar reads **File Edit View Insert Format Data Tools
-Extensions Help**. If you can see **Extensions**, you are on a real Google
-Sheet and everything below will work.
+`StreamPlay4K-orders.xlsx` is the finished sheet — columns, colours, the status
+dropdown, conditional formatting and the summary formulas are all in the file.
+The setup steps are also written on its first tab, so they are in front of you
+when you need them.
 
 ---
 
-## Step 2 — Paste the script
+## First — turn the file into a Google Sheet
+
+Upload `StreamPlay4K-orders.xlsx` to [drive.google.com](https://drive.google.com),
+open it, then:
+
+**File → Save as Google Sheets**
+
+A second file opens. Work in that one.
+
+> An uploaded spreadsheet stays an *Excel* file until you do this, and Excel
+> files have no **Extensions** menu — which is why Apps Script cannot be found
+> before this step.
+
+✅ **Check:** the menu bar now has an **Extensions** item.
+
+---
+
+## Step 1 — Paste the script
 
 **Extensions → Apps Script.** A new tab opens with a code editor containing a
 few lines of placeholder code.
@@ -33,7 +37,7 @@ few lines of placeholder code.
 
 ---
 
-## Step 3 — Set your token
+## Step 2 — Set your token
 
 Near the top of what you just pasted:
 
@@ -48,32 +52,29 @@ php -r 'echo bin2hex(random_bytes(24)), "\n";'
 ```
 
 **Keep it somewhere for a moment** — the same string goes into `config.php` in
-step 6.
+step 5.
 
 Save: **⌘S** (Mac) or **Ctrl+S** (Windows).
 
 ---
 
-## Step 4 — Run Setup once
+## Step 3 — Give it permission
 
-Still in the Apps Script editor:
+Press **▶ Run**. Google asks for permission the first time:
 
-1. In the toolbar there is a function dropdown — it probably says `onOpen`.
-   Change it to **`setup`**.
-2. Click **▶ Run**.
-3. Google asks for permission the first time. **Review permissions** → pick
-   your account → it warns the app is unverified (expected, you wrote it) →
-   **Advanced** → **Go to (project name)** → **Allow**.
+**Review permissions** → pick your account → it warns the app is unverified
+(normal — you wrote it) → **Advanced** → **Go to (project name)** → **Allow**.
 
-Go back to your spreadsheet tab and reload the page. You now have:
+Go back to the spreadsheet tab and reload the page. A **StreamPlay4K** menu
+appears in the menu bar.
 
-- an **Orders** tab, formatted, with a red tab colour
-- a **Summary** tab with revenue and per-plan totals
-- a **StreamPlay4K** menu in the menu bar
+> The formatting is already in the file, so there is nothing to build here.
+> Running it once is how you grant permission — and **StreamPlay4K → Setup /
+> repair formatting** is there if the colours or widths ever get knocked about.
 
 ---
 
-## Step 5 — Publish it
+## Step 4 — Publish it
 
 **Deploy → New deployment.**
 
@@ -94,18 +95,18 @@ Click the **gear icon** next to "Select type" and choose **Web app**.
 
 ---
 
-## Step 6 — Tell the site about it
+## Step 5 — Tell the site about it
 
 In `public_html/api/config.php` on Hostinger:
 
 ```php
 'sheets_url'   => 'https://script.google.com/macros/s/AKfy…/exec',
-'sheets_token' => 'the same string from step 3',
+'sheets_token' => 'the same string from step 2',
 ```
 
 ---
 
-## Step 7 — Test
+## Step 6 — Test
 
 Open the `/exec` URL in a browser. You should see:
 
