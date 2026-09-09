@@ -243,6 +243,25 @@ $checks[] = array(
             . 'order is answered with the homepage and nothing is ever saved.',
 );
 
+/* ── Password scrambler ────────────────────────────────────────────
+   config.php stores a hash, never the password. Producing one normally
+   means an SSH command, which is a wall for anyone who does not use a
+   terminal — and the wall is right at the last step of setup. POST only,
+   so the password never lands in a server access log the way a query
+   string would, and the password itself is never echoed back. */
+$hashOut = '';
+$hashErr = '';
+if (isset($_POST['makehash'])) {
+    $pw = isset($_POST['pw']) ? (string) $_POST['pw'] : '';
+    if (strlen($pw) < 8) {
+        $hashErr = 'Use at least 8 characters. This is the only lock on your customers&rsquo; contact details.';
+    } elseif (!function_exists('password_hash')) {
+        $hashErr = 'This PHP version cannot do it. Fix the PHP version above first.';
+    } else {
+        $hashOut = password_hash($pw, PASSWORD_DEFAULT);
+    }
+}
+
 $fails = 0; $warns = 0;
 foreach ($checks as $c) {
     if (!$c['ok']) $fails++;
@@ -287,6 +306,17 @@ foreach ($checks as $c) {
        padding:12px 18px;cursor:pointer}
   .btn:hover{filter:brightness(1.08)}
   .btn-note{font-size:13px;color:var(--mut);margin-left:12px}
+  .tool{margin-top:34px;padding:20px;background:var(--card);border:1px solid var(--line);border-radius:11px}
+  .tool h2{font-size:17px;margin:0 0 6px}
+  .tool p{margin:0 0 14px;color:var(--mut);font-size:14px}
+  .tool form{display:flex;flex-wrap:wrap;gap:10px}
+  .tool input{flex:1;min-width:200px;padding:11px 13px;font:14px/1 inherit;
+              background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px}
+  .tool textarea{width:100%;margin:6px 0 4px;padding:11px 13px;border:1px solid var(--line);
+                 border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical;
+                 font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+  .tool .lbl{margin:10px 0 0;font-size:13px}
+  .tool .err{margin:12px 0 0;color:var(--bad);font-size:13.5px}
 </style>
 </head><body><div class="w">
 
@@ -333,6 +363,23 @@ foreach ($checks as $c) {
     </div>
   </div>
 <?php endforeach; ?>
+
+<section class="tool">
+  <h2>Password scrambler</h2>
+  <p>For <code>admin_password_hash</code> in <code>config.php</code>. Type the password you
+     want for <code>/admin/</code> and copy the scrambled line it gives back.</p>
+  <form method="post">
+    <input type="password" name="pw" placeholder="Your dashboard password" autocomplete="new-password" required>
+    <button type="submit" name="makehash" value="1" class="btn">Scramble it</button>
+  </form>
+  <?php if ($hashErr): ?>
+    <p class="err"><?php echo $hashErr; ?></p>
+  <?php elseif ($hashOut): ?>
+    <p class="lbl">Copy this whole line into config.php:</p>
+    <textarea readonly rows="2" onclick="this.select()"><?php echo htmlspecialchars($hashOut, ENT_QUOTES, 'UTF-8'); ?></textarea>
+    <p class="lbl">Your password itself was not saved or shown anywhere.</p>
+  <?php endif; ?>
+</section>
 
 <footer>
   No passwords or keys are shown on this page — only whether they are filled in.
