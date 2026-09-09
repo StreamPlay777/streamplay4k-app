@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money, type Quote } from '../../data/pricing';
 import { track } from '../../lib/analytics';
-import { buildPayload, submitOrder, stashOrder } from '../../lib/orderService';
+import { buildPayload, submitOrder, stashOrder, captureLead } from '../../lib/orderService';
 import { isValidPhone, isValidEmail, phoneError, emailError } from './validation';
 import { DIAL_CODES, composePhone, dialCodeFor } from '../../data/dialCodes';
 import Check from './Check';
@@ -101,8 +101,11 @@ export default function OrderFlow({
     if (!validatedOnce.current) {
       validatedOnce.current = true;
       track('phone_validated', { term: q.term.id, devices: q.devices });
+      // Same moment, same reason: they have given us a working number and
+      // moved on. If they abandon from here, this is the only trace of them.
+      captureLead(q.term.id, q.devices, phone, dialIso);
     }
-  }, [phoneOk, emailShown, q.term.id, q.devices]);
+  }, [phoneOk, emailShown, q.term.id, q.devices, phone, dialIso]);
 
   // Hand focus to the email field after typing pauses, if the phone is done
   // and the email is still empty. Never while someone is mid-keystroke.
@@ -137,7 +140,7 @@ export default function OrderFlow({
     setFailure(null);
     track('submit_order', { term: q.term.id, devices: q.devices, total: q.totalCents / 100 });
 
-    const res = await submitOrder(buildPayload(q.term.id, q.devices, phone, email));
+    const res = await submitOrder(buildPayload(q.term.id, q.devices, phone, email, dialIso));
     setBusy(false);
 
     if (!res.ok) { setFailure(res.error); return; }

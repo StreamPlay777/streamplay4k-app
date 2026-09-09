@@ -70,13 +70,62 @@ function sp_customer_email(array $o, array $cfg): array
     $wa = sp_esc($cfg['whatsapp_url']);
     $refund = sp_esc($cfg['refund_label']);
 
+    /* WITH A PAY LINK, THIS EMAIL IS THE CHECKOUT.
+       Without one it is a receipt for a promise, and the customer waits for a
+       human to send an invoice — which is where orders go cold overnight. So
+       the two versions differ in more than a button: the opening line, the
+       three steps and the subject all change to match what the reader can
+       actually do right now. */
+    $pay = isset($o['payUrl']) && $o['payUrl'] !== '' ? sp_esc((string) $o['payUrl']) : '';
+
+    $headline = $pay ? 'One step left' : 'We have your order';
+
+    $lede = $pay
+        ? 'Thanks — your order is reserved. One step left: complete payment below and your login is on its way.'
+        : 'Thanks — your order reached us and nothing more is needed from you right now. '
+          . 'Your invoice and payment instructions are on their way.';
+
+    $steps = $pay
+        ? [
+            'Pay securely — card, Apple Pay or Google Pay.',
+            'We activate your account the moment payment clears.',
+            "Your login arrives, usually {$window} later. Then you are watching.",
+          ]
+        : [
+            'We send your invoice with payment instructions.',
+            'You pay using whichever method suits you.',
+            "Your login arrives, usually {$window} after payment is confirmed. Then you are watching.",
+          ];
+
+    $stepRows = '';
+    foreach ($steps as $i => $step) {
+        $stepRows .= '<tr><td style="padding:0 0 10px;color:#4b4f5a;font-size:14.5px;line-height:1.6;">'
+                   . '<strong style="color:#111114;">' . ($i + 1) . '.</strong> ' . sp_esc($step)
+                   . '</td></tr>';
+    }
+
+    /* The pay button sits ABOVE the order summary, not below the fold. A
+       customer who has decided to pay should not have to scroll past a table
+       to find out how. */
+    $payBlock = $pay ? <<<PAY
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 10px;">
+        <tr><td style="background:#ff2b20;border-radius:10px;">
+          <a href="{$pay}" style="display:inline-block;padding:15px 30px;color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;">Pay {$total} now &rarr;</a>
+        </td></tr>
+      </table>
+      <p style="margin:0 0 22px;color:#656a78;font-size:12.5px;line-height:1.6;">
+        Secure checkout by Stripe. Card, Apple Pay or Google Pay. This link is valid for 24 hours &mdash; we&rsquo;ll send a fresh one if it expires.
+      </p>
+PAY : '';
+
     $inner = <<<HTML
     <tr><td style="background:#ffffff;padding:30px 28px 6px;">
-      <h1 style="margin:0 0 10px;color:#111114;font-size:24px;line-height:1.25;font-weight:800;">We have your order</h1>
+      <h1 style="margin:0 0 10px;color:#111114;font-size:24px;line-height:1.25;font-weight:800;">{$headline}</h1>
       <p style="margin:0 0 22px;color:#4b4f5a;font-size:15px;line-height:1.65;">
-        Thanks — your order reached us and nothing more is needed from you right now.
-        Your invoice and payment instructions are on their way.
+        {$lede}
       </p>
+
+      {$payBlock}
 
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f7fa;border:1px solid #e8e8ee;border-radius:12px;">
         <tr><td style="padding:18px 20px;">
@@ -88,17 +137,7 @@ function sp_customer_email(array $o, array $cfg): array
       </table>
 
       <p style="margin:24px 0 10px;color:#111114;font-size:15px;font-weight:700;">What happens next</p>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-        <tr><td style="padding:0 0 10px;color:#4b4f5a;font-size:14.5px;line-height:1.6;">
-          <strong style="color:#111114;">1.</strong> We send your invoice with payment instructions.
-        </td></tr>
-        <tr><td style="padding:0 0 10px;color:#4b4f5a;font-size:14.5px;line-height:1.6;">
-          <strong style="color:#111114;">2.</strong> You pay using whichever method suits you.
-        </td></tr>
-        <tr><td style="padding:0 0 10px;color:#4b4f5a;font-size:14.5px;line-height:1.6;">
-          <strong style="color:#111114;">3.</strong> Your login arrives, usually {$window} after payment is confirmed. Then you are watching.
-        </td></tr>
-      </table>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{$stepRows}</table>
 
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px 0 6px;">
         <tr><td style="background:#ff2b20;border-radius:10px;">
@@ -112,20 +151,26 @@ function sp_customer_email(array $o, array $cfg): array
     </td></tr>
 HTML;
 
-    $text = "We have your order\n\n"
-        . "Thanks — your order reached us and nothing more is needed from you right now.\n\n"
+    $textSteps = '';
+    foreach ($steps as $i => $step) $textSteps .= ($i + 1) . '. ' . $step . "\n";
+
+    $text = $headline . "\n\n"
+        . ($pay
+            ? "Your order is reserved. One step left — pay here:\n{$o['payUrl']}\n\n"
+            : "Thanks — your order reached us and nothing more is needed from you right now.\n\n")
         . "YOUR ORDER\n{$o['planLabel']} · {$devices} {$deviceWord}\n{$o['totalFormatted']}\nReference {$o['id']}\n\n"
-        . "WHAT HAPPENS NEXT\n"
-        . "1. We send your invoice with payment instructions.\n"
-        . "2. You pay using whichever method suits you.\n"
-        . "3. Your login arrives, usually {$cfg['activation_window']} after payment is confirmed.\n\n"
+        . "WHAT HAPPENS NEXT\n" . $textSteps . "\n"
         . "Questions? Message us on WhatsApp: {$cfg['whatsapp_url']}\n"
         . "{$cfg['refund_label']} · Reply to this email any time.\n\n"
         . "{$cfg['brand_name']} · {$cfg['site_url']}\n{$cfg['postal_address']}\n";
 
     return [
-        'subject' => "We have your order — {$o['planLabel']}, {$o['totalFormatted']}",
-        'html'    => sp_email_shell('We have your order', $inner, $cfg),
+        /* The subject is the first thing that decides whether this gets opened
+           at all, so it says what to do rather than what happened. */
+        'subject' => $pay
+            ? "Complete your order — {$o['planLabel']}, {$o['totalFormatted']}"
+            : "We have your order — {$o['planLabel']}, {$o['totalFormatted']}",
+        'html'    => sp_email_shell($headline, $inner, $cfg),
         'text'    => $text,
     ];
 }
@@ -198,6 +243,122 @@ HTML;
     return [
         'subject' => "New order · {$o['totalFormatted']} · {$o['planLabel']} · {$o['devices']}× device",
         'html'    => sp_email_shell('New order', $inner, $cfg),
+        'text'    => $text,
+    ];
+}
+
+/**
+ * Sent the moment Stripe confirms payment.
+ *
+ * This is the email that stops the "did it go through?" message arriving on
+ * WhatsApp twenty minutes later. It exists because Stripe's own receipt tells
+ * the customer they were charged, not what happens to their subscription —
+ * and the gap between those two facts is where the anxious message comes from.
+ */
+function sp_paid_email(array $o, array $cfg): array
+{
+    $brand   = sp_esc($cfg['brand_name']);
+    $plan    = sp_esc($o['planLabel']);
+    $devices = (int) $o['devices'];
+    $word    = $devices === 1 ? 'device' : 'devices';
+    $total   = sp_esc($o['totalFormatted']);
+    $ref     = sp_esc($o['id']);
+    $window  = sp_esc($cfg['activation_window']);
+    $wa      = sp_esc($cfg['whatsapp_url']);
+    $setup   = sp_esc(rtrim($cfg['site_url'], '/') . '/setup-guide/');
+
+    $inner = <<<HTML
+    <tr><td style="background:#ffffff;padding:30px 28px 6px;">
+      <h1 style="margin:0 0 10px;color:#111114;font-size:24px;line-height:1.25;font-weight:800;">Payment received</h1>
+      <p style="margin:0 0 22px;color:#4b4f5a;font-size:15px;line-height:1.65;">
+        You&rsquo;re paid up for {$plan} on {$devices} {$word}. We&rsquo;re setting your account up now &mdash;
+        your login lands in this inbox, usually within {$window}.
+      </p>
+
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f7fa;border:1px solid #e8e8ee;border-radius:12px;">
+        <tr><td style="padding:18px 20px;">
+          <p style="margin:0 0 4px;color:#656a78;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;">Paid</p>
+          <p style="margin:0;color:#111114;font-size:24px;font-weight:800;line-height:1.2;">{$total}</p>
+          <p style="margin:8px 0 0;color:#656a78;font-size:12.5px;">Reference {$ref}</p>
+        </td></tr>
+      </table>
+
+      <p style="margin:24px 0 10px;color:#111114;font-size:15px;font-weight:700;">While you wait</p>
+      <p style="margin:0 0 18px;color:#4b4f5a;font-size:14.5px;line-height:1.6;">
+        Install the player on your TV or phone now and you&rsquo;ll be watching within a minute of your
+        login arriving. The guide takes about five minutes.
+      </p>
+
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 8px;">
+        <tr><td style="background:#ff2b20;border-radius:10px;">
+          <a href="{$setup}" style="display:inline-block;padding:13px 26px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;">Open the setup guide &rarr;</a>
+        </td></tr>
+      </table>
+      <p style="margin:10px 0 22px;color:#656a78;font-size:13px;line-height:1.6;">
+        Stuck at any point? <a href="{$wa}" style="color:#c41f0f;text-decoration:none;">Message us on WhatsApp</a> &mdash; someone is there around the clock.
+      </p>
+    </td></tr>
+HTML;
+
+    $text = "Payment received\n\n"
+        . "You're paid up for {$o['planLabel']} on {$devices} {$word}. We're setting your account up now —\n"
+        . "your login lands in this inbox, usually within {$cfg['activation_window']}.\n\n"
+        . "PAID\n{$o['totalFormatted']}\nReference {$o['id']}\n\n"
+        . "WHILE YOU WAIT\nInstall the player now and you'll be watching within a minute of your login arriving:\n"
+        . rtrim($cfg['site_url'], '/') . "/setup-guide/\n\n"
+        . "Stuck? Message us on WhatsApp: {$cfg['whatsapp_url']}\n\n"
+        . "{$cfg['brand_name']} · {$cfg['site_url']}\n{$cfg['postal_address']}\n";
+
+    return [
+        'subject' => "Payment received — setting up your {$o['planLabel']} account",
+        'html'    => sp_email_shell('Payment received', $inner, $cfg),
+        'text'    => $text,
+    ];
+}
+
+/** The one that tells you to go and create the account. */
+function sp_internal_paid_email(array $o, array $cfg): array
+{
+    $devices = (int) $o['devices'];
+    $digits = preg_replace('/\D+/', '', (string) $o['phone']) ?? '';
+    $wa = sp_esc('https://wa.me/' . $digits . '?text=' . rawurlencode(
+        "Hi, this is {$cfg['brand_name']} — payment received for order {$o['id']}. Setting your account up now."
+    ));
+
+    $rows = [
+        'Reference' => $o['id'],
+        'Plan'      => $o['planLabel'] . ' (' . $o['termMonths'] . ' months)',
+        'Devices'   => (string) $devices,
+        'Paid'      => sp_money((int) ($o['paidCents'] ?? $o['totalCents'])),
+        'Email'     => $o['email'],
+        'Phone'     => $o['phone'],
+        'Paid at'   => $o['paidAt'] ?? gmdate('c'),
+    ];
+    $html = '';
+    $text = "PAID — CREATE THE ACCOUNT\n\n";
+    foreach ($rows as $k => $v) {
+        $html .= '<tr><td style="padding:7px 0;color:#656a78;font-size:13px;width:110px;">' . sp_esc((string) $k)
+              . '</td><td style="padding:7px 0;color:#111114;font-size:14px;font-weight:600;">' . sp_esc((string) $v) . '</td></tr>';
+        $text .= str_pad((string) $k, 12) . $v . "\n";
+    }
+    $text .= "\nWhatsApp this customer: https://wa.me/{$digits}\n";
+
+    $inner = <<<HTML
+    <tr><td style="background:#ffffff;padding:28px 28px 8px;">
+      <h1 style="margin:0 0 4px;color:#111114;font-size:21px;font-weight:800;">Paid — create the account</h1>
+      <p style="margin:0 0 18px;color:#4b4f5a;font-size:14px;">The customer has been told to expect their login within {$cfg['activation_window']}.</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{$html}</table>
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px 0 8px;">
+        <tr><td style="background:#25D366;border-radius:10px;">
+          <a href="{$wa}" style="display:inline-block;padding:12px 22px;color:#ffffff;font-size:14.5px;font-weight:700;text-decoration:none;">Open WhatsApp with this customer</a>
+        </td></tr>
+      </table>
+    </td></tr>
+HTML;
+
+    return [
+        'subject' => "PAID · {$o['id']} · " . sp_money((int) ($o['paidCents'] ?? $o['totalCents'])) . " · {$o['planLabel']}",
+        'html'    => sp_email_shell('Paid — create the account', $inner, $cfg),
         'text'    => $text,
     ];
 }

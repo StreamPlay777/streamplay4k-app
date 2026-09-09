@@ -15,11 +15,18 @@ number and an email address. No payment is taken on the site. On submit:
    compared, never trusted. If they disagree, the server's number wins and the
    mismatch is written to the log.
 3. The order is **written to disk first**, above the web root.
-4. Only then are two emails sent through Mailgun:
+4. If Stripe is configured, a checkout link is created for that exact amount.
+5. The order is mirrored into your Google Sheet, if one is set up.
+6. Only then are two emails sent through Mailgun:
    - one to your inbox: the order, with a one-tap WhatsApp link to the customer;
    - one to the customer: what they ordered, what happens next, and how to reach you.
-5. The browser gets `{ ok: true, orderId: "SP-20260909-A1B2C3" }` and the
+7. The browser gets `{ ok: true, orderId: "SP-20260909-A1B2C3" }` and the
    customer lands on `/thank-you/` with that reference.
+
+Steps 4 and 5 are optional and independent. With neither configured the shop
+works exactly as it did before them: the customer is told an invoice is coming,
+and you send one. Nothing in either step can fail an order — it is already on
+disk by then.
 
 Storing before sending is the part that matters. Mailgun will have a bad
 minute eventually. When it does, the order is already on disk and you can still
@@ -123,12 +130,16 @@ fallback answers it with `index.html`. Confirm `public_html/.htaccess` contains
 the `^api/order/?$` rule, and that hidden files were included in the upload —
 File Manager hides dotfiles by default (Settings → *Show hidden files*).
 
-These must all be false before you take real orders:
+These must all pass before you take real orders:
 
 - [ ] `curl https://streamplay4k.com/api/config.php` returns **403**, not PHP source
 - [ ] `curl https://streamplay4k.com/api/lib/mailer.php` returns **403**
+- [ ] `curl https://streamplay4k.com/api/cron/followups.php` returns **403**
 - [ ] `https://streamplay4k.com/streamplay4k-orders/` is **404** (the folder is outside the web root)
-- [ ] The order form on the live site does **not** show the yellow "development mode" notice
+- [ ] `https://streamplay4k.com/admin/` asks for a password before showing anything
+
+The first three matter most. `config.php` holds your Mailgun and Stripe keys;
+`cron/` sends email to your customer list.
 
 ---
 
@@ -137,19 +148,26 @@ These must all be false before you take real orders:
 ```
 /home/uXXXXXXX/
 ├── streamplay4k-orders/          ← above the web root, not reachable over HTTP
-│   ├── SP-20260909-A1B2C3.json   one file per order
-│   ├── orders-2026-09.ndjson     one line per order — open this to see the day
+│   ├── SP-20260909-A1B2C3.json   one file per order — the current truth
+│   ├── orders-2026-09.ndjson     one line per order as placed
 │   ├── endpoint.log              what was sent, what failed, price mismatches
+│   ├── leads.json                entered a number, never ordered
 │   ├── recent.json               5-minute duplicate guard
-│   └── ratelimit.json            per-IP throttle
+│   ├── ratelimit.json            per-IP throttle
+│   ├── admin-attempts.json       dashboard login lockouts
+│   └── sheets-pending.json       sheet pushes awaiting retry
 └── public_html/
-    ├── .htaccess                 routes /api/order, blocks /api/lib and config
+    ├── .htaccess                 routes the API, blocks lib/ cron/ and config
     ├── index.html, pricing/, …   the pre-rendered site
+    ├── admin/index.php           your dashboard
     └── api/
-        ├── order.php             the endpoint
-        ├── config.php            ← YOUR KEY. Created by hand, never deployed.
-        ├── lib/                  pricing, validation, mailer, storage
-        └── templates/            the two emails
+        ├── order.php             the order endpoint
+        ├── lead.php              captures an abandoned number
+        ├── stripe-webhook.php    payment confirmations from Stripe
+        ├── config.php            ← YOUR KEYS. By hand, never deployed.
+        ├── cron/followups.php    the four follow-up emails
+        ├── lib/                  pricing, validation, mail, storage, Stripe, Sheets
+        └── templates/            the emails
 ```
 
 `orders-YYYY-MM.ndjson` is one JSON object per line, so a month of orders opens
@@ -187,17 +205,132 @@ for l in sys.stdin:
 
 ---
 
+## 6. Stripe — turn the confirmation email into a checkout
+
+Optional, and the single highest-value thing you can switch on. Without it,
+every order waits for you to type an invoice; with it, the customer can pay in
+one tap while they still want to.
+
+**Get two values.**
+
+1. **Developers → API keys → Secret key** (`sk_live_…`). Treat it exactly like
+   the Mailgun key: `config.php` only.
+2. **Developers → Webhooks → Add endpoint**
+   - URL: `https://streamplay4k.com/api/stripe-webhook`
+   - Event: **`checkout.session.completed`**
+
+   Stripe then shows a **signing secret** (`whsec_…`).
+
+```php
+'stripe_secret'         => 'sk_live_…',
+'stripe_webhook_secret' => 'whsec_…',
+```
+
+⚠️ **Both, or neither.** Without the webhook secret every webhook is rejected —
+which is the correct default, because an unverified webhook endpoint is a
+button anyone can press to mark an order paid. You would take payments and
+never hear about them.
+
+**What changes.** The confirmation email becomes the checkout: subject
+"Complete your order", a **Pay $149.99 now** button above the fold, and three
+steps that describe paying rather than waiting. When the payment clears, the
+order marks itself paid, the customer gets "Payment received — setting up your
+account" with a link to the setup guide, and you get a **PAID — create the
+account** email with their details.
+
+The checkout amount is created per order from the server's own figure, so it
+can never disagree with what you quoted. Links expire after 24 hours; the
+follow-up emails issue fresh ones.
+
+**Test with Stripe in test mode first** — `sk_test_…` and a test-mode webhook —
+and use card `4242 4242 4242 4242`. Confirm the order flips to paid in
+`/admin/` before switching to live keys.
+
+---
+
+## 7. Google Sheets
+
+`server/google-sheets/README.md` walks through it — five minutes, no API key.
+Two values land in `config.php`. The sheet is a mirror: orders are on disk
+first, and a sheet outage never touches the customer.
+
+---
+
+## 8. The follow-up emails (cron)
+
+Four emails, each with one job:
+
+| When | To | What it does |
+|---|---|---|
+| +6h | unpaid | A nudge with a **fresh** pay link. Most people who stop here got distracted, not cold. |
+| +24h | unpaid | Last one about money. Offers WhatsApp, because someone who ignored a button twice has a question. |
+| +48h | paid | "Is everything working?" — catches the customer quietly stuck on setup who would otherwise charge back. |
+| +5d | paid | Two days before the refund window closes. |
+
+hPanel → **Advanced → Cron Jobs** → add:
+
+```
+0 * * * *   /usr/bin/php /home/uXXXXXXX/public_html/api/cron/followups.php
+```
+
+Hourly. Each run sends at most one stage per order, so nobody gets two emails
+in the same minute. The same run retries any Google Sheet pushes that failed.
+
+**Try it first without sending anything:**
+
+```bash
+php ~/public_html/api/cron/followups.php --dry-run
+```
+
+That prints exactly what a real run would send.
+
+Three things it will not do: send the same stage twice (each send is recorded
+on the order), chase someone who has paid in the meantime (status is re-read at
+send time), or mail your back catalogue when you switch it on (anything older
+than 14 days is left alone).
+
+---
+
+## 9. Your dashboard
+
+**`https://streamplay4k.com/admin/`**
+
+Set a username and a password hash in `config.php`. The password itself is
+never stored — generate the hash over SSH:
+
+```bash
+php -r 'echo password_hash("your-password-here", PASSWORD_DEFAULT), "\n";'
+```
+
+```php
+'admin_user'          => 'hamza',
+'admin_password_hash' => '$2y$10$…the output above…',
+```
+
+What you get: paid revenue, paid today, how many are awaiting payment and what
+that is worth; every order with contact details and a one-tap WhatsApp link;
+search and filter; and a status you can set to paid, activated or cancelled —
+which writes through to the Google Sheet too.
+
+Below that, **Didn't finish** — people who entered a working number and stopped
+before ordering, each with a pre-written WhatsApp message. They are the closest
+anyone gets to buying without buying. Rows vanish once the person orders.
+
+Five wrong passwords locks that IP out for fifteen minutes.
+
+⚠️ This page shows customer phone numbers and email addresses. Use a password
+you use nowhere else. If you want a second lock, hPanel → **Password Protect
+Directories** on `/admin/` adds a browser prompt in front of it.
+
+---
+
 ## Still to decide
 
-Two things are not built because they depend on answers only you have:
+**How you take payment if you are not using Stripe.** Skip section 6 and the
+customer email keeps saying an invoice is coming — true, and it works, but
+every order then waits on you.
 
-1. **How customers pay.** The customer email currently says you will send
-   payment details — because there is no payment link in the code yet. Once you
-   pick a method (Stripe payment link, PayPal.me, bank transfer), it becomes one
-   value in `config.php` and one line in the email template.
-2. **Which inbox receives orders.** `orders_inbox` in `config.php`.
-
-The follow-up sequence (a nudge at 6h and 24h if an order is unpaid, a check-in
-on day 2, a note before the refund window closes on day 5) is the next piece.
-Cloud Startup has cron, so it runs on a schedule reading the same order files —
-no extra service, no extra cost.
+**Whether you want a database.** Orders are one JSON file each plus a monthly
+NDJSON log. That is the right amount of machinery at this volume, and only four
+functions in `lib/store.php` know how orders are stored — moving to SQLite later
+would not change the endpoint, the cron or the dashboard.

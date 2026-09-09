@@ -24,8 +24,14 @@ import { fileURLToPath } from 'node:url';
  */
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const src = path.join(root, 'server', 'api');
-const dest = path.join(root, 'dist', 'api');
+/* Both server trees. server/admin is the dashboard; it reads ../api/config.php
+   and the order files, so the two have to land as siblings under the web root
+   for the relative require to resolve. */
+const TREES = [
+  { from: path.join(root, 'server', 'api'),   to: path.join(root, 'dist', 'api') },
+  { from: path.join(root, 'server', 'admin'), to: path.join(root, 'dist', 'admin') },
+];
+const src = TREES[0].from;
 
 const SKIP = new Set(['config.php']);
 
@@ -86,7 +92,9 @@ async function walk(from, to) {
   }
 }
 
-await fs.rm(dest, { recursive: true, force: true });
-await walk(src, dest);
+for (const t of TREES) {
+  await fs.rm(t.to, { recursive: true, force: true });
+  await walk(t.from, t.to);
+}
 
-console.log(`\nBundled ${copied} API files into dist/api/ (config.php excluded).`);
+console.log(`\nBundled ${copied} server files into dist/api/ and dist/admin/ (config.php excluded).`);

@@ -25,6 +25,8 @@ require __DIR__ . '/lib/pricing.php';
 require __DIR__ . '/lib/validate.php';
 require __DIR__ . '/lib/mailer.php';
 require __DIR__ . '/lib/store.php';
+require __DIR__ . '/lib/stripe.php';
+require __DIR__ . '/lib/sheets.php';
 require __DIR__ . '/templates/emails.php';
 
 $configPath = __DIR__ . '/config.php';
@@ -112,6 +114,7 @@ $order = [
     'totalFormatted'  => sp_money($q['totalCents']),
     'perMonthCents'   => $q['perMonthCents'],
     'phone'           => $phone,
+    'country'         => sp_clean($in['country'] ?? '', 4),
     'email'           => $email,
     'sourcePage'      => sp_clean($in['sourcePage'] ?? '', 120),
     'campaign'        => sp_campaign($in['campaign'] ?? null),
@@ -146,6 +149,35 @@ if (!$stored['ok']) {
 
 if ($mismatch) {
     sp_log($cfg, "PRICE MISMATCH {$id}: browser said {$clientTotal}, server charged {$q['totalCents']}");
+}
+
+/* ── A pay-now link, if Stripe is configured ──────────────────────────── */
+/* Created for the exact figure calculated above. If Stripe is off or the call
+   fails, $pay stays null and the customer email says an invoice is coming —
+   which is what it said before Stripe existed. Nothing here can fail the
+   order: it is already recorded. */
+$pay = sp_stripe_checkout($cfg, $order);
+if ($pay) {
+    $order['payUrl'] = $pay['url'];
+    $order['stripeSession'] = $pay['sessionId'];
+    sp_update_order($cfg, $id, [
+        'payUrl'        => $pay['url'],
+        'stripeSession' => $pay['sessionId'],
+    ]);
+} elseif (sp_stripe_enabled($cfg)) {
+    sp_log($cfg, "{$id} stripe checkout FAILED — customer gets the invoice-coming email");
+}
+
+/* This person is no longer an abandoned lead. */
+sp_lead_converted($cfg, $phone);
+
+/* ── Mirror into the Google Sheet ─────────────────────────────────────── */
+/* Best-effort by design. A failure is queued for the cron to retry rather
+   than shown to the customer — the order is on disk either way. */
+$sheet = sp_sheets_push($cfg, $order);
+if (!$sheet['ok']) {
+    sp_sheets_defer($cfg, $id);
+    sp_log($cfg, "{$id} sheet push failed ({$sheet['error']}) — queued for retry");
 }
 
 /* ── Then email ───────────────────────────────────────────────────────── */

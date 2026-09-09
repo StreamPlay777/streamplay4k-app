@@ -124,3 +124,120 @@ function sp_rate_limited(array $cfg, string $ip, int $max = 8, int $windowSecond
     @file_put_contents($file, json_encode($map), LOCK_EX);
     return $over;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   READING AND UPDATING
+
+   Written after the endpoint, because the dashboard, the follow-up cron and
+   the Stripe webhook all need to read an order back and change its status.
+   They share these four functions rather than each parsing the directory
+   their own way — three implementations of "which orders are unpaid" would
+   drift, and the one that drifts is the one that emails the wrong customer.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/** Absolute path of one order's file. Never built from unfiltered input. */
+function sp_order_path(array $cfg, string $id): ?string
+{
+    // Ids are generated as SP-YYYYMMDD-XXXXXX. Anything else is a traversal
+    // attempt or a bug; either way it must not reach the filesystem.
+    if (!preg_match('/^SP-\d{8}-[A-Z0-9]{6}$/', $id)) return null;
+    return rtrim($cfg['orders_dir'], '/') . '/' . $id . '.json';
+}
+
+function sp_read_order(array $cfg, string $id): ?array
+{
+    $path = sp_order_path($cfg, $id);
+    if ($path === null || !is_file($path)) return null;
+    $data = json_decode((string) @file_get_contents($path), true);
+    return is_array($data) ? $data : null;
+}
+
+/**
+ * Merge fields into an order and write it back.
+ *
+ * Read-modify-write under an exclusive lock held across BOTH halves. Without
+ * the lock, the follow-up cron and a Stripe webhook landing in the same second
+ * would each read the pre-change record and the second write would erase the
+ * first — which in practice means an order marked paid, then un-marked, and a
+ * customer chased for money they already sent.
+ */
+function sp_update_order(array $cfg, string $id, array $changes): ?array
+{
+    $path = sp_order_path($cfg, $id);
+    if ($path === null || !is_file($path)) return null;
+
+    $fh = @fopen($path, 'c+');
+    if (!$fh) return null;
+    if (!flock($fh, LOCK_EX)) { fclose($fh); return null; }
+
+    $raw = stream_get_contents($fh);
+    $order = json_decode((string) $raw, true);
+    if (!is_array($order)) { flock($fh, LOCK_UN); fclose($fh); return null; }
+
+    $order = array_merge($order, $changes);
+    $order['updatedAt'] = gmdate('c');
+
+    $json = json_encode($order, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    rewind($fh);
+    ftruncate($fh, 0);
+    fwrite($fh, (string) $json);
+    fflush($fh);
+    flock($fh, LOCK_UN);
+    fclose($fh);
+
+    return $order;
+}
+
+/**
+ * Every order, newest first.
+ *
+ * Reads the per-order files rather than the NDJSON log, because the log is
+ * append-only and holds each order as it was *created* — an order marked paid
+ * an hour later still reads "new" there. The files are the current truth.
+ *
+ * A directory scan is the right tool at this volume. If this ever gets slow,
+ * that is the signal to move to SQLite, and the endpoint will not have to
+ * change: only these four functions know how orders are stored.
+ */
+function sp_list_orders(array $cfg, int $limit = 500): array
+{
+    $dir = rtrim($cfg['orders_dir'], '/');
+    $files = glob($dir . '/SP-*.json') ?: [];
+    rsort($files, SORT_STRING);           // ids start with the date, so this is chronological
+    $out = [];
+    foreach (array_slice($files, 0, $limit) as $f) {
+        $o = json_decode((string) @file_get_contents($f), true);
+        if (is_array($o) && isset($o['id'])) $out[] = $o;
+    }
+    return $out;
+}
+
+/**
+ * Marks a captured lead as converted, so the recovery list only holds people
+ * who genuinely did not finish.
+ *
+ * Called when an order completes. Without it the list fills with customers who
+ * already bought, and chasing those is worse than not chasing at all.
+ */
+function sp_lead_converted(array $cfg, string $phone): void
+{
+    $file = rtrim($cfg['orders_dir'], '/') . '/leads.json';
+    if (!is_file($file)) return;
+    $leads = json_decode((string) @file_get_contents($file), true) ?: [];
+    $key = hash('sha256', preg_replace('/\D+/', '', $phone) ?? '');
+    if (!isset($leads[$key])) return;
+    $leads[$key]['converted'] = true;
+    $leads[$key]['convertedAt'] = gmdate('c');
+    @file_put_contents($file, json_encode($leads, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
+}
+
+/** Leads who never ordered, newest first. */
+function sp_open_leads(array $cfg): array
+{
+    $file = rtrim($cfg['orders_dir'], '/') . '/leads.json';
+    if (!is_file($file)) return [];
+    $leads = json_decode((string) @file_get_contents($file), true) ?: [];
+    $open = array_values(array_filter($leads, static fn($l) => is_array($l) && empty($l['converted'])));
+    usort($open, static fn($a, $b) => strcmp((string) $b['lastSeen'], (string) $a['lastSeen']));
+    return $open;
+}

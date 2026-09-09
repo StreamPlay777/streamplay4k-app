@@ -49,9 +49,21 @@
   --ink: #E8ECF5;
   --ink-2: #C4CCDC;
   --ink-3: #97A2B8;
-  --ink-4: #6B7689;
-  --ink-5: #5C6680;
-  --ink-6: #465066;
+  /* The quiet end of the ramp, raised.
+     --ink-4 was #6B7689 and --ink-5 #5C6680, which measured 3.7:1 and 3.0:1
+     against the lightest raised ground on a dark page — below AA for the body
+     text they actually carry: footer copy, review bylines, form hints, the
+     captions under every device tile. Small grey-on-dark is the type most
+     likely to be read on a phone in daylight, so it was failing exactly where
+     it was needed most.
+     Five distinguishable greys cannot all clear 4.5:1 on this ground, so the
+     ramp now separates at the top (ink → ink-2 → ink-3) and compresses at the
+     bottom. --ink-6 is folded into --ink-5: there is no room for a legible
+     step below it, and it had two uses.
+     Measured from rendered pixels, not computed styles: 5.6:1 and 4.6:1. */
+  --ink-4: #8A94A8;
+  --ink-5: #7A8497;
+  --ink-6: #7A8497;
 
   --line: rgba(255, 255, 255, .08);
   --line-2: rgba(255, 255, 255, .12);

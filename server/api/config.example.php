@@ -36,6 +36,49 @@ return [
        Create it in hPanel → File Manager and paste the full path here. */
     'orders_dir' => '',                                       // ← FULL PATH
 
+    /* ── Stripe (optional) ───────────────────────────────────────────────
+       With these blank, the site still works exactly as before: the customer
+       gets "your invoice is on its way" and you send payment details by hand.
+       Fill them in and the same email carries a Pay-now button for the exact
+       amount, and orders mark themselves paid.
+
+       stripe_secret          Developers → API keys → Secret key (sk_live_…).
+                              Treat it exactly like the Mailgun key: this file
+                              only, never a commit, never a chat.
+       stripe_webhook_secret  Developers → Webhooks → add endpoint
+                                https://streamplay4k.com/api/stripe-webhook
+                              listening for `checkout.session.completed`.
+                              Stripe then shows a signing secret (whsec_…).
+                              Without it every webhook is rejected — which is
+                              the correct default, since an unverified webhook
+                              would let anyone mark an order paid. */
+    'stripe_secret'         => '',
+    'stripe_webhook_secret' => '',
+
+    /* ── Google Sheet (optional) ─────────────────────────────────────────
+       Mirrors every order into a spreadsheet. A mirror only: orders are
+       written to disk first and a sheet failure never reaches the customer.
+       Setup is in server/google-sheets/README.md — it takes about five
+       minutes and needs no API key.
+
+       sheets_url    the /exec URL of your deployed Apps Script web app
+       sheets_token  the same long random string as SHARED_TOKEN in Code.gs */
+    'sheets_url'   => '',
+    'sheets_token' => '',
+
+    /* ── Dashboard login ─────────────────────────────────────────────────
+       For https://streamplay4k.com/admin/ — your orders, contact details and
+       who did not finish.
+
+       The PASSWORD IS NEVER STORED HERE, only its hash. Generate it over SSH:
+
+         php -r 'echo password_hash("your-password-here", PASSWORD_DEFAULT), "\n";'
+
+       Paste the output (it starts $2y$) below. Anyone who later reads this
+       file still cannot sign in as you anywhere else. */
+    'admin_user'          => '',
+    'admin_password_hash' => '',
+
     /* ── Brand facts used in the emails ──────────────────────────────────
        Kept in step with src/data/site.ts by hand; they are the same values. */
     'brand_name'        => 'StreamPlay4K',

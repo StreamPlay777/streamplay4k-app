@@ -1,0 +1,4 @@
+# This directory sends email. Reachable over HTTP it would be a button anyone
+# on the internet could press to blast your customer list, so it is denied
+# here as well as in the site's root .htaccess and in followups.php itself.
+Require all denied

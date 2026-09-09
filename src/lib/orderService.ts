@@ -21,6 +21,8 @@ export interface OrderPayload {
   total: number;
   phone: string;
   email: string;
+  /** ISO code of the chosen calling code — "+1" alone is four countries. */
+  country: string;
   sourcePage: string;
   timestamp: string;
   campaign: CampaignMeta;
@@ -58,6 +60,7 @@ export function buildPayload(
   devices: number,
   phone: string,
   email: string,
+  country: string,
 ): OrderPayload {
   const q = quote(termId, devices);
   return {
@@ -68,6 +71,7 @@ export function buildPayload(
     total: q.totalCents,
     phone: phone.trim(),
     email: email.trim().toLowerCase(),
+    country,
     sourcePage: window.location.pathname,
     timestamp: new Date().toISOString(),
     campaign: readCampaign(),
@@ -75,6 +79,8 @@ export function buildPayload(
 }
 
 const ENDPOINT = import.meta.env.VITE_ORDER_ENDPOINT ?? '/api/order';
+/** Sits beside the order endpoint; see captureLead() at the foot of this file. */
+const LEAD_ENDPOINT = ENDPOINT.replace(/\/order$/, '/lead');
 
 /**
  * True while no real endpoint is configured — development only.
@@ -171,5 +177,48 @@ export function readOrder(): OrderSummary | null {
     return raw ? (JSON.parse(raw) as OrderSummary) : null;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Records a phone number once it validates and the customer moves on.
+ *
+ * WHY IT EXISTS: the people who type a working number and never press Order
+ * are the closest anyone gets to buying without buying. Nothing else on the
+ * site can tell you who they were, and one message often finishes it.
+ *
+ * WHERE THE LINE IS: this fires on a deliberate, completed act — a number that
+ * validated, and focus moving on to the email field. It is not a keystroke
+ * logger: nothing is sent while the field is being typed into, and a number
+ * that never validates is never sent at all. The Privacy Policy names this
+ * collection; if that disclosure is ever removed, this call goes with it.
+ *
+ * Fire-and-forget. keepalive so it survives the tab closing a moment later,
+ * which is exactly when it matters. Failures are silent — a lead is a nice to
+ * have, and nothing here may interrupt someone who is still ordering.
+ */
+export function captureLead(
+  termId: string,
+  devices: number,
+  phone: string,
+  country: string,
+): void {
+  if (IS_MOCK) return;
+  try {
+    void fetch(LEAD_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        phone: phone.trim(),
+        country,
+        planId: termId,
+        deviceCount: devices,
+        sourcePage: window.location.pathname,
+        campaign: readCampaign(),
+      }),
+    }).catch(() => {});
+  } catch {
+    /* never let this affect the order */
   }
 }

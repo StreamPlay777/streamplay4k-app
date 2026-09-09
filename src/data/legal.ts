@@ -218,6 +218,7 @@ export const privacy: LegalDoc = {
           'your phone or WhatsApp number, so we can send the same information there and help with setup',
         ]),
         p('If you contact us for support, we also hold whatever you choose to tell us in that conversation — typically your device type and a description of the problem.'),
+        p('If you enter a phone number in the order form and then leave without completing the order, we keep that number so we can offer to help you finish. We record it only once the number is complete and you have moved on to the next field — nothing is stored while you are still typing, and a number that is never completed is never stored. We do not keep any other detail from an unfinished order. Ask us and we will delete it.'),
         p('We do not ask for, and do not want, your card or bank details on this website. No payment is taken here.'),
       ],
     },
@@ -226,6 +227,7 @@ export const privacy: LegalDoc = {
       heading: '2. Order information',
       blocks: [
         p('Alongside your contact details, an order record holds the plan and term you chose, the number of devices, the total to be invoiced, the page you ordered from, and any campaign parameters present in the link you arrived through.'),
+        p('Payment, when you make one, happens on our payment provider\u2019s own secure checkout page, not on this website. They receive your email address and the amount, and they handle your card details — we never see or store them. Your order record notes that a payment succeeded and for how much, nothing more.'),
       ],
     },
     {

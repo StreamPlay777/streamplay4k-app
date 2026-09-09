@@ -25,11 +25,15 @@ RewriteRule ^(.*)$ /$1/ [R=301,L]
 # 200 with an HTML body, which fetch() parses as a failed JSON response. This
 # rule must stay ABOVE the fallback.
 RewriteRule ^api/order/?$ /api/order.php [L]
+RewriteRule ^api/lead/?$ /api/lead.php [L]
+RewriteRule ^api/stripe-webhook/?$ /api/stripe-webhook.php [L]
 
 # Nothing else under /api/ is meant to be reachable. lib/ and templates/ are
-# includes, config.php holds the Mailgun key. Deny them outright rather than
-# relying on PHP to refuse to output anything useful.
-RewriteRule ^api/(lib|templates)/ - [F,L]
+# includes, config.php holds the Mailgun and Stripe keys, and cron/ sends mail
+# — reachable over HTTP it would be a button anyone could press to blast your
+# customer list. Deny them outright rather than relying on PHP to refuse.
+# (followups.php also checks PHP_SAPI itself; this is the belt to that brace.)
+RewriteRule ^api/(lib|templates|cron)/ - [F,L]
 RewriteRule ^api/config(\.example)?\.php$ - [F,L]
 
 # ── SPA fallback ──────────────────────────────────────────────────────────────
@@ -38,6 +42,16 @@ RewriteRule ^api/config(\.example)?\.php$ - [F,L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.html [QSA,L]
+
+# ── Dashboard ─────────────────────────────────────────────────────────────────
+# /admin/ is a real directory with index.php, so the fallback above already
+# leaves it alone. What it must never do is get cached or indexed.
+<IfModule mod_headers.c>
+  <FilesMatch "^index\.php$">
+    Header set Cache-Control "no-store, private"
+    Header set X-Robots-Tag "noindex, nofollow"
+  </FilesMatch>
+</IfModule>
 
 # ── Caching ───────────────────────────────────────────────────────────────────
 # Hashed assets are immutable; HTML must revalidate so a deploy is picked up.
