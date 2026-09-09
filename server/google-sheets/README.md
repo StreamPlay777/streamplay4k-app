@@ -1,110 +1,179 @@
-# Your orders, in a Google Sheet
+# Connect your orders to a Google Sheet
 
-Two parts: **make the sheet** (2 minutes, and the file is already made for you)
-and **connect it** (3 minutes). No API key, no service account, nothing to
-download from Google.
+**About 6 minutes.** No API key, no downloads, no Excel file. You start with a
+blank Google Sheet and the script builds everything else.
 
----
-
-## Part 1 — Make the sheet
-
-You do not have to build it. `StreamPlay4K-orders.xlsx` in this folder is the
-finished thing: three tabs, the right columns in the right order, a status
-dropdown, and a Summary tab whose totals update themselves.
-
-1. Open [drive.google.com](https://drive.google.com).
-2. Drag `StreamPlay4K-orders.xlsx` onto the page. It uploads.
-3. Double-click it → **Open with → Google Sheets**.
-4. **File → Save as Google Sheets.** (Drive keeps `.xlsx` files as Excel until
-   you do this. The Apps Script in Part 2 only works on a real Google Sheet.)
-
-You now have three tabs:
-
-| Tab | What it is |
-|---|---|
-| **Read me** | The rules, so a month from now you remember them |
-| **Orders** | Where every order lands. One row each |
-| **Summary** | Totals and a per-plan count. Formulas, always current |
-
-> Do not rename the **Orders** tab or reorder its columns — the script writes
-> by tab name and column position. Adding columns to the right of **Notes** is
-> safe; the script never touches them.
+> Ignore any earlier `.xlsx` file. Uploading a spreadsheet to Drive leaves it as
+> an *Excel* file, and Excel files have no **Extensions** menu — which is why
+> Apps Script was nowhere to be found. Starting from a blank Google Sheet
+> avoids that entirely.
 
 ---
 
-## Part 2 — Connect it to the site
+## Step 1 — Make a blank sheet
 
-**1.** In your sheet: **Extensions → Apps Script**. Delete whatever is in the
-editor and paste the whole of `Code.gs` from this folder.
+Go to **[sheets.new](https://sheets.new)**
 
-**2.** Near the top, replace the placeholder:
+That's it. A new, empty Google Sheet opens. Give it a name in the top-left —
+*StreamPlay4K orders*.
+
+✅ Check: the menu bar reads **File Edit View Insert Format Data Tools
+Extensions Help**. If you can see **Extensions**, you are on a real Google
+Sheet and everything below will work.
+
+---
+
+## Step 2 — Paste the script
+
+**Extensions → Apps Script.** A new tab opens with a code editor containing a
+few lines of placeholder code.
+
+1. Select all of it and delete it.
+2. Open `Code.gs` from this folder, copy the whole file, paste it in.
+
+---
+
+## Step 3 — Set your token
+
+Near the top of what you just pasted:
 
 ```js
 const SHARED_TOKEN = 'CHANGE-ME-TO-A-LONG-RANDOM-STRING';
 ```
 
-Generate one over SSH and paste the output in place of the placeholder text:
+Replace the placeholder with a long random string. Generate one over SSH:
 
 ```bash
 php -r 'echo bin2hex(random_bytes(24)), "\n";'
 ```
 
-Save (**⌘S** / **Ctrl+S**).
+**Keep it somewhere for a moment** — the same string goes into `config.php` in
+step 6.
 
-**3.** **Deploy → New deployment** → the gear icon → **Web app**.
-
-| Field | Value |
-|---|---|
-| Execute as | **Me** |
-| Who has access | **Anyone** |
-
-Deploy, and grant the permissions Google asks for. It warns that the app is
-unverified — expected for a script you wrote yourself. **Advanced → Go to
-(project name) → Allow.**
-
-> **"Anyone" does not mean anyone can read your sheet.** It means the URL
-> accepts a request without a Google login, which is what lets your server post
-> to it. The script only appends rows, never reads any back, and refuses every
-> request that does not carry your token.
-
-**4.** Copy the deployment URL. It ends in `/exec`.
-
-**5.** Put both values into `public_html/api/config.php`:
-
-```php
-'sheets_url'   => 'https://script.google.com/macros/s/AKfy…/exec',
-'sheets_token' => 'the same string you pasted in step 2',
-```
-
-**6.** Check it. Open the `/exec` URL in a browser — you should see
-`{"ok":true,"service":"StreamPlay4K orders"}`. Then place a test order on the
-site and watch a row appear.
+Save: **⌘S** (Mac) or **Ctrl+S** (Windows).
 
 ---
 
-## What lands in each row
+## Step 4 — Run Setup once
 
-Order ID · Created · Status · **Plan** (Basic / Standard / Premium) · Term ·
-Months · Devices · Total · Total in cents · Phone · Email · Country ·
-Source page · Campaign · Paid at · Activated at · Notes
+Still in the Apps Script editor:
 
-Rows **update in place** rather than duplicating, so an order you later mark
-paid changes the row it already has. Matching is by Order ID, so sorting and
-filtering the sheet is safe.
+1. In the toolbar there is a function dropdown — it probably says `onOpen`.
+   Change it to **`setup`**.
+2. Click **▶ Run**.
+3. Google asks for permission the first time. **Review permissions** → pick
+   your account → it warns the app is unverified (expected, you wrote it) →
+   **Advanced** → **Go to (project name)** → **Allow**.
 
-Phone numbers are written with a leading apostrophe. Without it Sheets reads
-`+12125551234` as a formula and shows `#ERROR!` where the number should be.
+Go back to your spreadsheet tab and reload the page. You now have:
 
-**The sheet is a copy, not the record.** Every order is written to your server
-first, outside the web root. If the sheet is deleted, or Google has a bad hour,
-nothing is lost and the shop keeps working — anything that failed to reach the
-sheet is queued and pushed by the hourly cron.
+- an **Orders** tab, formatted, with a red tab colour
+- a **Summary** tab with revenue and per-plan totals
+- a **StreamPlay4K** menu in the menu bar
+
+---
+
+## Step 5 — Publish it
+
+**Deploy → New deployment.**
+
+Click the **gear icon** next to "Select type" and choose **Web app**.
+
+| Field | Value |
+|---|---|
+| Description | anything, e.g. `orders` |
+| Execute as | **Me** |
+| Who has access | **Anyone** |
+
+**Deploy**, then copy the **Web app URL**. It ends in `/exec`.
+
+> **"Anyone" does not mean anyone can read your sheet.** It means the URL
+> accepts a request without a Google login — which is what lets your server
+> post to it. The script only ever appends rows, never reads any back, and
+> refuses every request that doesn't carry your token.
+
+---
+
+## Step 6 — Tell the site about it
+
+In `public_html/api/config.php` on Hostinger:
+
+```php
+'sheets_url'   => 'https://script.google.com/macros/s/AKfy…/exec',
+'sheets_token' => 'the same string from step 3',
+```
+
+---
+
+## Step 7 — Test
+
+Open the `/exec` URL in a browser. You should see:
+
+```json
+{"ok":true,"service":"StreamPlay4K orders","sheet":"Orders"}
+```
+
+Then place a test order on the site and watch a row appear.
+
+---
+
+## Using it day to day
+
+Click any cell in an order's row, then use the **StreamPlay4K** menu:
+
+| | |
+|---|---|
+| ✅ **Mark as paid** | Row turns green, stamps today's date in **Paid** |
+| 🚀 **Mark as activated** | Row turns blue, stamps **Activated** |
+| ↩️ **Back to new** | Row turns amber, clears both dates |
+| 🚫 **Mark as cancelled** | Row turns grey |
+
+Select several rows first and it marks all of them at once.
+
+The colour is on the **whole row**, not a chip in one column, so you can see
+what still needs paying from across the room. The dates are stamped for you
+because that is the half everyone forgets by hand — and every figure on the
+**Summary** tab is built on those dates.
+
+**Notes** is yours. Nothing ever overwrites it, including an order that
+updates itself later.
+
+---
+
+## The twelve columns
+
+`Order · Date · Status · Plan · Devices · Total · Email · Phone · Country ·
+Paid · Activated · Notes`
+
+Order references are short — **SP-1001**, **SP-1002** — because they get read
+out on WhatsApp and typed into payment descriptions.
+
+Dropped from the earlier version: term, months, total-in-cents, source page and
+campaign. All true, none of them acted on, and a sheet you scroll sideways is a
+sheet you stop opening. They are all still on your server and in `/admin/`.
+
+Three kept against a shorter list, and why: **Total**, because a sheet without
+the amount can't tell you what to invoice or what you're owed; **Phone**,
+because messaging on WhatsApp is the thing this business does; **Date**,
+because without it nothing sorts.
+
+---
+
+## Rules that keep it working
+
+- Don't rename the **Orders** tab.
+- Don't reorder or delete its columns — the script writes by position.
+- Adding columns **to the right of Notes** is fine; the script never touches them.
+- Sorting and filtering are fine; rows are matched by Order reference, not position.
+
+Run **StreamPlay4K → Setup / repair formatting** any time the colours or widths
+get knocked about. It repairs; it does not wipe your data.
 
 ---
 
 ## If rows stop appearing
 
-Look in `endpoint.log` in your orders folder; a failed push is logged with the
+Check `endpoint.log` in your orders folder — a failed push is logged with the
 reason.
 
 | What you see | What it means |
@@ -113,9 +182,10 @@ reason.
 | `http 302`, or an HTML body | The script was edited but not redeployed |
 | Nothing logged at all | `sheets_url` is blank, so the mirror is off |
 
-The redeploy one catches everybody: **editing the script does not change what
-the URL serves.** Go to **Deploy → Manage deployments → pencil icon → Version:
-New version → Deploy.**
+**The redeploy one catches everybody: editing the script does not change what
+the URL serves.** Go to **Deploy → Manage deployments → pencil icon →
+Version: New version → Deploy.**
 
-Anything queued goes out on the next hourly cron run, so a fixed configuration
-back-fills itself.
+Nothing is lost while it is broken. Orders are on your server first, and
+anything that failed to reach the sheet is pushed on the next hourly cron run —
+so a fixed configuration back-fills itself.

@@ -21,7 +21,7 @@ number and an email address. No payment is taken on the site. On submit:
 6. Only then are two emails sent through Mailgun:
    - one to your inbox: the order, with a one-tap WhatsApp link to the customer;
    - one to the customer: what they ordered, what happens next, and how to reach you.
-7. The browser gets `{ ok: true, orderId: "SP-20260909-A1B2C3" }` and the
+7. The browser gets `{ ok: true, orderId: "SP-1001" }` and the
    customer lands on `/thank-you/` with that reference.
 
 Steps 4 and 5 are optional and independent, and nothing in either can fail an
@@ -128,8 +128,8 @@ curl -sS -X POST https://streamplay4k.com/api/order \
   -d '{"planId":"12m","deviceCount":2,"total":14999,"phone":"+12125551234","email":"you@example.com","sourcePage":"/pricing/"}'
 ```
 
-Expect `{"ok":true,"orderId":"SP-..."}`, an email in your inbox, an email at
-`you@example.com`, and a new `SP-....json` in the orders folder.
+Expect `{"ok":true,"orderId":"SP-1001"}`, an email in your inbox, an email at
+`you@example.com`, and a new `SP-1001.json` in the orders folder.
 
 Note the `total` above is deliberately wrong — the server should still charge
 $149.99 (12 months, 2 devices) and log a `PRICE MISMATCH` line. That is the
@@ -159,7 +159,8 @@ The first three matter most. `config.php` holds your Mailgun and Stripe keys;
 ```
 /home/uXXXXXXX/
 ├── streamplay4k-orders/          ← above the web root, not reachable over HTTP
-│   ├── SP-20260909-A1B2C3.json   one file per order — the current truth
+│   ├── SP-1001.json               one file per order — the current truth
+│   ├── counter.json              the next order number
 │   ├── orders-2026-09.ndjson     one line per order as placed
 │   ├── endpoint.log              what was sent, what failed, price mismatches
 │   ├── leads.json                entered a number, never ordered
@@ -291,25 +292,29 @@ and use card `4242 4242 4242 4242`. Confirm the order flips to paid in
 
 ## 7. Google Sheets
 
-**You do not have to build the sheet.**
-`server/google-sheets/StreamPlay4K-orders.xlsx` is the finished thing — three
-tabs, the right columns, a status dropdown and a Summary tab whose totals keep
-themselves current. Drag it into Google Drive, open it with Google Sheets, then
-**File → Save as Google Sheets**.
+**Start from a blank sheet, not a file.** Go to
+**[sheets.new](https://sheets.new)**, paste `server/google-sheets/Code.gs` into
+**Extensions → Apps Script**, set your token, and run **setup** once. The script
+builds both tabs, the formatting and the colours itself.
 
-Connecting it takes three more minutes and needs no API key:
-`server/google-sheets/README.md` has every click.
+> Do not upload a spreadsheet file to Drive for this. An uploaded file stays an
+> *Excel* file, and Excel files have no **Extensions** menu — so Apps Script is
+> nowhere to be found. A blank Google Sheet has it from the start.
 
-Each row carries the plan by name — **Basic**, **Standard**, **Premium** — as
-well as the term, the full contact details, the source page and the campaign.
-Rows update in place, so an order you later mark paid changes the row it
-already has rather than adding a second one.
+Every click is written out in `server/google-sheets/README.md`. Two values end
+up in `config.php`.
+
+**Twelve columns:** Order · Date · Status · Plan · Devices · Total · Email ·
+Phone · Country · Paid · Activated · Notes.
+
+**A menu, not just a table.** Select a row and use **StreamPlay4K → Mark as
+paid** (or activated, or cancelled). It colours the whole row and stamps the
+date, which is the half people forget by hand and the half every figure on the
+Summary tab depends on.
 
 The sheet is a mirror. Orders reach your server first, and a failed push is
 queued for the hourly cron — a Google outage cannot cost you an order or leave
 a hole in the sheet.
-
----
 
 ## 8. The follow-up emails (cron)
 

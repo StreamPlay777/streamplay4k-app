@@ -138,9 +138,10 @@ function sp_rate_limited(array $cfg, string $ip, int $max = 8, int $windowSecond
 /** Absolute path of one order's file. Never built from unfiltered input. */
 function sp_order_path(array $cfg, string $id): ?string
 {
-    // Ids are generated as SP-YYYYMMDD-XXXXXX. Anything else is a traversal
-    // attempt or a bug; either way it must not reach the filesystem.
-    if (!preg_match('/^SP-\d{8}-[A-Z0-9]{6}$/', $id)) return null;
+    // Ids are SP-1234. The longer SP-YYYYMMDD-XXXXXX form is still accepted so
+    // that orders taken before the short format stay readable. Anything else
+    // is a traversal attempt or a bug, and must not reach the filesystem.
+    if (!preg_match('/^SP-(\d{4,8}|\d{8}-[A-Z0-9]{6})$/', $id)) return null;
     return rtrim($cfg['orders_dir'], '/') . '/' . $id . '.json';
 }
 
@@ -240,4 +241,59 @@ function sp_open_leads(array $cfg): array
     $open = array_values(array_filter($leads, static fn($l) => is_array($l) && empty($l['converted'])));
     usort($open, static fn($a, $b) => strcmp((string) $b['lastSeen'], (string) $a['lastSeen']));
     return $open;
+}
+
+/**
+ * The next order reference: SP-1001, SP-1002, and so on.
+ *
+ * SEQUENTIAL, NOT RANDOM. Four digits is 10,000 values, and random picks from
+ * that pool collide sooner than intuition suggests — a 50/50 chance of a
+ * repeat by the 118th order. A repeat here is not cosmetic: two orders would
+ * write to the same file and one customer's details would overwrite the
+ * other's. Counting removes the possibility instead of making it unlikely.
+ *
+ * Starts at 1001 so the first customer is not told they are order number one.
+ *
+ * The counter is read and written under one exclusive lock. Two orders landing
+ * in the same instant would otherwise both read the same number, and the
+ * second write would silently replace the first order on disk.
+ *
+ * If the counter file is ever lost, it is rebuilt from the highest id already
+ * in the directory rather than restarting at 1001 and overwriting history.
+ */
+function sp_next_order_id(array $cfg): string
+{
+    $dir = rtrim($cfg['orders_dir'], '/');
+    if (!is_dir($dir) && !@mkdir($dir, 0750, true) && !is_dir($dir)) {
+        // Nowhere to keep a counter. A timestamp-based id is ugly but unique,
+        // and the caller is about to fail on the write anyway.
+        return 'SP-' . substr((string) time(), -6);
+    }
+
+    $file = $dir . '/counter.json';
+    $fh = @fopen($file, 'c+');
+    if (!$fh) return 'SP-' . substr((string) time(), -6);
+    flock($fh, LOCK_EX);
+
+    $raw = stream_get_contents($fh);
+    $data = json_decode((string) $raw, true);
+    $next = is_array($data) && isset($data['next']) ? (int) $data['next'] : 0;
+
+    if ($next < 1001) {
+        // First run, or a lost counter: resume above the highest id on disk.
+        $highest = 1000;
+        foreach (glob($dir . '/SP-*.json') ?: [] as $f) {
+            if (preg_match('/SP-(\d+)\.json$/', $f, $m)) $highest = max($highest, (int) $m[1]);
+        }
+        $next = $highest + 1;
+    }
+
+    rewind($fh);
+    ftruncate($fh, 0);
+    fwrite($fh, (string) json_encode(['next' => $next + 1, 'updatedAt' => gmdate('c')]));
+    fflush($fh);
+    flock($fh, LOCK_UN);
+    fclose($fh);
+
+    return 'SP-' . $next;
 }

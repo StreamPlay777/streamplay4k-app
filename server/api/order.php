@@ -99,7 +99,9 @@ $clientTotal = (int) ($in['total'] ?? 0);
 $mismatch = $clientTotal !== $q['totalCents'];
 
 /* ── Assemble ─────────────────────────────────────────────────────────── */
-$id = 'SP-' . gmdate('Ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(4)), 0, 6));
+/* Short and sequential — SP-1001, SP-1002. It is read out on WhatsApp and
+   typed into a payment description, so every character costs something. */
+$id = sp_next_order_id($cfg);
 
 $order = [
     'id'              => $id,
