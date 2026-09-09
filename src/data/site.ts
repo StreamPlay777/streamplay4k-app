@@ -54,8 +54,15 @@ export const site = {
   refundLabel: '7-Day Money-Back Guarantee',
 
   /* ── Setup ─────────────────────────────────────────────────────────────── */
-  /** TODO(client): confirm before launch — carried over from the handoff. */
-  downloaderCode: '481200',
+  /** Downloader code for the Hot Player install. Client-confirmed. */
+  downloaderCode: '395800',
+
+  /** Hot Player, the app we install on. Client-confirmed links. */
+  player: {
+    name: 'Hot Player',
+    ios: 'https://apps.apple.com/us/app/hot-player/id6695762404',
+    android: 'https://apk.hotplayer.app/',
+  },
 
   description:
     'StreamPlay4K brings live TV, sports, movies and series together across your favorite devices, with HD and 4K quality where available.',
