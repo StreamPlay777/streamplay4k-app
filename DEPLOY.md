@@ -96,6 +96,47 @@ without: if it is missing, `/api/order` returns 500 rather than pretending.
 
 ---
 
+## 3b. Set PHP to 8.1 (once)
+
+**hPanel → Advanced → PHP Configuration → PHP version → 8.1 or newer → Save.**
+
+⚠️ Do this before anything else if the account previously ran WordPress.
+WordPress hosting is routinely left on PHP 7.4, and on 7.4 the order endpoint
+cannot run at all — it fails with a parse error before a single line executes,
+which looks like a blank page and an order form that silently stops working.
+
+`api/check.php` (section 5) is written in old PHP on purpose so it still runs
+on 7.4 and can tell you this is the problem.
+
+---
+
+## 3c. Replacing an existing WordPress site
+
+**Empty `public_html` completely. Do not upload on top of WordPress.**
+
+Three reasons overwriting fails:
+
+1. **`index.php` wins.** Apache tries `index.php` before `index.html`, so
+   WordPress's own index file keeps answering the homepage and your new site
+   never appears — while every file looks correctly uploaded.
+2. **Two `.htaccess` files fight.** WordPress writes its own rewrite rules.
+   Left in place they swallow `/pricing/`, `/api/order` and everything else.
+3. **An abandoned WordPress is a liability.** `wp-admin`, `wp-includes` and
+   old plugins that nobody updates are the most common way a small site gets
+   compromised. Leaving them "just in case" is the worst of both.
+
+**Back up first, even if you are sure.** hPanel → Files → Backups → create one,
+and download it. Five minutes now against an afternoon of regret.
+
+Then: hPanel → File Manager → open `public_html` → select all → delete. Turn on
+**Settings → Show hidden files** first, so `.htaccess` is included in the
+selection. If hPanel lists the site under **Websites → WordPress**, remove it
+there instead — that clears its database too.
+
+The folder should be completely empty before you upload.
+
+---
+
 ## 4. Build and upload
 
 ```bash
@@ -121,6 +162,17 @@ key.
 
 ## 5. Check it end to end
 
+**Open `https://streamplay4k.com/api/check.php` first.**
+
+It tests the PHP version, the extensions, every setting in `config.php`,
+whether the orders folder exists, is writable and is outside the web root, and
+whether `/api/order` is actually routed. Each failure comes with what to do
+about it. No keys or passwords are shown — only whether they are filled in.
+
+**Delete `api/check.php` once everything passes.**
+
+Then the endpoint itself:
+
 ```bash
 # Should return JSON with an orderId, and should NOT return HTML.
 curl -sS -X POST https://streamplay4k.com/api/order \
@@ -143,6 +195,7 @@ File Manager hides dotfiles by default (Settings → *Show hidden files*).
 
 These must all pass before you take real orders:
 
+- [ ] `https://streamplay4k.com/api/check.php` shows all green (then delete it)
 - [ ] `curl https://streamplay4k.com/api/config.php` returns **403**, not PHP source
 - [ ] `curl https://streamplay4k.com/api/lib/mailer.php` returns **403**
 - [ ] `curl https://streamplay4k.com/api/cron/followups.php` returns **403**
