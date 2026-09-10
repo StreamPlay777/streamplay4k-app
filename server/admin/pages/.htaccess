@@ -1,0 +1,8 @@
+# Includes, not pages. Every file here expects SP_ADMIN to be defined and the
+# config to be loaded; requested directly they would run without a session and
+# without an authorisation check.
+#
+# Each file also refuses to run on its own, so this is the second of two locks.
+# The first is in the code, where it cannot be lost by a deploy that rewrites
+# the site's .htaccess files.
+Require all denied

@@ -27,6 +27,7 @@ require __DIR__ . '/lib/mailer.php';
 require __DIR__ . '/lib/store.php';
 require __DIR__ . '/lib/stripe.php';
 require __DIR__ . '/lib/sheets.php';
+require __DIR__ . '/lib/settings.php';
 require __DIR__ . '/templates/emails.php';
 
 $configPath = __DIR__ . '/config.php';
@@ -162,11 +163,14 @@ if ($mismatch) {
  *      amount is fixed, the payment reports itself back, the order marks
  *      itself paid. Best, and the most setup.
  *
- *   2. payment_link set   — one reusable Stripe link the customer types the
+ *   2. a payment link set  — one reusable Stripe link the customer types the
  *      amount into. No API key, nothing to maintain. The email states the
  *      figure large and twice, because with a link like this the amount is
  *      the customer's job to get right and a mistyped one is your afternoon.
  *      Nothing reports back, so you mark orders paid in the dashboard.
+ *      The link is read through sp_payment_link(), which prefers whatever the
+ *      owner last saved in the admin and falls back to config.php — so
+ *      rotating it is a text box, not a deploy.
  *
  *   3. neither            — the email says the invoice is on its way, and you
  *      send it. This is the default and it is a complete, working shop.
@@ -183,8 +187,9 @@ if ($pay) {
     ]);
 } elseif (sp_stripe_enabled($cfg)) {
     sp_log($cfg, "{$id} stripe checkout FAILED — customer gets the invoice-coming email");
-} elseif (!empty($cfg['payment_link'])) {
-    $order['payLink'] = (string) $cfg['payment_link'];
+} else {
+    $payLink = sp_payment_link($cfg);
+    if ($payLink !== '') $order['payLink'] = $payLink;
 }
 
 /* This person is no longer an abandoned lead. */
