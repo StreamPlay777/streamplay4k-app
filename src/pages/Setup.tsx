@@ -1,229 +1,291 @@
-import { useState } from 'react';
-import { ChevronRight, CheckCircle, Play, MessageCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import Seo from '../components/Seo';
+import { pageSeo } from '../data/seo';
 import { Link } from 'react-router-dom';
+import { site, routes, trialUrl, whatsappUrlWith } from '../data/site';
+import { deviceGuides, loginFormats, activationFacts } from '../data/setup';
+import { SectionHeading } from '../components/ui';
+import Reveal from '../components/Reveal';
+import ClosingCta from '../components/ClosingCta';
+import { CatIcon } from '../components/CategoryIcons';
+import { track } from '../lib/analytics';
 
-const deviceGuides = [
-  {
-    id: 'firestick',
-    name: 'Amazon Firestick',
-    icon: '🔥',
-    popular: true,
-    steps: [
-      { step: 1, title: 'Enable Apps from Unknown Sources', desc: 'Go to Settings → My Fire TV → Developer Options → Apps from Unknown Sources → Turn ON.' },
-      { step: 2, title: 'Install Downloader App', desc: 'Go to the Fire TV Search bar → search "Downloader" → Install the Downloader app (orange icon) for free.' },
-      { step: 3, title: 'Download the IPTV App', desc: 'Open Downloader → type the URL we send you after purchase → Download and install the IPTV player app.' },
-      { step: 4, title: 'Enter Your Credentials', desc: 'Open the app → tap Add Playlist or M3U URL → enter the URL, username, and password from your welcome email.' },
-      { step: 5, title: 'Start Streaming!', desc: 'Channels will load in under 60 seconds. Browse all 10,000+ channels, movies, and shows in 4K. Enjoy!' },
-    ],
-  },
-  {
-    id: 'android',
-    name: 'Android TV / Box',
-    icon: '📱',
-    steps: [
-      { step: 1, title: 'Open Google Play Store', desc: 'On your Android TV or box, open the Google Play Store from the home screen or apps menu.' },
-      { step: 2, title: 'Install an IPTV Player', desc: 'Search for "IPTV Smarters Pro" or "TiviMate" → Download and install the app (free).' },
-      { step: 3, title: 'Add Your Subscription', desc: 'Open the app → select "Add New User" or "Add Playlist" → choose M3U URL → enter your credentials from your welcome email.' },
-      { step: 4, title: 'Load Channels', desc: 'The app will sync all 10,000+ channels and your full VOD library automatically. This takes about 60 seconds.' },
-      { step: 5, title: 'Enjoy 4K Streaming', desc: 'Browse channels by category, use the EPG guide, or search for specific channels and movies. Start watching!' },
-    ],
-  },
-  {
-    id: 'appletv',
-    name: 'Apple TV',
-    icon: '🍎',
-    steps: [
-      { step: 1, title: 'Open the App Store', desc: 'On your Apple TV, navigate to the App Store from the home screen.' },
-      { step: 2, title: 'Install GSE Smart IPTV', desc: 'Search for "GSE Smart IPTV" or "IPTV Smarters" → Download and install the app (may require purchase).' },
-      { step: 3, title: 'Add Remote Playlist', desc: 'Open the app → go to Remote Playlists → tap the + icon → enter your M3U URL from your welcome email.' },
-      { step: 4, title: 'Load Your Channels', desc: 'The app will import all your channels and VOD content. Wait about 60 seconds for everything to load.' },
-      { step: 5, title: 'Start Watching', desc: 'Browse live channels, movies, and TV shows. Use the built-in EPG to see what\'s on and schedule recordings.' },
-    ],
-  },
-  {
-    id: 'smarttv',
-    name: 'Smart TV (Samsung / LG)',
-    icon: '📺',
-    steps: [
-      { step: 1, title: 'Open the App Store', desc: 'On Samsung: press Smart Hub → App Store. On LG: press Home → LG Content Store.' },
-      { step: 2, title: 'Search for IPTV App', desc: 'Search for "Smart IPTV" (Samsung) or "SS IPTV" (LG) → Install the free app.' },
-      { step: 3, title: 'Note Your Device MAC Address', desc: 'Open the app and note the MAC address shown on screen. You\'ll need this to activate your subscription.' },
-      { step: 4, title: 'Activate on the Website', desc: 'Go to the Smart IPTV website, enter your MAC address and your M3U playlist URL from your welcome email.' },
-      { step: 5, title: 'Restart and Stream', desc: 'Restart the app on your TV — all 10,000+ channels will load automatically. Start enjoying 4K content!' },
-    ],
-  },
-  {
-    id: 'pc',
-    name: 'Windows PC / Mac',
-    icon: '💻',
-    steps: [
-      { step: 1, title: 'Download VLC Media Player', desc: 'Go to videolan.org and download VLC Media Player (free and available for Windows and Mac).' },
-      { step: 2, title: 'Open Network Stream', desc: 'In VLC, go to Media → Open Network Stream (Ctrl+N on Windows, Command+N on Mac).' },
-      { step: 3, title: 'Enter Your M3U URL', desc: 'Paste your M3U playlist URL from your welcome email into the Network URL field → click Play.' },
-      { step: 4, title: 'Browse Your Channels', desc: 'VLC will load your full playlist. You can also use IPTV apps like "Kodi" or "IPTV Smarters Web" for a better EPG experience.' },
-      { step: 5, title: 'Stream in 4K', desc: 'Enjoy all 10,000+ channels and 60,000+ VOD titles directly on your PC or Mac in full 4K quality.' },
-    ],
-  },
-  {
-    id: 'iphone',
-    name: 'iPhone / iPad',
-    icon: '📱',
-    steps: [
-      { step: 1, title: 'Open the App Store', desc: 'On your iPhone or iPad, open the App Store app.' },
-      { step: 2, title: 'Install GSE Smart IPTV', desc: 'Search for "GSE Smart IPTV" or "IPTV Smarters Pro" → Download and install (may require a small fee).' },
-      { step: 3, title: 'Add Your M3U Playlist', desc: 'Open the app → go to Remote Playlists → tap + → enter your M3U URL from your welcome email.' },
-      { step: 4, title: 'Let It Load', desc: 'The app will automatically import all channels, movies, and TV shows. This takes about 60 seconds on a good connection.' },
-      { step: 5, title: 'Watch Anywhere', desc: 'Stream your favorite sports, shows, and movies on the go — at home, at work, or anywhere you have internet.' },
-    ],
-  },
-];
-
+/**
+ * Installation guide.
+ *
+ * ONE DEVICE AT A TIME. The page shows the steps for the device you pick and
+ * nothing else. Six guides printed at once is how setup pages become the thing
+ * customers message support about instead of reading — the point of an install
+ * guide is that the visitor sees four steps, not thirty.
+ *
+ * Everything above the picker is what applies to every device: the code, how
+ * long it takes, and what the two login formats are. Everything below is the
+ * one device's steps.
+ */
 export default function Setup() {
-  const [activeDevice, setActiveDevice] = useState('firestick');
-  const active = deviceGuides.find(d => d.id === activeDevice)!;
+  const [deviceId, setDeviceId] = useState(deviceGuides[0].id);
+
+  /**
+   * The navbar's Setup menu and the footer link to /setup-guide/#firestick and
+   * friends. With one panel instead of six sections there is nothing for the
+   * browser to scroll to, so the hash selects the device instead — otherwise
+   * every one of those links would land on the page showing Firestick.
+   *
+   * hashchange as well as mount: those links are same-page navigations once a
+   * visitor is already here, and React Router will not remount for them.
+   */
+  useEffect(() => {
+    const apply = () => {
+      const id = window.location.hash.replace('#', '');
+      if (deviceGuides.some((d) => d.id === id)) {
+        setDeviceId(id);
+        document.getElementById('your-device')?.scrollIntoView({ block: 'start' });
+      }
+    };
+    apply();
+    window.addEventListener('hashchange', apply);
+    return () => window.removeEventListener('hashchange', apply);
+  }, []);
+  const [copied, setCopied] = useState(false);
+  const device = deviceGuides.find((d) => d.id === deviceId)!;
+
+  const copyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(activationFacts.code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard blocked (insecure context, or permission denied) — the code
+      // is on screen either way, so fail quietly rather than at the user.
+      setCopied(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen pt-24">
-      {/* Hero */}
-      <section className="bg-brand-darker border-b border-brand-border py-16 text-center">
-        <div className="max-w-4xl mx-auto px-4">
-          <span className="text-brand-red text-sm font-bold uppercase tracking-widest">Setup Guide</span>
-          <h1 className="text-5xl font-black text-white mt-2 mb-4">
-            Start Streaming in <span className="text-gradient">Under 5 Minutes</span>
+    <>
+      <Seo seo={pageSeo[routes.setup]} />
+
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <section className="px-7 pb-[46px] pt-[74px] text-center">
+        <div className="mx-auto max-w-[760px]">
+          <p className="eyebrow">Set up in minutes</p>
+          <h1
+            className="mt-4 font-display font-extrabold leading-none text-ink"
+            style={{ fontSize: 'clamp(38px, 6.5vw, 66px)' }}
+          >
+            Installation <span className="text-grad">Guide</span>
           </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Follow our step-by-step guide to set up StreamPlay4K on your favorite device. No technical skills needed.
+          <p className="mx-auto mt-6 max-w-[560px] text-[17.5px] leading-relaxed text-ink-3">
+            Pick your device below and follow the exact steps. Your login arrives by email right
+            after purchase.
+          </p>
+          <p className="mt-5 text-[11.5px] font-bold uppercase tracking-[.16em] text-accent-ink">
+            No hidden fees · Fast activation · 24/7 support
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link to={routes.pricing} onClick={() => track('view_pricing', { from: 'setup-hero' })} className="btn-accent">
+              See pricing →
+            </Link>
+            <a
+              href={trialUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track('start_free_trial', { from: 'setup-hero' })}
+              className="btn-outline"
+            >
+              Free trial
+            </a>
+          </div>
+          <p className="mt-5 text-[12.5px] text-ink-5">
+            <a href="#your-device" className="hover:text-accent-link">Or jump to your device ↓</a>
           </p>
         </div>
       </section>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Device selector */}
-        <h2 className="text-white font-bold text-lg mb-5">Choose Your Device:</h2>
-        <div className="flex flex-wrap gap-3 mb-12">
-          {deviceGuides.map(d => (
-            <button
-              key={d.id}
-              onClick={() => setActiveDevice(d.id)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
-                activeDevice === d.id
-                  ? 'gradient-red text-white shadow-lg shadow-brand-red/30'
-                  : 'bg-brand-card border border-brand-border text-gray-300 hover:border-brand-red hover:text-white'
-              }`}
-            >
-              <span className="text-lg">{d.icon}</span>
-              {d.name}
-              {d.popular && <span className="text-[9px] bg-white/20 px-1.5 py-0.5 rounded-full font-black">POPULAR</span>}
-            </button>
-          ))}
-        </div>
+      {/* ── What applies to every device ───────────────────────────────── */}
+      <section className="section-tight px-7">
+        <div className="mx-auto max-w-shell">
+          <div className="card px-6 py-7 sm:px-8 sm:py-8">
+            <h2 className="font-display text-[22px] font-extrabold text-ink sm:text-[25px]">
+              Activate {site.name} on any device
+            </h2>
+            <p className="mt-3 max-w-[680px] text-[14.5px] leading-relaxed text-ink-3">
+              Pick your device and we will show the exact steps. Where the device allows it we install{' '}
+              {activationFacts.player} with the Downloader app using the code below. Televisions that
+              cannot sideload go to their own app store instead.
+            </p>
 
-        {/* Steps */}
-        <div className="grid lg:grid-cols-2 gap-10 items-start">
-          <div>
-            <div className="flex items-center gap-3 mb-8">
-              <span className="text-4xl">{active.icon}</span>
-              <h2 className="text-2xl font-black text-white">Setup on {active.name}</h2>
-            </div>
-            <div className="space-y-4">
-              {active.steps.map((s) => (
-                <div key={s.step} className="flex gap-4 bg-brand-card border border-brand-border rounded-xl p-5">
-                  <div className="w-8 h-8 gradient-red rounded-full flex items-center justify-center shrink-0 text-white font-black text-sm">
-                    {s.step}
-                  </div>
-                  <div>
-                    <h3 className="text-white font-bold mb-1">{s.title}</h3>
-                    <p className="text-gray-400 text-sm leading-relaxed">{s.desc}</p>
-                  </div>
+            <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-xl border border-line bg-raise px-5 py-4">
+                <p className="text-[11px] font-bold uppercase tracking-[.14em] text-ink-5">Downloader code</p>
+                <div className="mt-2.5 flex flex-wrap items-center gap-3">
+                  <span className="nums font-display text-[26px] font-extrabold tracking-[.1em] text-ink">
+                    {activationFacts.code}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={copyCode}
+                    className="btn-sm border border-line-2 bg-raise-2 text-ink-2 hover:border-accent hover:text-ink"
+                  >
+                    {copied ? '✓ Copied' : 'Copy code'}
+                  </button>
                 </div>
+              </div>
+
+              <div className="rounded-xl border border-line bg-raise px-5 py-4">
+                <p className="text-[11px] font-bold uppercase tracking-[.14em] text-ink-5">Typical time</p>
+                <p className="nums mt-2.5 font-display text-[26px] font-extrabold text-ink">
+                  {activationFacts.typicalTime}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-line bg-raise px-5 py-4">
+                <p className="text-[11px] font-bold uppercase tracking-[.14em] text-ink-5">Need a hand?</p>
+                <a
+                  href={whatsappUrlWith(`Hi ${site.name}, I need help setting up on my device.`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => track('whatsapp_click', { from: 'setup-help' })}
+                  className="btn-accent mt-2.5 !w-full !py-2.5 !text-[13.5px]"
+                >
+                  Chat with an expert
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── The two login formats ──────────────────────────────────────── */}
+      <section className="section-tight px-7">
+        <div className="mx-auto max-w-shell">
+          <div className="card px-6 py-7 sm:px-8 sm:py-8">
+            <h2 className="font-display text-[22px] font-extrabold text-ink sm:text-[25px]">
+              Where do I find my login details?
+            </h2>
+            <p className="mt-3 max-w-[680px] text-[14.5px] leading-relaxed text-ink-3">
+              After your purchase we email your login. Players accept one of two formats, and your
+              email tells you which you have.
+            </p>
+
+            {/* min-w-0 on each card: a grid item defaults to min-width:auto,
+                so the long unbroken M3U example below would set the track's
+                width and push the whole page sideways on a phone. */}
+            <div className="mt-7 grid gap-3 lg:grid-cols-2">
+              {loginFormats.map((f, i) => (
+                <Reveal key={f.id} delay={i} shift={12} className="min-w-0 rounded-xl border border-line bg-raise p-5">
+                  <div className="flex items-start gap-3">
+                    <span className="cat-icon grid h-10 w-10 flex-none place-items-center rounded-xl" aria-hidden="true">
+                      <CatIcon name={f.id === 'xtream' ? 'setup' : 'devices'} />
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="font-display text-[16px] font-bold text-ink">{f.name}</h3>
+                      <p className="mt-0.5 text-[12.5px] text-ink-4">{f.what}</p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-[13.5px] leading-relaxed text-ink-3">{f.body}</p>
+                  <p className="mt-4 text-[11px] font-bold uppercase tracking-[.14em] text-ink-5">
+                    {f.exampleLabel}
+                  </p>
+                  <p className="mt-1.5 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border border-line bg-raise-2 px-3 py-2.5 font-mono text-[12px] text-ink-4">
+                    {f.example}
+                  </p>
+                </Reveal>
               ))}
             </div>
-          </div>
 
-          {/* Sidebar info */}
-          <div className="space-y-6">
-            {/* Quick start */}
-            <div className="bg-gradient-to-br from-brand-red/20 to-brand-orange/10 border border-brand-red/30 rounded-2xl p-6">
-              <h3 className="text-white font-black text-lg mb-4">⚡ Quick Start Checklist</h3>
-              <ul className="space-y-3">
-                {[
-                  'Subscribe to a plan and receive your credentials via email',
-                  'Download the recommended IPTV app for your device',
-                  'Enter your M3U URL, username & password',
-                  'Wait 60 seconds for channels to load',
-                  'Start streaming in 4K!',
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                    <CheckCircle size={14} className="text-green-400 mt-0.5 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Recommended apps */}
-            <div className="bg-brand-card border border-brand-border rounded-2xl p-6">
-              <h3 className="text-white font-bold mb-4">📱 Recommended Apps</h3>
-              <ul className="space-y-3">
-                {[
-                  { name: 'IPTV Smarters Pro', platform: 'Firestick, Android, iOS', rating: '★ 4.7' },
-                  { name: 'TiviMate', platform: 'Android TV, Firestick', rating: '★ 4.9' },
-                  { name: 'GSE Smart IPTV', platform: 'iOS, Apple TV', rating: '★ 4.6' },
-                  { name: 'Kodi + PVR Add-on', platform: 'All platforms', rating: '★ 4.8' },
-                  { name: 'VLC Media Player', platform: 'Windows, Mac', rating: '★ 4.7' },
-                ].map(app => (
-                  <li key={app.name} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-white text-sm font-medium">{app.name}</p>
-                      <p className="text-gray-500 text-xs">{app.platform}</p>
-                    </div>
-                    <span className="text-brand-orange text-xs font-bold">{app.rating}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Requirements */}
-            <div className="bg-brand-card border border-brand-border rounded-2xl p-6">
-              <h3 className="text-white font-bold mb-4">📋 Requirements</h3>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li className="flex items-center gap-2"><ChevronRight size={12} className="text-brand-red" /> Internet: 10 Mbps+ for HD, 25 Mbps+ for 4K</li>
-                <li className="flex items-center gap-2"><ChevronRight size={12} className="text-brand-red" /> Compatible device (see list above)</li>
-                <li className="flex items-center gap-2"><ChevronRight size={12} className="text-brand-red" /> Active StreamPlay4K subscription</li>
-                <li className="flex items-center gap-2"><ChevronRight size={12} className="text-brand-red" /> Your welcome email with login credentials</li>
-              </ul>
-            </div>
-
-            {/* Support */}
-            <div className="bg-brand-card border border-brand-border rounded-2xl p-6 text-center">
-              <MessageCircle size={32} className="text-green-400 mx-auto mb-3" />
-              <h3 className="text-white font-bold mb-2">Need Help Setting Up?</h3>
-              <p className="text-gray-400 text-sm mb-4">Our team will set it up for you — for free. Just contact support after subscribing.</p>
-              <a
-                href="https://wa.me/1234567890"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-500 text-white font-bold text-sm rounded-xl hover:bg-green-600 transition-colors"
-              >
-                <MessageCircle size={16} /> WhatsApp Support
-              </a>
-            </div>
+            <p className="mt-6 rounded-xl border border-line bg-raise-2 px-4 py-3.5 text-[13px] leading-relaxed text-ink-3">
+              <strong className="font-semibold text-ink-2">Tip:</strong> your plan allows a set number of
+              devices at once. If a stream stops working, another device is probably using the slot — log
+              out there, or message us and we will check.
+            </p>
           </div>
         </div>
+      </section>
 
-        {/* CTA */}
-        <div className="mt-16 text-center bg-gradient-to-br from-brand-card to-brand-darker border border-brand-border rounded-3xl p-12">
-          <Play size={40} className="text-brand-red mx-auto mb-4" />
-          <h2 className="text-3xl font-black text-white mb-3">Ready to Start?</h2>
-          <p className="text-gray-400 mb-6">Get your credentials instantly after subscribing. We'll even help you set up.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/pricing" className="flex items-center justify-center gap-2 px-8 py-4 gradient-red text-white font-black text-lg rounded-xl hover:opacity-90 transition-opacity">
-              Subscribe Now <ChevronRight size={18} />
-            </Link>
-            <Link to="/channels" className="flex items-center justify-center gap-2 px-8 py-4 bg-white/10 border border-white/20 text-white font-bold text-lg rounded-xl hover:bg-white/20 transition-all">
-              Browse Channels
-            </Link>
+      {/* ── One device, its steps ──────────────────────────────────────── */}
+      <section id="your-device" className="section amb amb-warm bg-bg">
+        <div className="mx-auto max-w-shell">
+          <SectionHeading
+            label="Step by step"
+            title={<>What are you <span className="text-grad">installing on?</span></>}
+            sub="Choose your device and we will show only the steps that matter for it."
+          />
+
+          <div className="mt-10 rounded-2xl border border-line bg-surface p-5 sm:p-7">
+            <label htmlFor="device-picker" className="block text-[13px] font-semibold text-ink-2">
+              Select your device
+            </label>
+            <select
+              id="device-picker"
+              value={deviceId}
+              onChange={(e) => { setDeviceId(e.target.value); track('channel_search', { from: 'setup-device', q: e.target.value }); }}
+              className="field mt-2 max-w-[380px] !py-3"
+            >
+              {deviceGuides.map((d) => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </select>
+
+            {/* key on the device id so the panel replays its entrance when the
+                selection changes — otherwise the steps swap silently and it is
+                easy to miss that the list is now a different device's. */}
+            <div key={device.id} className="panel-swap mt-7">
+              <p className="text-[11px] font-bold uppercase tracking-[.14em] text-ink-5">
+                Steps for {device.name}
+              </p>
+              <p className="mt-2 max-w-[720px] text-[14.5px] leading-relaxed text-ink-2">
+                {device.summary}
+              </p>
+
+              {device.downloads.length > 0 && (
+                <div className="mt-5 flex flex-wrap gap-2.5">
+                  {device.downloads.map((d) => (
+                    <a
+                      key={d.label}
+                      href={d.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => track('start_free_trial', { from: 'setup-download', device: device.id })}
+                      className="btn-accent !py-2.5 !text-[13.5px]"
+                    >
+                      ↓ {d.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              <ol className="mt-7 grid gap-3 lg:grid-cols-2">
+                {device.steps.map((s, i) => (
+                  <li key={s.title} className="step-card rounded-xl border border-line bg-raise p-5">
+                    <span className="step-badge inline-flex items-center rounded-md px-2 py-[3px] font-display text-[10.5px] font-extrabold uppercase tracking-[.1em]">
+                      Step {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <h3 className="mt-3 font-display text-[16px] font-bold text-ink">{s.title}</h3>
+                    <p className="mt-2 text-[13.5px] leading-relaxed text-ink-3">{s.body}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </div>
+
+          <p className="mx-auto mt-7 max-w-[620px] text-center text-[13.5px] leading-relaxed text-ink-4">
+            Stuck at any step?{' '}
+            <a
+              href={whatsappUrlWith(`Hi ${site.name}, I'm stuck setting up on ${device.name}.`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track('whatsapp_click', { from: 'setup-stuck', device: device.id })}
+              className="font-semibold text-accent-ink hover:underline"
+            >
+              Message us on WhatsApp
+            </a>{' '}
+            — tell us your device and where you got to, and we will walk you through it.
+          </p>
         </div>
-      </div>
-    </div>
+      </section>
+
+      <ClosingCta from="setup-closing" />
+    </>
   );
 }

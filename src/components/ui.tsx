@@ -1,0 +1,188 @@
+import type { ReactNode } from 'react';
+import type { Title } from '../data/vod';
+import type { NetworkLogo } from '../data/logos';
+import Poster from './Poster';
+
+/** Centred section header: eyebrow label, h2, optional sub-paragraph. */
+export function SectionHeading({
+  label, title, sub, align = 'center', size = 52,
+}: {
+  label?: string;
+  title: ReactNode;
+  sub?: ReactNode;
+  align?: 'center' | 'left';
+  size?: number;
+}) {
+  const centred = align === 'center';
+  return (
+    <div className={centred ? 'mx-auto max-w-[720px] text-center' : 'max-w-[720px]'}>
+      {label && <div className="label mb-4">{label}</div>}
+      <h2
+        className="font-display font-extrabold leading-[1.02] text-ink text-balance"
+        style={{ fontSize: `clamp(32px, 5vw, ${size}px)` }}
+      >
+        {title}
+      </h2>
+      {sub && (
+        <p className={`mt-5 text-[17px] leading-relaxed text-ink-3 ${centred ? 'mx-auto max-w-[620px]' : 'max-w-[620px]'}`}>
+          {sub}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Striped stand-in for artwork not yet supplied. Every one of these is a slot
+ * waiting on a real asset — see the Assets note in the design handoff.
+ */
+export function Placeholder({ label, note, height }: { label: string; note?: string; height: number }) {
+  return (
+    <div
+      className="placeholder-stripes relative grid place-items-center px-4 text-center"
+      style={{ height }}
+    >
+      <div>
+        <div className="nums text-[11px] text-ink-5">{label}</div>
+        {note && <div className="mt-1.5 nums text-[10px] text-ink-6">{note}</div>}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Infinite CSS marquee. The track renders its children twice back to back inside
+ * a max-content flex row so the loop is seamless. Pauses on hover; disabled
+ * entirely under prefers-reduced-motion (see index.css).
+ */
+export function Marquee({
+  items, direction = 'left', duration, tight = false, renderItem,
+}: {
+  items: string[];
+  direction?: 'left' | 'right';
+  duration: number;
+  tight?: boolean;
+  renderItem: (item: string, key: string) => ReactNode;
+}) {
+  return (
+    <div className={`overflow-hidden ${tight ? 'mask-rail-tight' : 'mask-rail'}`}>
+      <div
+        className="marquee-track flex w-max gap-2.5"
+        style={{
+          animationName: direction === 'left' ? 'marquee-l' : 'marquee-r',
+          animationDuration: `${duration}s`,
+          animationTimingFunction: 'linear',
+          animationIterationCount: 'infinite',
+        }}
+      >
+        {[0, 1].map((pass) => (
+          <div key={pass} className="flex gap-2.5" aria-hidden={pass === 1}>
+            {items.map((item, i) => renderItem(item, `${pass}-${i}`))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Accent tick used across feature and checklist rows. */
+export function Tick() {
+  return <span className="mt-[2px] flex-none font-display text-[15px] font-bold text-accent-ink">✓</span>;
+}
+
+/** Five accent stars. */
+export function Stars({ size = 14 }: { size?: number }) {
+  return (
+    <div className="tracking-[.2em] text-accent-ink" style={{ fontSize: size }} aria-label="5 out of 5 stars">
+      ★★★★★
+    </div>
+  );
+}
+
+/** Marquee of poster cards — the on-demand rails. */
+export function TitleMarquee({ titles, direction, duration }: {
+  titles: Title[];
+  direction: 'left' | 'right';
+  duration: number;
+}) {
+  return (
+    <div className="mask-rail-tight overflow-hidden">
+      <div
+        className="marquee-track flex w-max gap-2.5"
+        style={{
+          animationName: direction === 'left' ? 'marquee-l' : 'marquee-r',
+          animationDuration: `${duration}s`,
+          animationTimingFunction: 'linear',
+          animationIterationCount: 'infinite',
+        }}
+      >
+        {[0, 1].map((pass) => (
+          <div key={pass} className="flex gap-2.5" aria-hidden={pass === 1}>
+            {titles.map((t) => <Poster key={`${pass}-${t.name}`} title={t} />)}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Marquee of network marks — the logo wall.
+ *
+ * Chips are frosted white glass: the marks arrive as dark and brand-colour
+ * artwork, so a light chip is what makes them legible on the dark page (and
+ * forcing them all white destroys any mark built as knockout type on a solid
+ * shape). Chip width hugs the logo rather than being fixed, so a wide wordmark
+ * and a square badge both sit correctly.
+ *
+ * Sizing steps down for phone and tablet so marks stay readable rather than
+ * shrinking to illegible slivers.
+ */
+export function LogoMarquee({ logos, direction, duration }: {
+  logos: NetworkLogo[];
+  direction: 'left' | 'right';
+  duration: number;
+}) {
+  return (
+    <div className="mask-rail overflow-hidden">
+      <div
+        className="marquee-track flex w-max gap-2 sm:gap-2.5"
+        style={{
+          animationName: direction === 'left' ? 'marquee-l' : 'marquee-r',
+          animationDuration: `${duration}s`,
+          animationTimingFunction: 'linear',
+          animationIterationCount: 'infinite',
+        }}
+      >
+        {[0, 1].map((pass) => (
+          <div key={pass} className="flex gap-2 sm:gap-2.5" aria-hidden={pass === 1}>
+            {logos.map((logo) => (
+              <span
+                key={`${pass}-${logo.slug}`}
+                className="logo-plate flex h-11 min-w-[84px] flex-none items-center justify-center
+                           rounded-xl px-4 sm:h-[52px] sm:min-w-[104px] sm:px-5
+                           lg:h-[58px] lg:min-w-[116px]"
+                style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+              >
+                <img
+                  src={logo.src}
+                  alt={pass === 0 ? logo.name : ''}
+                  /* Every mark scrolls through within one cycle, so lazy
+                     loading only bought a visible pop-in. Low priority keeps
+                     them from competing with above-the-fold work. */
+                  decoding="async"
+                  /* Lowercase: React 18 does not recognise the camelCase form
+                     and warns during server rendering. The DOM attribute is
+                     `fetchpriority` either way. */
+                  {...{ fetchpriority: 'low' }}
+                  className="max-h-[20px] max-w-[104px] object-contain sm:max-h-[24px] sm:max-w-[124px] lg:max-h-[28px] lg:max-w-[140px]"
+                  style={logo.invert ? { filter: 'invert(1)' } : undefined}
+                />
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

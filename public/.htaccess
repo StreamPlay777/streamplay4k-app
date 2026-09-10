@@ -1,4 +1,65 @@
+# StreamPlay4K — Apache configuration.
+#
+# ORDER MATTERS. The previous version rewrote every non-file request to
+# index.html, which would now serve the HOMEPAGE for /pricing/, /terms/ and
+# every other pre-rendered page — silently undoing the whole static build. The
+# `!-d` condition on the fallback is what prevents that.
+
 Options -MultiViews
 RewriteEngine On
+
+# ── Permanent redirect for the renamed setup route ────────────────────────────
+RewriteRule ^setup/?$ /setup-guide/ [R=301,L]
+
+# ── Canonical trailing slash ──────────────────────────────────────────────────
+# /pricing -> /pricing/ where a pre-rendered directory exists. mod_dir would do
+# this itself, but stating it keeps the canonical form explicit and stops the
+# SPA fallback below from claiming the slashless form first.
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteCond %{REQUEST_URI} !/$
+RewriteRule ^(.*)$ /$1/ [R=301,L]
+
+# ── API ───────────────────────────────────────────────────────────────────────
+# /api/order has no extension and no file on disk under that exact name, so the
+# SPA fallback below would match it first and hand the browser index.html — a
+# 200 with an HTML body, which fetch() parses as a failed JSON response. This
+# rule must stay ABOVE the fallback.
+RewriteRule ^api/order/?$ /api/order.php [L]
+RewriteRule ^api/lead/?$ /api/lead.php [L]
+RewriteRule ^api/stripe-webhook/?$ /api/stripe-webhook.php [L]
+
+# Nothing else under /api/ is meant to be reachable. lib/ and templates/ are
+# includes, config.php holds the Mailgun and Stripe keys, and cron/ sends mail
+# — reachable over HTTP it would be a button anyone could press to blast your
+# customer list. Deny them outright rather than relying on PHP to refuse.
+# (followups.php also checks PHP_SAPI itself; this is the belt to that brace.)
+RewriteRule ^api/(lib|templates|cron)/ - [F,L]
+RewriteRule ^api/config(\.example)?\.php$ - [F,L]
+
+# ── SPA fallback ──────────────────────────────────────────────────────────────
+# Only for URLs with nothing on disk: campaign routes not yet pre-rendered,
+# /blog/<slug>/ for a post added after deploy, and client-side navigation.
 RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.html [QSA,L]
+
+# ── Dashboard ─────────────────────────────────────────────────────────────────
+# /admin/ is a real directory with index.php, so the fallback above already
+# leaves it alone. What it must never do is get cached or indexed.
+<IfModule mod_headers.c>
+  <FilesMatch "^index\.php$">
+    Header set Cache-Control "no-store, private"
+    Header set X-Robots-Tag "noindex, nofollow"
+  </FilesMatch>
+</IfModule>
+
+# ── Caching ───────────────────────────────────────────────────────────────────
+# Hashed assets are immutable; HTML must revalidate so a deploy is picked up.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css|woff2|webp|png|svg)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>

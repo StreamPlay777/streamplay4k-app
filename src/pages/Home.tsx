@@ -1,410 +1,724 @@
+import { useRef, useState } from 'react';
+import Seo from '../components/Seo';
+import { pageSeo } from '../data/seo';
 import { Link } from 'react-router-dom';
-import {
-  Play, ChevronRight, Check, Star, Zap, Shield, Wifi, Monitor,
-  Globe, Award, Clock, MessageCircle
-} from 'lucide-react';
-import { movies } from '../data/movies';
-import { channels } from '../data/channels';
-import { plans } from '../data/pricing';
-
-// Movie posters shown in hero background TV grid
-const heroPosterRows = [
-  [
-    'https://image.tmdb.org/t/p/w200/rSnpBMFHFtSyBSBDHXXRAWntnhS.jpg',
-    'https://image.tmdb.org/t/p/w200/z53D72EAOxGRqdr7KXXWp9dJiDe.jpg',
-    'https://image.tmdb.org/t/p/w200/m9EXaDAzMFW3eFO36vTZ0MRXqBD.jpg',
-    'https://image.tmdb.org/t/p/w200/pzIddUEMWhWzfvLI3TwxUG2wGoi.jpg',
-    'https://image.tmdb.org/t/p/w200/vbpGlEGPFvK7dT2jRFbYHFkuEFG.jpg',
-    'https://image.tmdb.org/t/p/w200/3bN6nPMQSv3kWKMBHRQTfqfEwSv.jpg',
-    'https://image.tmdb.org/t/p/w200/6CoRTJTmijhBLJTUNoVSUNxZMEI.jpg',
-    'https://image.tmdb.org/t/p/w200/oSGGfyR8232pWOpFWmtLV2cMFBo.jpg',
-  ],
-  [
-    'https://image.tmdb.org/t/p/w200/xJHokMbljvjADYdit5fK5VQsXEG.jpg',
-    'https://image.tmdb.org/t/p/w200/iPh4d5IzAv2s9Cj9IF6nrXJC8tl.jpg',
-    'https://image.tmdb.org/t/p/w200/q4HWlkC7nGBBLfb6MAfxhQJHgzf.jpg',
-    'https://image.tmdb.org/t/p/w200/m9EXaDAzMFW3eFO36vTZ0MRXqBD.jpg',
-    'https://image.tmdb.org/t/p/w200/rSnpBMFHFtSyBSBDHXXRAWntnhS.jpg',
-    'https://image.tmdb.org/t/p/w200/vbpGlEGPFvK7dT2jRFbYHFkuEFG.jpg',
-    'https://image.tmdb.org/t/p/w200/z53D72EAOxGRqdr7KXXWp9dJiDe.jpg',
-    'https://image.tmdb.org/t/p/w200/6CoRTJTmijhBLJTUNoVSUNxZMEI.jpg',
-  ],
-];
-
-const stats = [
-  { value: '10,000+', label: 'Live Channels' },
-  { value: '60,000+', label: 'Movies & Series' },
-  { value: '24/7', label: 'Live Support' },
-  { value: 'HD / 4K', label: 'Quality' },
-];
-
-const features = [
-  { icon: Zap, title: '4K Ultra HD Quality', desc: 'Stream in stunning 4K and HD quality on any device. Crystal-clear picture every time.' },
-  { icon: Wifi, title: '10,000+ Live Channels', desc: 'Sports, news, entertainment, kids, international & more — all in one subscription.' },
-  { icon: Monitor, title: 'All Devices Supported', desc: 'Firestick, Android TV, Apple TV, Smart TV, PC, iPhone, iPad & more.' },
-  { icon: Shield, title: '99.9% Uptime', desc: 'Anti-freeze servers ensure smooth, buffer-free streaming 24/7.' },
-  { icon: Globe, title: 'No Contract', desc: 'Month-to-month plans. Cancel anytime, no questions asked, no hidden fees.' },
-  { icon: Clock, title: '24/7 Live Support', desc: 'Expert support team ready to help via WhatsApp, live chat & email.' },
-];
-
-const testimonials = [
-  { name: 'Mike T.', location: 'Los Angeles, CA', rating: 5, text: 'Best IPTV service I\'ve ever used. The 4K quality on NFL games is absolutely insane. Zero buffering all season long.' },
-  { name: 'Sarah K.', location: 'New York, NY', rating: 5, text: 'Setup took less than 5 minutes on my Firestick. 10,000+ channels and they all work flawlessly. Worth every penny!' },
-  { name: 'James R.', location: 'Chicago, IL', rating: 5, text: 'Been with StreamPlay4K for 8 months. Never had a single issue. Customer support is top notch. Highly recommend.' },
-  { name: 'Diana M.', location: 'Miami, FL', rating: 5, text: 'Cut the cord 6 months ago and this is better than cable in every way. Sports, movies, kids shows — everything.' },
-  { name: 'Carlos V.', location: 'Houston, TX', rating: 5, text: 'Amazing international channels — Spanish, Arabic, French plus all US channels. Incredible value.' },
-  { name: 'Priya S.', location: 'San Jose, CA', rating: 5, text: 'The EPG guide is super clean and easy to use. Feels premium, works perfectly every single day.' },
-];
-
-const faqs = [
-  { q: 'What devices does StreamPlay4K work on?', a: 'StreamPlay4K works on Amazon Firestick, Android TV, Apple TV, Smart TVs, Windows PC, Mac, iPhone, iPad, Roku, MAG Box, and more.' },
-  { q: 'How fast will I receive my login credentials?', a: 'Instantly! After payment, your credentials are emailed within 60 seconds. Setup takes under 5 minutes.' },
-  { q: 'Is there a free trial?', a: 'Yes! We offer a 24-hour free trial. Contact our support team via WhatsApp or live chat to request yours.' },
-  { q: 'How many devices can I use at the same time?', a: 'Depends on plan: Monthly = 1 connection, 3-Month = 2, 6-Month = 2, 12-Month = 3 simultaneous connections.' },
-  { q: 'What payment methods do you accept?', a: 'Visa, Mastercard, PayPal, American Express, and multiple cryptocurrencies (Bitcoin, USDT, ETH).' },
-  { q: 'Is there a money-back guarantee?', a: 'Yes — 30-day money-back guarantee if you\'re not satisfied for any reason. No questions asked.' },
-];
+import { site, heroStats, routes, trialUrl } from '../data/site';
+import { track } from '../lib/analytics';
+import Reveal from '../components/Reveal';
+import CountUp from '../components/CountUp';
+import ClosingCta from '../components/ClosingCta';
+import { useAutoScroll } from '../hooks/useAutoScroll';
+import ChannelFinder from '../components/ChannelFinder';
+import { TERMS, quote, money, savingsPerMonth, DEFAULT_TERM_ID, INVOICE_PAYMENT_METHODS } from '../data/pricing';
+import EmailMock from '../components/EmailMock';
+import PaymentMarks from '../components/PaymentMarks';
+import { whySwitch, coverageChecklist } from '../data/marquees';
+import { platforms, platformRowA, platformRowB } from '../data/platforms';
+import PlatformTile from '../components/PlatformMarks';
+import { MAX_DEVICES } from '../data/pricing';
+import { logoRows } from '../data/logos';
+import PosterWall from '../components/PosterWall';
+import SavingsSection from '../components/SavingsSection';
+import ShowcaseRow from '../components/ShowcaseRow';
+import TrustpilotBadge from '../components/TrustpilotBadge';
+import ReviewWall from '../components/ReviewWall';
+import TrustCards from '../components/TrustCards';
+import { trustpilot } from '../data/reviews';
+import Check from '../components/pricing/Check';
+import { SectionHeading, LogoMarquee, Marquee, Tick } from '../components/ui';
+import PricingOrder from '../components/pricing/PricingOrder';
+import Faq from '../components/Faq';
 
 export default function Home() {
-  const featuredMovies = movies.slice(0, 12);
-  const sportChannels = channels.filter(c => c.category === 'Sports');
-  const newsChannels = channels.filter(c => c.category === 'News');
-  const entertainmentChannels = channels.filter(c => c.category === 'Entertainment');
-  const kidsChannels = channels.filter(c => c.category === 'Kids');
+  return (
+    <>
+      <Seo seo={pageSeo[routes.home]} />
+      {/* Home page order — see the brief. Keep these in this sequence. */}
+      <Hero />
+      <StatBar />
+      <NetworkWall />        {/* Animated channel logos */}
+      <ChannelFinder />      {/* Live search over the real channel dataset */}
+      <OnDemand />           {/* Movies & series / premium content */}
+      <SavingsSection />     {/* Savings */}
+      <PricingOrder />       {/* Pricing + quick order flow */}
+      <ThreeSteps />         {/* How it works */}
+      <Reviews />            {/* Social proof */}
+      <DeviceCoverage />     {/* Device compatibility */}
+      <WhySwitch />          {/* Not in the brief's list — flagged for a decision */}
+      <FaqSection />
+      <ClosingCta from="home-closing" />
+    </>
+  );
+}
+
+/* ── 1.1 Hero ──────────────────────────────────────────────────────────────── */
+function Hero() {
+  return (
+    <section
+      className="relative isolate overflow-hidden px-5 pb-20 sm:px-7 sm:pb-24"
+      // Pulled up behind the floating nav so the artwork runs to the very top
+      // of the window, with the padding put back so the copy sits where it did.
+      style={{
+        marginTop: 'calc(var(--nav-h) * -1)',
+        paddingTop: 'calc(var(--nav-h) + 92px)',
+      }}
+    >
+      {/* Drifting wall of artwork, blurred well back. Layer order matters:
+          artwork, then a scrim heavy enough to hold the headline's contrast,
+          then the brand glow. No grid overlay: it read as a
+          visible mesh over the artwork rather than as texture. */}
+      <PosterWall variant="backdrop" />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, var(--scrim-mid) 0%, var(--scrim-heavy) 46%, var(--scrim-heavy) 82%, var(--scrim-solid) 100%)',
+        }}
+      />
+
+      {/* Decorative layers, all non-interactive */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: `radial-gradient(ellipse 900px 520px at 50% -8%, rgba(255,43,42,.20), transparent 70%),
+                       radial-gradient(ellipse 620px 360px at 78% 8%, rgba(255,154,62,.13), transparent 70%),
+                       radial-gradient(ellipse 700px 400px at 12% 40%, rgba(38,64,160,.20), transparent 70%)`,
+        }}
+      />
+      <div className="relative mx-auto max-w-[1000px] text-center">
+        <div className="inline-flex items-center gap-2.5 rounded-full border border-accent/[.32] bg-accent/[.09] px-4 py-2">
+          <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-accent" />
+          <span className="font-display text-[12px] font-bold uppercase tracking-[.14em] text-accent-soft">
+            Premium TV • Sports • Movies • 4K
+          </span>
+        </div>
+
+        <h1
+          className="mt-7 font-display font-extrabold leading-[0.96] text-ink text-balance"
+          style={{ fontSize: 'clamp(40px, 7.5vw, 82px)' }}
+        >
+          Everything You Love.
+          <br />
+          <span className="text-grad">One Simple Subscription.</span>
+        </h1>
+
+        <p className="mx-auto mt-6 max-w-[620px] text-[18.5px] leading-relaxed text-ink-2">
+          Live TV, sports, movies and series in HD &amp; 4K — available across your favorite devices,
+          with fast activation and 24/7 support.
+        </p>
+
+        <div className="mt-9 flex flex-wrap justify-center gap-3">
+          <Link
+            to={routes.pricing}
+            onClick={() => track('view_pricing', { from: 'hero' })}
+            className="btn-accent"
+          >
+            View plans →
+          </Link>
+          <a
+            href={trialUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => track('start_free_trial', { from: 'hero' })}
+            className="btn-outline"
+          >
+            Start free trial
+          </a>
+        </div>
+
+        <p className="mt-5 text-[13px] text-ink-3">
+          {site.refundLabel} · Fast Activation · 24/7 Support
+        </p>
+
+        {/* Social proof sits with the CTAs rather than in a separate strip */}
+        <div className="mt-9 flex justify-center">
+          <TrustpilotBadge />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── 1.2 Stat bar ──────────────────────────────────────────────────────────── */
+/**
+ * Proof strip under the hero.
+ *
+ * Was a solid red slab, which was the only flat-colour block on an otherwise
+ * dark, layered page — it read as a template banner and fought the hero rather
+ * than continuing it. Now the band stays dark and the brand colour lives in the
+ * numbers themselves, where the eye goes anyway.
+ *
+ * `dt` must precede `dd` in a definition list, so the label is first in the DOM
+ * and flex-col-reverse puts the number on top visually. Screen readers get
+ * "Live channels: 60,000+"; sighted readers get the number leading.
+ */
+function StatBar() {
+  return (
+    <section className="section-tight relative bg-bg">
+      {/* Carries the hero's warmth down over the seam so the two sections read
+          as one movement rather than two stacked blocks. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+        style={{ background: 'radial-gradient(ellipse 760px 120px at 50% 0%, rgba(255,70,32,.13), transparent 72%)' }}
+      />
+      <dl
+        className="relative mx-auto grid max-w-shell grid-cols-2 gap-y-10 [&>*:nth-child(even)]:border-l
+                   [&>*]:border-line md:grid-cols-4 md:gap-y-0 md:[&>*:nth-child(n+2)]:border-l"
+      >
+        {heroStats.map((s) => (
+          <div key={s.label} className="flex flex-col-reverse items-center px-3 text-center sm:px-6">
+            {/* ink-3, not ink-4: measured on the rendered pixels, ink-4 came out
+                at 4.36:1 over the warm glow — just under the 4.5:1 minimum. */}
+            <dt className="mt-2.5 font-display text-[11px] font-bold uppercase tracking-[.18em] text-ink-3 sm:text-[11.5px]">
+              {s.label}
+            </dt>
+            <CountUp
+              as="dd"
+              value={s.value}
+              className="nums text-grad font-display font-extrabold leading-[.95]"
+              style={{ fontSize: 'clamp(28px, 4.4vw, 42px)' }}
+            />
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
+/* ── 1.3 Network wall ──────────────────────────────────────────────────────── */
+function NetworkWall() {
+  // Alternating directions, and each row a different speed so the rows never
+  // fall into step with one another.
+  const rows = [
+    { direction: 'left' as const, duration: 64 },
+    { direction: 'right' as const, duration: 78 },
+    { direction: 'left' as const, duration: 88 },
+  ];
 
   return (
-    <div className="bg-[#0a0d14]">
-
-      {/* ═══════════════════════════════════════ HERO ═══════════════════════════════════════ */}
-      <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
-
-        {/* Background: movie poster grid (like Netflix on TV) */}
-        <div className="absolute inset-0 z-0">
-          {/* Dark room background */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0d14] via-[#0d1117]/60 to-[#0a0d14]" />
-
-          {/* Poster grid rows */}
-          <div className="absolute inset-0 opacity-25 flex flex-col gap-2 pt-4 pointer-events-none select-none">
-            {heroPosterRows.map((row, ri) => (
-              <div key={ri} className="flex gap-2 px-4">
-                {row.map((src, i) => (
-                  <img
-                    key={i}
-                    src={src}
-                    alt=""
-                    className="h-40 w-28 object-cover rounded flex-shrink-0"
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-
-          {/* Heavy dark overlay so text is readable */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0d14]/70 via-[#0a0d14]/50 to-[#0a0d14]/80" />
-          {/* Red glow bottom */}
-          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-brand-red/20 to-transparent" />
-        </div>
-
-        {/* Hero content — centered */}
-        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 pt-20 pb-48">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight mb-6 max-w-4xl">
-            <span className="text-white">The Ultimate 4K IPTV</span>
-            <br />
-            <span className="text-white">Experience </span>
-            <span className="text-brand-red">in the USA</span>
-          </h1>
-          <p className="text-gray-300 text-lg md:text-xl mb-10 max-w-2xl">
-            Live TV, sports, movies and series in HD and 4K, on every device you own.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <Link
-              to="/pricing"
-              className="px-8 py-4 gradient-red text-white font-bold text-lg rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-brand-red/40 min-w-[200px] text-center"
-            >
-              See IPTV Pricing
-            </Link>
-            <a
-              href="https://wa.me/1234567890"
-              className="flex items-center justify-center gap-2 px-8 py-4 bg-transparent border-2 border-white/40 text-white font-bold text-lg rounded-lg hover:border-white hover:bg-white/10 transition-all min-w-[200px]"
-            >
-              <MessageCircle size={20} />
-              Start Free Trial
-            </a>
-          </div>
-        </div>
-
-        {/* Stats bar — pinned at bottom of hero */}
-        <div className="absolute bottom-0 left-0 right-0 z-10">
-          {/* Red curved wave */}
-          <div className="relative">
-            <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full block -mb-1">
-              <path d="M0 80 C360 0 1080 0 1440 80 L1440 80 L0 80Z" fill="#E8322A"/>
-            </svg>
-            <div className="bg-brand-red py-8">
-              <div className="max-w-4xl mx-auto px-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                  {stats.map(s => (
-                    <div key={s.label}>
-                      <div className="text-3xl md:text-4xl font-black text-white">{s.value}</div>
-                      <div className="text-red-200 text-sm font-medium mt-1">{s.label}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════ FEATURES ═══════════════════════════════════════ */}
-      <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <span className="text-brand-red text-sm font-bold uppercase tracking-widest">Why StreamPlay4K?</span>
-          <h2 className="text-4xl md:text-5xl font-black text-white mt-3">
-            Everything You Need to <span className="text-brand-red">Cut the Cord</span>
+    <section className="section-tight relative overflow-hidden bg-bg">
+      {/* Red wash behind the rails, echoing the band on the brand sites */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 90% 70% at 50% 50%, rgba(255,43,42,.16), transparent 72%)',
+        }}
+      />
+      <div className="relative">
+        <div className="mx-auto mb-10 max-w-[680px] px-6 text-center sm:mb-12">
+          <p className="eyebrow">Channels for every interest</p>
+          <h2
+            className="mt-4 font-display font-extrabold leading-[1.06] text-ink"
+            style={{ fontSize: 'clamp(27px, 4vw, 42px)' }}
+          >
+            Find What You <span className="text-grad">Love to Watch</span>
           </h2>
-          <p className="text-gray-400 text-lg mt-4 max-w-2xl mx-auto">
-            Premium 4K streaming without the cable price. Get more channels, more content, for a fraction of the cost.
+          <p className="mx-auto mt-4 max-w-[520px] text-[16px] leading-relaxed text-ink-3">
+            Explore entertainment across sports, news, movies, international channels and more.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map(f => (
-            <div key={f.title} className="bg-[#0d1117] border border-white/10 rounded-2xl p-6 card-hover">
-              <div className="w-12 h-12 gradient-red rounded-xl flex items-center justify-center mb-4">
-                <f.icon size={22} className="text-white" />
-              </div>
-              <h3 className="text-white font-bold text-lg mb-2">{f.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
-            </div>
+
+        <div className="flex flex-col gap-2 sm:gap-2.5">
+          {rows.map((row, i) => (
+            <LogoMarquee key={i} logos={logoRows[i]} direction={row.direction} duration={row.duration} />
           ))}
         </div>
-      </section>
-
-      {/* ═══════════════════════════════════════ CHANNEL SECTIONS ═══════════════════════════════════════ */}
-      {[
-        { label: 'Live Sports', title: 'Every Game. Every Sport. Live.', list: sportChannels },
-        { label: 'News', title: 'Stay Informed 24/7', list: newsChannels },
-        { label: 'Entertainment', title: 'Top TV Networks Included', list: entertainmentChannels },
-        { label: 'Kids', title: 'Safe & Fun Kids Channels', list: kidsChannels },
-      ].map(section => (
-        <section key={section.label} className="py-16 border-t border-white/5">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <span className="text-brand-red text-xs font-bold uppercase tracking-widest">{section.label}</span>
-                <h2 className="text-2xl md:text-3xl font-black text-white mt-1">{section.title}</h2>
               </div>
-              <Link to="/channels" className="text-brand-red text-sm font-medium hover:underline flex items-center gap-1">
-                View All <ChevronRight size={14} />
-              </Link>
-            </div>
-            <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-3">
-              {section.list.slice(0, 20).map(ch => (
-                <div
-                  key={ch.name}
-                  className="bg-[#0d1117] border border-white/10 rounded-xl p-2.5 flex flex-col items-center gap-2 hover:border-brand-red hover:scale-105 transition-all cursor-pointer group"
-                >
-                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden">
-                    <img
-                      src={ch.logo}
-                      alt={ch.name}
-                      className="w-8 h-8 object-contain"
-                      onError={e => {
-                        const el = e.target as HTMLImageElement;
-                        el.style.display = 'none';
-                        el.parentElement!.innerHTML = `<span class="text-gray-700 font-black text-[8px] text-center px-1 leading-tight">${ch.name.slice(0, 6)}</span>`;
-                      }}
-                    />
-                  </div>
-                  <span className="text-gray-400 text-[10px] text-center font-medium leading-tight group-hover:text-white transition-colors line-clamp-2">{ch.name}</span>
-                  {ch.uhd && <span className="text-[8px] bg-brand-orange/20 text-brand-orange px-1 rounded font-bold">4K</span>}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      ))}
+    </section>
+  );
+}
 
-      {/* ═══════════════════════════════════════ MOVIES ═══════════════════════════════════════ */}
-      <section className="py-20 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-10">
-            <div>
-              <span className="text-brand-red text-xs font-bold uppercase tracking-widest">VOD Library</span>
-              <h2 className="text-3xl md:text-4xl font-black text-white mt-1">Latest Blockbuster Movies</h2>
-            </div>
-            <Link to="/channels" className="text-brand-red text-sm font-medium hover:underline flex items-center gap-1">
-              Full Library <ChevronRight size={14} />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {featuredMovies.map(movie => (
-              <div key={movie.title} className="group relative bg-[#0d1117] border border-white/10 rounded-xl overflow-hidden card-hover cursor-pointer">
-                <div className="aspect-[2/3] relative overflow-hidden bg-[#1a1d26]">
-                  <img
-                    src={movie.poster}
-                    alt={movie.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
-                  {movie.badge && (
-                    <span className="absolute top-2 left-2 px-2 py-0.5 bg-brand-red text-white text-[9px] font-black rounded">
-                      {movie.badge}
-                    </span>
-                  )}
-                  <div className="absolute bottom-0 left-0 right-0 p-2">
-                    <p className="text-white font-bold text-xs leading-tight">{movie.title}</p>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="text-brand-orange text-[10px] font-bold">★ {movie.score}</span>
-                      <span className="text-gray-400 text-[10px]">{movie.year}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+/* ── Cost comparison lives in components/SavingsSection.tsx ────────────────── */
+
+/* ── 1.5 On-demand library ─────────────────────────────────────────────────── */
+function OnDemand() {
+  const points = [
+    'Movies & series on demand',
+    'New content added regularly',
+    'HD & 4K where available',
+    'Entertainment from around the world',
+  ];
+
+  return (
+    <section className="section relative isolate overflow-hidden bg-bg">
+      {/* Blurred wall of artwork behind everything — the library, felt rather
+          than listed. Scrimmed heavily so the copy in front stays readable. */}
+      <PosterWall variant="backdrop" />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, var(--scrim-solid) 0%, var(--scrim-mid) 26%, var(--scrim-mid) 74%, var(--scrim-solid) 100%)',
+        }}
+      />
+
+      <div className="relative mx-auto max-w-shell px-5 sm:px-7">
+        {/* Header */}
+        <div className="mx-auto max-w-[760px] text-center">
+          <p className="flex items-center justify-center gap-3 text-[12px] font-bold uppercase tracking-[.18em] text-accent-ink">
+            <span className="h-px w-8 bg-accent/50" aria-hidden="true" />
+            Movies &amp; series
+            <span className="h-px w-8 bg-accent/50" aria-hidden="true" />
+          </p>
+          <h2
+            className="mt-5 font-display font-extrabold leading-[1.04] text-ink"
+            style={{ fontSize: 'clamp(30px, 4.6vw, 50px)' }}
+          >
+            Movies, Series &amp; More.
+            <br />
+            <span className="text-grad">Ready When You Are.</span>
+          </h2>
+          <p className="mx-auto mt-5 max-w-[560px] text-[16.5px] leading-relaxed text-ink-3">
+            Explore movies, series, box sets and on-demand entertainment, with HD and 4K quality
+            where available.
+          </p>
+        </div>
+
+        {/* Labelled cards */}
+        <div className="mt-12">
+          <ShowcaseRow />
+        </div>
+
+        {/* The copy that actually sells, kept from the previous version */}
+        <ul className="mx-auto mt-14 grid max-w-[840px] gap-3 sm:grid-cols-2 sm:gap-x-10">
+          {points.map((t, i) => (
+            <Reveal as="li" key={t} delay={i} shift={12} className="flex items-start gap-3">
+              <span className="mt-[3px] grid h-[18px] w-[18px] flex-none place-items-center rounded-full bg-accent text-white">
+                <Check />
+              </span>
+              <span className="text-[15px] leading-snug text-ink-2">{t}</span>
+            </Reveal>
+          ))}
+        </ul>
+
+        <div className="mt-10 text-center">
+          <Link to={routes.pricing} className="btn-accent">Explore what&apos;s included →</Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── 1.6 Pricing + order (Section 05) ──────────────────────────────────────── */
+// Lives in components/pricing/PricingOrder.tsx — see spec section 05.
+
+/* ── 1.7 Device coverage ───────────────────────────────────────────────────── */
+/**
+ * Device ecosystem (brief §10) — the one homepage section approved for a
+ * visual redesign.
+ *
+ * Replaces four generic category cards with the actual platform list from
+ * data/platforms.ts, which is derived from the setup guides we publish. Nothing
+ * is shown that we cannot walk a customer through.
+ *
+ * Two slow counter-rotating rows on wide screens, one swipeable row on phones.
+ * Both use the existing Marquee — no new animation code, and the shared
+ * reduced-motion rule in index.css already stops them.
+ *
+ * The old headline "Every screen in the house. One login." is gone: it
+ * contradicted the selected-device model. The approved line is the device cap.
+ */
+function DeviceCoverage() {
+  return (
+    <section className="section relative overflow-hidden bg-bg">
+      <div className="mx-auto max-w-shell">
+        <SectionHeading
+          label="Watch your way"
+          title={<><span className="text-grad">{site.name}</span> on Any Device</>}
+          sub="Set up StreamPlay4K on the devices you already use at home or on the go."
+        />
+        <p className="mx-auto mt-5 max-w-[520px] text-center text-[14.5px] font-semibold text-ink-2">
+          Choose up to {MAX_DEVICES} devices with your plan.
+        </p>
+
+        {/* Phones: one drifting row, full-size tiles, no clipped logos. It
+            moves on its own so the list reads as alive, and stops under a
+            finger so nothing slides away mid-tap. */}
+        <PlatformRail />
+
+        {/* Tablet and up: two rows drifting in opposite directions. */}
+        <div className="mt-14 hidden flex-col gap-3 sm:flex">
+          <PlatformMarquee row={platformRowA} direction="left" duration={62} />
+          <PlatformMarquee row={platformRowB} direction="right" duration={74} />
+        </div>
+
+        <div className="mx-auto mt-12 grid max-w-[900px] gap-3 sm:grid-cols-2 sm:gap-x-8">
+          {coverageChecklist.map((line, i) => (
+            <Reveal key={line} delay={i} shift={12} className="flex items-start gap-3">
+              <Tick />
+              <span className="text-[15px] leading-snug text-ink-2">{line}</span>
+            </Reveal>
+          ))}
+        </div>
+
+        <div className="mt-11 text-center">
+          <Link to={routes.setup} className="btn-outline">See the setup guides →</Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Phone rail of every platform. Same drift as the reviews rail: a real scroll
+ * container that nudges itself along between interactions, rendered twice so
+ * the wrap is invisible.
+ */
+function PlatformRail() {
+  const rail = useRef<HTMLDivElement>(null);
+  useAutoScroll(rail, { speed: 30 });
+  return (
+    <div className="mt-12 sm:hidden">
+      <div
+        ref={rail}
+        className="-mx-5 flex overflow-x-auto px-5 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        aria-label="Supported devices"
+      >
+        {[0, 1].map((pass) => (
+          <div key={pass} className="flex flex-none gap-3 pr-3" aria-hidden={pass === 1}>
+            {platforms.map((pf) => (
+              <PlatformTile key={pf.name} platform={pf} />
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════ PRICING PREVIEW ═══════════════════════════════════════ */}
-      <section className="py-24 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="text-brand-red text-sm font-bold uppercase tracking-widest">Pricing</span>
-            <h2 className="text-4xl md:text-5xl font-black text-white mt-3">
-              Simple & Transparent <span className="text-brand-red">Plans</span>
-            </h2>
-            <p className="text-gray-400 text-lg mt-4">No hidden fees. Cancel anytime. Instant activation.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map(plan => (
-              <div
-                key={plan.id}
-                className={`relative bg-[#0d1117] border rounded-2xl p-6 flex flex-col card-hover ${plan.popular ? 'border-brand-red shadow-lg shadow-brand-red/20' : 'border-white/10'}`}
-              >
-                {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 gradient-red text-white text-xs font-black rounded-full whitespace-nowrap">
-                    🔥 {plan.badge}
-                  </div>
-                )}
-                <h3 className="text-white font-bold text-lg mb-1">{plan.name}</h3>
-                <div className="flex items-end gap-1 mb-1">
-                  <span className="text-4xl font-black text-white">${plan.price}</span>
-                </div>
-                {plan.originalPrice && (
-                  <p className="text-xs text-gray-500 line-through mb-1">${plan.originalPrice}</p>
-                )}
-                <p className="text-brand-orange text-xs font-bold mb-5">≈ ${plan.pricePerMonth}/mo</p>
-                <ul className="space-y-2 mb-6 flex-1">
-                  {plan.features.slice(0, 5).map(f => (
-                    <li key={f} className="flex items-start gap-2 text-xs text-gray-300">
-                      <Check size={12} className="text-green-400 mt-0.5 shrink-0" /> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  to="/pricing"
-                  className={`block text-center py-3 rounded-xl font-bold text-sm transition-all ${plan.popular ? 'gradient-red text-white hover:opacity-90' : 'bg-white/10 text-white hover:bg-brand-red border border-white/10'}`}
-                >
-                  Get Started
-                </Link>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <Link to="/pricing" className="inline-flex items-center gap-1 text-brand-red font-medium hover:underline">
-              See full plan details <ChevronRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════ TESTIMONIALS ═══════════════════════════════════════ */}
-      <section id="reviews" className="py-24 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="text-brand-red text-sm font-bold uppercase tracking-widest">Reviews</span>
-            <h2 className="text-4xl md:text-5xl font-black text-white mt-3">
-              Trusted by <span className="text-brand-red">50,000+ Subscribers</span>
-            </h2>
-            <div className="flex items-center justify-center gap-2 mt-4">
-              {[...Array(5)].map((_, i) => <Star key={i} size={20} fill="#F5A623" className="text-brand-orange" />)}
-              <span className="text-white font-bold ml-1">4.9/5</span>
-              <span className="text-gray-400 text-sm">· 2,847 reviews</span>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials.map(t => (
-              <div key={t.name} className="bg-[#0d1117] border border-white/10 rounded-2xl p-6">
-                <div className="flex items-center gap-1 mb-3">
-                  {[...Array(t.rating)].map((_, i) => <Star key={i} size={13} fill="#F5A623" className="text-brand-orange" />)}
-                </div>
-                <p className="text-gray-300 text-sm leading-relaxed mb-4">"{t.text}"</p>
-                <div>
-                  <p className="text-white font-bold text-sm">{t.name}</p>
-                  <p className="text-gray-500 text-xs">{t.location}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════ FAQ ═══════════════════════════════════════ */}
-      <section id="faq" className="py-24 border-t border-white/5">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <span className="text-brand-red text-sm font-bold uppercase tracking-widest">FAQs</span>
-            <h2 className="text-4xl font-black text-white mt-3">Frequently Asked Questions</h2>
-          </div>
-          <div className="space-y-3">
-            {faqs.map(faq => (
-              <details key={faq.q} className="group bg-[#0d1117] border border-white/10 rounded-xl overflow-hidden">
-                <summary className="flex items-center justify-between p-5 cursor-pointer text-white font-semibold text-sm select-none list-none">
-                  {faq.q}
-                  <ChevronRight size={16} className="text-brand-red shrink-0 ml-3 group-open:rotate-90 transition-transform" />
-                </summary>
-                <div className="px-5 pb-5 text-gray-400 text-sm leading-relaxed border-t border-white/5 pt-4">
-                  {faq.a}
-                </div>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════ CONTACT ═══════════════════════════════════════ */}
-      <section id="contact" className="py-24 border-t border-white/5">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="bg-gradient-to-br from-brand-red/20 to-brand-orange/10 border border-brand-red/30 rounded-3xl p-12">
-            <Award size={48} className="text-brand-orange mx-auto mb-4" />
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
-              Ready to Start Streaming?
-            </h2>
-            <p className="text-gray-300 text-lg mb-8 max-w-xl mx-auto">
-              Join 50,000+ customers streaming in 4K today. Setup in under 5 minutes. No contract required.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/pricing"
-                className="flex items-center justify-center gap-2 px-10 py-4 gradient-red text-white font-black text-lg rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-brand-red/30"
-              >
-                <Play size={20} fill="white" /> Get Started Now
-              </Link>
-              <a
-                href="https://wa.me/1234567890"
-                className="flex items-center justify-center gap-2 px-10 py-4 bg-green-500/20 border border-green-500/40 text-green-400 font-bold text-lg rounded-xl hover:bg-green-500/30 transition-all"
-              >
-                <MessageCircle size={20} /> WhatsApp Us
-              </a>
-            </div>
-            <p className="text-gray-500 text-xs mt-6">30-Day Money-Back Guarantee · Secure Payment · Instant Activation</p>
-          </div>
-        </div>
-      </section>
-
+        ))}
+      </div>
+      <p className="mt-3 text-center text-[12px] text-ink-5">Swipe to hold and browse</p>
     </div>
   );
 }
+
+/** One drifting row of platform tiles, edge-faded by the shared mask. */
+function PlatformMarquee({
+  row, direction, duration,
+}: {
+  row: typeof platforms;
+  direction: 'left' | 'right';
+  duration: number;
+}) {
+  return (
+    <Marquee
+      items={row.map((p) => p.name)}
+      direction={direction}
+      duration={duration}
+      renderItem={(name: string, key: string) => {
+        const pf = row.find((p) => p.name === name)!;
+        return <PlatformTile key={key} platform={pf} />;
+      }}
+    />
+  );
+}
+
+/* ── 1.8 Why switch ────────────────────────────────────────────────────────── */
+function WhySwitch() {
+  return (
+    <section className="section amb amb-cool bg-bg">
+      <div className="mx-auto max-w-shell">
+        <SectionHeading title={<>Why people switch to <span className="text-grad">{site.name}</span></>} />
+        <div className="mt-14 grid gap-[18px] md:grid-cols-2 lg:grid-cols-3">
+          {whySwitch.map((card, i) => (
+            <Reveal key={card.title} delay={i} shift={16} className="card-hover px-[26px] pb-[30px] pt-7">
+              <div className="nums text-[13px] font-bold text-accent-ink">
+                {String(i + 1).padStart(2, '0')}
+              </div>
+              <h3 className="mt-4 font-display text-[21px] font-bold text-ink">{card.title}</h3>
+              <p className="mt-2.5 text-[15px] leading-relaxed text-ink-3">{card.body}</p>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── How it works / three steps ────────────────────────────────────────────── */
+/**
+ * How it works.
+ *
+ * The live widgets stay: they let someone try the plan ladder and see the real
+ * total before they commit, which the flat editorial version could not do. What
+ * changed is the ground under them — the section now sits on the same near-black
+ * as its neighbours with the cinematic ambient behind it, and on the shared
+ * spacing scale, so it no longer reads as a separate black rectangle.
+ *
+ * Step copy is the client's approved wording from the polish brief.
+ */
+function ThreeSteps() {
+  // Mirrors the locked pricing; the live selector with device count is Section 05.
+  const [termId, setTermId] = useState(DEFAULT_TERM_ID);
+  const q = quote(termId, 1);
+
+  // "Best value" is computed, not asserted: the term with the lowest cost per
+  // month. With the locked ladder that is 12 months, but it is derived so the
+  // label can never drift out of step with the prices.
+  const bestValueId = TERMS.reduce((best, t) =>
+    t.baseCents / t.months < best.baseCents / best.months ? t : best, TERMS[0]).id;
+
+  const steps = [
+    {
+      n: '01',
+      title: 'Choose Your Plan',
+      body: 'Select your subscription length and the number of devices you need.',
+      widget: (
+        <div className="rounded-2xl border border-line bg-raise p-2.5" role="group" aria-label="Choose a plan">
+          <div className="flex flex-col gap-2">
+            {TERMS.map((t) => {
+              const on = t.id === termId;
+              const save = savingsPerMonth(t);
+              const best = t.id === bestValueId;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTermId(t.id)}
+                  aria-pressed={on}
+                  className={`flex min-h-[54px] items-center gap-3 rounded-xl px-4 text-left transition-colors ${
+                    on ? 'bg-accent text-white shadow-cta' : 'bg-raise-2 text-ink hover:bg-raise-2'
+                  }`}
+                >
+                  <span className="flex-1 font-display text-[15px] font-bold">{t.label}</span>
+                  {best ? (
+                    <span className={`rounded px-1.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wide ${
+                      on ? 'bg-white text-accent-ink' : 'bg-accent/[.14] text-accent-bright'
+                    }`}>
+                      Best value
+                    </span>
+                  ) : (
+                    <span className={`text-[11.5px] ${on ? 'text-white/80' : 'text-ink-4'}`}>
+                      {save > 0 ? `Save ${money(save)}/mo` : 'Try it out'}
+                    </span>
+                  )}
+                  <span className="nums font-display text-[19px] font-extrabold">{money(t.baseCents)}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ),
+    },
+    {
+      n: '02',
+      title: 'Place Your Order',
+      // No payment is taken on this site — the invoice follows by email and
+      // WhatsApp — so this step is honest about that rather than echoing the
+      // reference's "pay now".
+      body: 'Enter your contact details and confirm your order. No payment is taken on the order form.',
+      widget: (
+        <div className="rounded-2xl border border-line bg-raise p-5">
+          <div className="flex items-start gap-3">
+            <span
+              className="grid h-10 w-10 flex-none place-items-center rounded-lg bg-accent-gradient-diag font-display text-[17px] font-extrabold text-white"
+              aria-hidden="true"
+            >
+              S
+            </span>
+            <span className="min-w-0">
+              <span className="block font-display text-[15.5px] font-bold text-ink">{site.name}, {q.term.label.toLowerCase()}</span>
+              <span className="block text-[12.5px] text-ink-4">1 device · 4K where available · Login by email</span>
+            </span>
+          </div>
+          <div className="my-4 border-t border-line" />
+          <div className="flex items-end justify-between">
+            <span className="text-[14px] text-ink-3">Total on your invoice</span>
+            <span className="nums font-display text-[28px] font-extrabold leading-none text-ink">{money(q.totalCents)}</span>
+          </div>
+          <Link to="/#pricing" className="btn-accent mt-5 w-full !py-3.5 !text-[14.5px]">
+            Order now →
+          </Link>
+          <p className="mt-3 text-center text-[11.5px] text-ink-4">
+            No payment is taken on this page.
+          </p>
+          <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[.14em] text-ink-5">
+            Pay your invoice with
+          </p>
+          <PaymentMarks methods={INVOICE_PAYMENT_METHODS} align="center" className="mt-3.5" />
+        </div>
+      ),
+    },
+    {
+      n: '03',
+      title: 'Get Activated',
+      body: `We\u2019ll send your invoice and payment instructions by email and WhatsApp. Once payment is confirmed, your access is usually ready within ${site.activationWindow}.`,
+      extra: <Link to="/setup" className="btn-outline mt-6 !py-3 !text-[14px]">See the setup guides</Link>,
+      widget: <EmailMock />,
+    },
+  ];
+
+  return (
+    <section id="setup" className="section amb amb-cine bg-bg">
+      <div className="mx-auto max-w-shell">
+        {/* Header */}
+        <div className="mx-auto max-w-[720px] text-center">
+          <p className="eyebrow">Three simple steps</p>
+          <h2
+            className="mt-4 font-display font-extrabold leading-[1.02] text-ink"
+            style={{ fontSize: 'clamp(32px, 5vw, 54px)' }}
+          >
+            Choose. Order.
+            <br />
+            <span className="text-grad">Start Watching.</span>
+          </h2>
+          <p className="mx-auto mt-5 max-w-[460px] text-[16px] leading-relaxed text-ink-3">
+            No hardware, no contract, no waiting around.
+          </p>
+        </div>
+
+        {/* Rules-only table: giant numeral, copy, live widget */}
+        <div className="mt-12 border-t border-line sm:mt-16">
+          {steps.map((step, i) => (
+            <div
+              key={step.n}
+              className={`grid items-center gap-8 py-12 sm:py-14 lg:grid-cols-[180px_minmax(0,1fr)_380px] lg:gap-12 lg:py-16 ${
+                i < steps.length - 1 ? 'border-b border-line' : ''
+              }`}
+            >
+              {/* Phone: numeral and copy share a row; desktop: three columns */}
+              <div className="flex items-center gap-5 lg:contents">
+                <div
+                  className="text-grad flex-none font-display font-extrabold leading-[.8] tracking-[-.06em]"
+                  style={{ fontSize: 'clamp(64px, 10vw, 120px)' }}
+                  aria-hidden="true"
+                >
+                  {step.n}
+                </div>
+                <div className="min-w-0 max-w-[440px]">
+                  <h3 className="font-display text-[24px] font-extrabold leading-tight text-ink sm:text-[28px] lg:text-[30px]">
+                    <span className="sr-only">Step {step.n}: </span>{step.title}
+                  </h3>
+                  <p className="mt-2.5 text-[15.5px] leading-relaxed text-ink-3 sm:text-[16px]">{step.body}</p>
+                  {step.extra}
+                </div>
+              </div>
+              <div className="min-w-0">{step.widget}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Close */}
+        <div className="mt-10 flex flex-col items-center gap-4 border-t border-line pt-10 sm:mt-12">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <Link to="/#pricing" className="btn-accent w-full sm:w-auto">I'm in — get my sub →</Link>
+            <Link to="/setup" className="btn-outline w-full sm:w-auto">See the setup guides</Link>
+          </div>
+          <p className="text-center text-[11.5px] font-bold uppercase tracking-[.13em] text-ink-4">
+            {site.refundLabel} · 24/7 support
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Reviews / social proof ────────────────────────────────────────────────── */
+function Reviews() {
+  // Every figure here comes from src/data/reviews.ts. The activation time is
+  // our own locked delivery figure, not a Trustpilot support metric, so it is
+  // labelled as activation rather than reply time.
+  const stats = [
+    { value: String(trustpilot.rating), label: 'Average rating out of 5' },
+    { value: String(trustpilot.reviewCount), label: 'Reviews on Trustpilot' },
+    { value: site.activationWindow, label: 'Typical activation time' },
+    { value: `Up to ${MAX_DEVICES}`, label: 'Devices you can choose' },
+  ];
+
+  return (
+    <section className="section amb amb-cool relative overflow-hidden bg-bg">
+      <ReviewWall />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, var(--scrim-solid) 0%, var(--scrim-mid) 20%, var(--scrim-mid) 80%, var(--scrim-solid) 100%)',
+        }}
+      />
+
+      <div className="relative mx-auto max-w-shell">
+        {/* Header */}
+        <div className="mx-auto max-w-[760px] text-center">
+          <p className="eyebrow">What our customers say</p>
+          <h2
+            className="mt-5 font-display font-extrabold leading-[1.04] text-ink"
+            style={{ fontSize: 'clamp(30px, 4.8vw, 52px)' }}
+          >
+            Our Customers
+            <br />
+            <span className="text-grad">Say It Best.</span>
+          </h2>
+          <p className="mx-auto mt-5 max-w-[520px] text-[15.5px] leading-relaxed text-ink-3 sm:text-[16px]">
+            See what customers are saying about their experience with {site.name} on Trustpilot.
+          </p>
+          <div className="mt-7 flex justify-center">
+            <TrustpilotBadge />
+          </div>
+        </div>
+
+        {/* Featured reviews */}
+        <div className="mt-12 sm:mt-14">
+          <TrustCards />
+        </div>
+
+        {/* Metrics — 2x2 on phones, four across from tablet up */}
+        <dl className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line-2 bg-raise-2 lg:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label} className="bg-surface px-4 py-5 sm:px-6 sm:py-7">
+              <CountUp
+                as="dt"
+                value={s.value}
+                className="font-display text-[24px] font-extrabold leading-none text-ink sm:text-[30px] lg:text-[34px]"
+              />
+              <dd className="mt-2 text-[10.5px] font-bold uppercase tracking-[.13em] text-ink-4 sm:text-[11px]">
+                {s.label}
+              </dd>
+            </div>
+          ))}
+        </dl>
+
+        {/* Actions */}
+        <div className="mt-10 flex flex-col items-center justify-between gap-5 lg:flex-row">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <Link to="/pricing" className="btn-accent w-full sm:w-auto">View plans →</Link>
+            <a
+              href={trustpilot.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Read all ${site.name} reviews on Trustpilot. Opens in a new tab.`}
+              className="btn-outline w-full sm:w-auto"
+            >
+              Read all reviews
+            </a>
+          </div>
+          <p className="text-center text-[11.5px] font-bold uppercase tracking-[.13em] text-ink-4 lg:text-right">
+            7-day money-back guarantee · 24/7 support
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── 1.11 FAQ ──────────────────────────────────────────────────────────────── */
+function FaqSection() {
+  return (
+    <section id="faq" className="section bg-bg">
+      <div className="mx-auto max-w-narrow">
+        <SectionHeading
+          label={`${site.name} FAQ`}
+          title={<>Questions? <span className="text-grad">We&apos;ve Got You.</span></>}
+          sub="Devices, activation, payment, trials and refunds — the things people ask before ordering."
+          size={50}
+        />
+        <div className="mt-12">
+          <Faq />
+        </div>
+        <p className="mt-9 text-center text-[14.5px] text-ink-4">
+          Still unsure?{' '}
+          <Link to={routes.faq} className="text-accent-link hover:underline">Read the full FAQ</Link>
+          {' '}or{' '}
+          <Link to={routes.contact} className="text-accent-link hover:underline">talk to support</Link>.
+        </p>
+      </div>
+    </section>
+  );
+}
+

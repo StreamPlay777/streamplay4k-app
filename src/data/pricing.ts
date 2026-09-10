@@ -1,105 +1,137 @@
-export interface Plan {
+/**
+ * Section 05 — locked pricing data and the single calculation utility.
+ *
+ * Everything price-related reads from here. Do not re-derive a total anywhere
+ * else: `quote()` is the one implementation, and the future backend must run
+ * the same rule server-side rather than trusting any total the browser sends.
+ *
+ * Prices are held in integer cents. Doing the arithmetic in cents avoids the
+ * float error that makes 59.985 land on 59.98 instead of 59.99, and makes the
+ * half-up rounding on the extra-device amount exact.
+ */
+
+import { site } from './site';
+
+export interface Term {
   id: string;
-  name: string;
-  duration: string;
-  price: number;
-  originalPrice?: number;
-  pricePerMonth: number;
-  badge?: string;
-  popular?: boolean;
-  features: string[];
-  connections: number;
-  devices: number;
+  months: number;
+  label: string;
+  /**
+   * The plan's name, as we call it when talking to a customer.
+   *
+   * Display only. The term is still what is sold and `label` is still what
+   * appears wherever the length is the point; this is the word that goes on
+   * the tile, in the order record and in the spreadsheet column, so "which
+   * plan did they buy" has a one-word answer. Nothing in quote() reads it.
+   */
+  tier: string;
+  /** Base price in cents, for one device. */
+  baseCents: number;
 }
 
-export const plans: Plan[] = [
-  {
-    id: 'monthly',
-    name: '1 Month',
-    duration: '1 Month',
-    price: 14.99,
-    pricePerMonth: 14.99,
-    connections: 1,
-    devices: 2,
-    features: [
-      '10,000+ Live Channels',
-      '4K Ultra HD Streaming',
-      '60,000+ Movies & TV Shows',
-      '24/7 Customer Support',
-      'Works on All Devices',
-      'EPG TV Guide',
-      'VOD Library Access',
-      'Anti-Freeze Technology',
-    ],
-  },
-  {
-    id: '3months',
-    name: '3 Months',
-    duration: '3 Months',
-    price: 34.99,
-    originalPrice: 44.97,
-    pricePerMonth: 11.66,
-    connections: 2,
-    devices: 4,
-    features: [
-      '10,000+ Live Channels',
-      '4K Ultra HD Streaming',
-      '60,000+ Movies & TV Shows',
-      '24/7 Customer Support',
-      'Works on All Devices',
-      'EPG TV Guide',
-      'VOD Library Access',
-      'Anti-Freeze Technology',
-      '2 Simultaneous Connections',
-    ],
-  },
-  {
-    id: '6months',
-    name: '6 Months',
-    duration: '6 Months',
-    price: 54.99,
-    originalPrice: 89.94,
-    pricePerMonth: 9.16,
-    popular: true,
-    badge: 'BEST VALUE',
-    connections: 2,
-    devices: 5,
-    features: [
-      '10,000+ Live Channels',
-      '4K Ultra HD Streaming',
-      '60,000+ Movies & TV Shows',
-      '24/7 Priority Support',
-      'Works on All Devices',
-      'EPG TV Guide',
-      'VOD Library Access',
-      'Anti-Freeze Technology',
-      '2 Simultaneous Connections',
-      'Premium Sports Channels',
-    ],
-  },
-  {
-    id: '12months',
-    name: '12 Months',
-    duration: '12 Months',
-    price: 89.99,
-    originalPrice: 179.88,
-    pricePerMonth: 7.49,
-    badge: 'SAVE 50%',
-    connections: 3,
-    devices: 6,
-    features: [
-      '10,000+ Live Channels',
-      '4K Ultra HD Streaming',
-      '60,000+ Movies & TV Shows',
-      '24/7 VIP Support',
-      'Works on All Devices',
-      'EPG TV Guide',
-      'VOD Library Access',
-      'Anti-Freeze Technology',
-      '3 Simultaneous Connections',
-      'Premium Sports Channels',
-      'PPV Events Included',
-      'Free Device Setup Help',
-    ],
-  },
+/** LOCKED — see spec §4 and §26. Do not edit without explicit approval. */
+export const TERMS: Term[] = [
+  { id: '3m', months: 3, label: '3 Months', tier: 'Basic', baseCents: 3999 },
+  { id: '6m', months: 6, label: '6 Months', tier: 'Standard', baseCents: 6999 },
+  { id: '12m', months: 12, label: '12 Months', tier: 'Premium', baseCents: 9999 },
 ];
+
+/** LOCKED — one device is included; each extra adds 50% of the base price. */
+export const EXTRA_DEVICE_RATE = 0.5;
+export const MAX_DEVICES = 5;
+export const MIN_DEVICES = 1;
+export const DEFAULT_TERM_ID = '12m';   // strongest value (spec §6)
+export const DEFAULT_DEVICES = 1;
+
+export interface Quote {
+  term: Term;
+  devices: number;
+  baseCents: number;
+  extraDevicesCents: number;
+  totalCents: number;
+  /** Total divided across the term, for the "≈ $x/mo" line. */
+  perMonthCents: number;
+}
+
+/**
+ * The single pricing calculation.
+ *   total = base + (base × 0.5 × (devices − 1))
+ * Rounded half-up to the nearest cent on the extra-device amount only.
+ */
+export function quote(termId: string, devices: number): Quote {
+  const term = TERMS.find((t) => t.id === termId) ?? TERMS[0];
+  const n = Math.min(MAX_DEVICES, Math.max(MIN_DEVICES, Math.round(devices)));
+
+  const extraDevicesCents = Math.round(term.baseCents * EXTRA_DEVICE_RATE * (n - 1));
+  const totalCents = term.baseCents + extraDevicesCents;
+
+  return {
+    term,
+    devices: n,
+    baseCents: term.baseCents,
+    extraDevicesCents,
+    totalCents,
+    perMonthCents: Math.round(totalCents / term.months),
+  };
+}
+
+/** Standard two-decimal currency formatting. */
+export function money(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+/** Savings against the shortest term, only where it is factually positive. */
+export function savingsPerMonth(term: Term): number {
+  const shortest = TERMS[0];
+  const baseline = shortest.baseCents / shortest.months;
+  const thisRate = term.baseCents / term.months;
+  return Math.max(0, Math.round(baseline - thisRate));
+}
+
+/**
+ * What every plan includes — client-approved list, used by the order panel.
+ *
+ * Split into two groups so the panel can give the catalogue figures more weight
+ * than the rest, which is how someone actually scans this: the two numbers
+ * first, then a checklist.
+ *
+ * The figures come from data/site.ts. Nothing here restates them.
+ *
+ * NOTE: "Anti-Freeze Technology" and "Ultra Fast Servers" are supplied by the
+ * client as approved product copy. They were removed in an earlier pass as
+ * unprovable performance claims and have been reinstated at the client's
+ * explicit instruction.
+ */
+export const PLAN_HIGHLIGHTS = [
+  { value: site.channels, label: 'Live TV Channels' },
+  { value: site.vod, label: 'Movies & Series' },
+] as const;
+
+export const PLAN_FEATURES = [
+  'Adult Channels Available',
+  'Sports Packages (NFL, NBA, UFC, beIN, Sky Sports)',
+  'International Channels',
+  '4K + HDR Streaming',
+  'Anti-Freeze Technology',
+  'Ultra Fast Servers',
+  'EPG (TV Guide Included)',
+  'Works on Smart TV, Firestick, Android, iOS, PC & more',
+  '24/7 Customer Support',
+];
+
+/** Trust points shown beside the order CTA (spec §10). */
+export const TRUST_POINTS = [
+  `Usually activated within ${site.activationWindow}`,
+  site.refundLabel,
+  'Support available 24/7',
+];
+
+/**
+ * Ways the invoice can be paid. No payment is taken on this site, so this list
+ * is always labelled as invoice options — never as on-page checkout (§10).
+ */
+export const INVOICE_PAYMENT_METHODS = [
+  // Card schemes first, then wallets. Names must match the keys in
+  // components/PaymentMarks.tsx — an unknown name renders nothing.
+  'Visa', 'Mastercard', 'Apple Pay', 'Google Pay', 'PayPal',
+] as const;

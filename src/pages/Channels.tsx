@@ -1,131 +1,158 @@
-import { useState } from 'react';
-import { Search, Tv, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { channels, categories } from '../data/channels';
+import Seo from '../components/Seo';
+import { pageSeo } from '../data/seo';
+import { site, routes } from '../data/site';
+import ChannelBrowser from '../components/ChannelBrowser';
+import CountUp from '../components/CountUp';
+import ClosingCta from '../components/ClosingCta';
+import Reveal from '../components/Reveal';
+import { SectionHeading } from '../components/ui';
+import { MAX_DEVICES } from '../data/pricing';
+import { CatIcon } from '../components/CategoryIcons';
+import { channelStats } from '../data/channelStats';
+
+/**
+ * Channel guide.
+ *
+ * Richer than the original handoff spec: the category chips with counts, the
+ * country filter, the adult toggle and the "showing N of M" meta line are all
+ * carried over from the live Primo guide, which handles the same catalogue.
+ */
+const categoryCards = [
+  { label: 'Live Sports', note: 'channels', value: channelStats.groups.sports.toLocaleString('en-US'), icon: <CatIcon name="sports" /> },
+  { label: 'Movies', note: 'and 24/7 film channels', value: channelStats.groups.movies.toLocaleString('en-US'), icon: <CatIcon name="movies" /> },
+  { label: 'Entertainment', note: 'channels', value: channelStats.groups.entertainment.toLocaleString('en-US'), icon: <CatIcon name="entertainment" /> },
+  { label: 'Kids', note: 'and family channels', value: channelStats.groups.kids.toLocaleString('en-US'), icon: <CatIcon name="kids" /> },
+  { label: 'News', note: 'channels worldwide', value: channelStats.groups.news.toLocaleString('en-US'), icon: <CatIcon name="news" /> },
+  { label: '4K & UHD', note: 'channels', value: channelStats.groups.uhd.toLocaleString('en-US'), icon: <CatIcon name="uhd" /> },
+];
+
+const includedCards = [
+  {
+    title: `Up to ${MAX_DEVICES} devices`,
+    body: 'Share it with the family. Everyone watches what they want, at the same time.',
+    icon: <CatIcon name="devices" />,
+  },
+  {
+    title: `${site.channels} channels`,
+    body: 'Sports, news, entertainment and kids. Every channel you need, in one place.',
+    icon: <CatIcon name="entertainment" />,
+  },
+  {
+    title: 'Set up in minutes',
+    body: `Install the app, sign in with the details we send, and start watching — usually ready in ${site.activationWindow}.`,
+    icon: <CatIcon name="setup" />,
+  },
+  {
+    title: '24/7 human support',
+    body: 'Message us any time. A real person answers on WhatsApp, not a ticket queue.',
+    icon: <CatIcon name="support" />,
+  },
+];
 
 export default function Channels() {
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [search, setSearch] = useState('');
-
-  const filtered = channels.filter(ch => {
-    const matchCat = activeCategory === 'All' || ch.category === activeCategory;
-    const matchSearch = ch.name.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
-
-  const counts: Record<string, number> = { All: channels.length };
-  categories.slice(1).forEach(cat => {
-    counts[cat] = channels.filter(c => c.category === cat).length;
-  });
+  // Every figure is counted from the shipped catalogue rather than asserted.
+  const stats = [
+    { value: site.channels, label: 'Live channels' },
+    { value: String(channelStats.regions), label: 'Countries & regions' },
+    { value: site.vod, label: 'Movies & series' },
+  ];
 
   return (
-    <div className="min-h-screen pt-24">
-      {/* Hero */}
-      <section className="bg-brand-darker border-b border-brand-border py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-brand-red text-sm font-bold uppercase tracking-widest">Channel Guide</span>
-          <h1 className="text-5xl font-black text-white mt-2 mb-4">
-            10,000+ Live <span className="text-gradient">TV Channels</span>
+    <>
+      <Seo seo={pageSeo[routes.channels]} />
+      {/* Header */}
+      <section className="px-7 pb-[46px] pt-[74px]">
+        <div className="mx-auto max-w-shell">
+          <div className="eyebrow">Channel guide</div>
+          <h1 className="mt-4 font-display font-extrabold leading-none text-ink" style={{ fontSize: 'clamp(38px, 6.5vw, 66px)' }}>
+            Every channel.
+            <br />
+            <span className="text-grad">Every country.</span>
           </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
-            Sports, news, movies, kids, international & more — all in stunning 4K Ultra HD. Browse our full channel lineup below.
+          <p className="mt-6 max-w-[620px] text-[18px] leading-relaxed text-ink-3">
+            The US, the UK, Europe, the Arab world and South Asia — in HD, 4K and 8K.
+            Search the whole line-up by name, or browse by where you are from.
           </p>
-          {/* Search */}
-          <div className="relative max-w-md mx-auto">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search channels..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-brand-card border border-brand-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-red transition-colors"
-            />
+        </div>
+      </section>
+
+      {/* Stat cards */}
+      <section className="px-7 pb-10">
+        <div className="mx-auto grid max-w-shell gap-4 sm:grid-cols-3">
+          {stats.map((s) => (
+            <div key={s.label} className="card px-6 py-7">
+              <CountUp as="div" value={s.value} className="font-display text-[36px] font-extrabold leading-none text-ink" />
+              <div className="mt-2.5 text-[14px] text-ink-3">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* What the line-up covers, category by category.
+          Counts are the real group totals from the catalogue build, not round
+          marketing numbers — a specific figure is more persuasive than a
+          rounded one, and these can be checked by filtering the browser below
+          on the same category. */}
+      <section className="section-tight px-7">
+        <div className="mx-auto max-w-shell">
+          <SectionHeading
+            label="Explore the line-up"
+            title={<>TV Made <span className="text-grad">For You</span></>}
+            sub="What a subscription covers, category by category."
+          />
+          <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {categoryCards.map((c, i) => (
+              <Reveal key={c.label} delay={i} shift={12} className="cat-card rounded-2xl border border-line bg-raise p-6 text-center">
+                <span className="cat-icon mx-auto grid h-11 w-11 place-items-center rounded-xl" aria-hidden="true">
+                  {c.icon}
+                </span>
+                <CountUp
+                  as="p"
+                  value={c.value}
+                  className="nums mt-4 font-display text-[30px] font-extrabold leading-none text-ink sm:text-[34px]"
+                />
+                <p className="mt-2 text-[13.5px] text-ink-3">
+                  <span className="font-semibold text-ink-2">{c.label}</span> {c.note}
+                </p>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Category tabs */}
-        <div className="flex flex-wrap gap-2 mb-10">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                activeCategory === cat
-                  ? 'gradient-red text-white'
-                  : 'bg-brand-card border border-brand-border text-gray-300 hover:border-brand-red hover:text-white'
-              }`}
-            >
-              {cat}
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${activeCategory === cat ? 'bg-white/20 text-white' : 'bg-brand-border text-gray-500'}`}>
-                {counts[cat] ?? 0}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Results count */}
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-gray-400 text-sm">
-            Showing <span className="text-white font-bold">{filtered.length}</span> channels
-            {activeCategory !== 'All' && <span> in <span className="text-brand-red">{activeCategory}</span></span>}
-          </p>
-        </div>
-
-        {/* Channel grid */}
-        {filtered.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {filtered.map(ch => (
-              <div
-                key={ch.name}
-                className="bg-brand-card border border-brand-border rounded-xl p-4 flex flex-col items-center gap-3 channel-card transition-all cursor-pointer group"
-              >
-                <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center overflow-hidden">
-                  <img
-                    src={ch.logo}
-                    alt={ch.name}
-                    className="w-11 h-11 object-contain"
-                    onError={(e) => {
-                      const el = e.target as HTMLImageElement;
-                      el.style.display = 'none';
-                      el.parentElement!.innerHTML = `<span class="text-gray-800 font-black text-xs text-center leading-tight px-1">${ch.name}</span>`;
-                    }}
-                  />
-                </div>
-                <div className="text-center">
-                  <p className="text-gray-300 text-xs font-semibold leading-tight group-hover:text-white transition-colors">{ch.name}</p>
-                  <div className="flex items-center justify-center gap-1 mt-1">
-                    {ch.uhd ? (
-                      <span className="text-[9px] bg-brand-orange/20 text-brand-orange px-1.5 py-0.5 rounded font-bold">4K</span>
-                    ) : ch.hd ? (
-                      <span className="text-[9px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold">HD</span>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
+      {/* Four things every plan includes. Straight from site.ts and
+          pricing.ts, so none of it can drift from what the rest of the site
+          promises. */}
+      <section className="section-tight px-7">
+        <div className="mx-auto max-w-shell">
+          <SectionHeading
+            title={<>Everything You Need, <span className="text-grad">Nothing You Don't</span></>}
+            sub={`What comes with every ${site.name} subscription.`}
+          />
+          <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {includedCards.map((c, i) => (
+              <Reveal key={c.title} delay={i} shift={12} className="card-hover h-full px-6 py-7">
+                <span className="cat-icon grid h-11 w-11 place-items-center rounded-xl" aria-hidden="true">
+                  {c.icon}
+                </span>
+                <h3 className="mt-4 font-display text-[16.5px] font-bold text-ink">{c.title}</h3>
+                <p className="mt-2 text-[13.5px] leading-relaxed text-ink-3">{c.body}</p>
+              </Reveal>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-20">
-            <Tv size={48} className="text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg">No channels found for "{search}"</p>
-          </div>
-        )}
-
-        {/* Note */}
-        <div className="mt-12 bg-brand-card border border-brand-border rounded-2xl p-6 text-center">
-          <p className="text-white font-bold text-lg mb-2">
-            🌍 Plus 9,000+ More Channels
-          </p>
-          <p className="text-gray-400 text-sm mb-4">
-            We show just a sample here. Our full library includes 10,000+ channels across all categories including international, PPV, premium, and regional channels.
-          </p>
-          <Link to="/pricing" className="inline-flex items-center gap-2 px-6 py-3 gradient-red text-white font-bold rounded-xl hover:opacity-90 transition-opacity">
-            Get Full Access <ChevronRight size={16} />
-          </Link>
         </div>
-      </div>
-    </div>
+      </section>
+
+      {/* The real catalogue, loaded on demand */}
+      <section className="px-7 pb-[110px]">
+        <ChannelBrowser />
+        <p className="mx-auto mt-5 max-w-shell nums text-[10.5px] text-ink-6">
+          Browse the live line-up across {channelStats.regions} countries and regions, updated{' '}
+          {channelStats.generated}.
+        </p>
+      </section>
+
+      <ClosingCta from="channels-closing" />
+    </>
   );
 }

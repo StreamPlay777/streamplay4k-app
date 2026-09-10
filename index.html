@@ -4,11 +4,37 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="StreamPlay4K — #1 4K IPTV Service USA. Watch 10,000+ live channels, sports, movies & VOD in 4K Ultra HD. No contract. Works on any device." />
-    <title>StreamPlay4K — #1 4K IPTV Service | 10,000+ Live Channels & VOD</title>
+    <meta name="theme-color" content="#06080F" />
+    <!-- Set before first paint. Scroll-reveal hides content only when scripting
+         is available, so pre-rendered HTML stays readable without JavaScript
+         and there is no flash between paint and hydration. -->
+    <script>
+      document.documentElement.classList.add('js');
+      /* Theme, before first paint. Applied here rather than on mount because
+         the pages are pre-rendered: a class set by React would arrive after
+         the browser had already painted the default theme, and a light-mode
+         visitor would see a flash of the dark site on every navigation.
+         Dark is the fallback — the brand's own dress. To follow the operating
+         system instead, replace the 'dark' below with
+         (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'). */
+      (function () {
+        var t = 'dark';
+        try {
+          var v = localStorage.getItem('sp-theme');
+          if (v === 'light' || v === 'dark') t = v;
+        } catch (e) { /* private mode: fall back to the brand's dark */ }
+        document.documentElement.dataset.theme = t;
+        /* The browser chrome is told here as well as in the toggle, or a
+           light-mode visitor gets a black address bar and iOS notch on every
+           fresh load until they touch the switch. */
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'light' ? '#FFFFFF' : '#06080F');
+      })();
+    </script>
+    <!--app-head-->
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><!--app-html--></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

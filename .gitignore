@@ -1,5 +1,91 @@
+# ══════════════════════════════════════════════════════════════════════
+#  NOTHING BELOW EVER REACHES GITHUB
+#
+#  Two kinds of thing are excluded: credentials, and customer data.
+#  Both are irreversible once pushed — a public repository is scraped
+#  within minutes, and git keeps deleted files in its history forever.
+# ══════════════════════════════════════════════════════════════════════
+
+# ── Build output and dependencies ────────────────────────────────────
 node_modules
 dist
+
+
+# ── PRODUCTION SECRETS ───────────────────────────────────────────────
+# config.php holds the Mailgun sending key, the Google Sheets token, the
+# Stripe keys, the dashboard password hash and the internal orders inbox.
+# It is created by hand on the server from config.example.php and lives
+# only there. config.example.php IS tracked — it is the empty template.
+server/api/config.php
+**/api/config.php
+config.php
+
+# Any other shape the same mistake could take.
+*config.local.*
+*.secret
+*.secret.*
+secrets.*
+
+
+# ── ENVIRONMENT FILES ────────────────────────────────────────────────
+# .env holds the TMDB key. .env.example and .env.production are tracked
+# on purpose: neither contains anything secret.
 .env
 .env.local
+.env.*.local
+!.env.example
+!.env.production
+
+
+# ── KEYS AND CERTIFICATES ────────────────────────────────────────────
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+*.ppk
+.ssh/
+
+
+# ── CUSTOMER AND ORDER DATA ──────────────────────────────────────────
+# On the server these live outside public_html and can never be reached
+# over the web. They must never reach a repository either: they are
+# real people's names, email addresses and phone numbers.
+streamplay4k-orders/
+orders/
+SP-*.json
+orders-*.ndjson
+leads.json
+counter.json
+recent.json
+ratelimit.json
+admin-attempts.json
+sheets-pending.json
+
+
+# ── LOGS ─────────────────────────────────────────────────────────────
+*.log
+endpoint.log
+sent.log
+error_log
+logs/
+
+
+# ── DEPLOYMENT ARTEFACTS ─────────────────────────────────────────────
+# The uploadable ZIP is built by CI, not committed.
+*.zip
+!server/google-sheets/*.xlsx
+.ftp-deploy-sync-state.json
+
+
+# ── LOCAL NOISE ──────────────────────────────────────────────────────
 *.local
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~

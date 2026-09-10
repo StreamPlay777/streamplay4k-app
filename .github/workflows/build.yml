@@ -1,0 +1,61 @@
+# ══════════════════════════════════════════════════════════════════════
+#  BUILD — runs on every push. Touches nothing on the live site.
+#
+#  It builds the site, checks the result for secrets, and attaches a
+#  ready-to-upload ZIP to the run. No server password or key is involved,
+#  so there is nothing here that can damage the live website.
+#
+#  Use it to get a fresh ZIP without running anything on your computer:
+#  GitHub → Actions → the newest run → Artifacts → download.
+# ══════════════════════════════════════════════════════════════════════
+name: Build site
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # ── The build must never contain a secret ────────────────────────
+      # One script, run identically here and on a developer's machine
+      # (`npm run verify`). The previous version of this check lived inline
+      # here and separately in a local test; the two drifted, and the copy
+      # that was wrong was the one nobody ran until CI did.
+      - name: Refuse to ship secrets
+        run: ./scripts/verify-build.sh dist
+
+      - name: Summarise
+        run: |
+          {
+            echo "### Build ready"
+            echo ""
+            echo "- files: $(find dist -type f | wc -l)"
+            echo "- size:  $(du -sh dist | cut -f1)"
+            echo "- no secrets, no check.php, .htaccess present"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: streamplay4k-public_html
+          path: dist/
+          retention-days: 30
+          include-hidden-files: true   # .htaccess, without which nothing routes
