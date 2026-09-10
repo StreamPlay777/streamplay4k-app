@@ -106,19 +106,24 @@ jobs:
           # this workflow was written: a --delete sync leaves config.php
           # byte-identical.
           #
-          # .well-known and cgi-bin belong to the server, not to this
-          # repository, so they are absent from every build — which is exactly
-          # what --delete removes. .well-known is where a certificate authority
+          # .well-known, cgi-bin and .private belong to the server, not to
+          # this repository, so they are absent from every build — which is
+          # exactly what --delete removes. .well-known is where a certificate authority
           # looks when renewing SSL: deleting it does nothing visible today and
           # fails the renewal weeks later, with the site showing a security
           # warning and no recent change to blame it on. Found by rehearsing a
           # real --delete sync against a copy of the live server, not by
-          # reading the flags.
+          # reading the flags. .private was found the same way and later: it
+          # did not exist in the rehearsal, only on the real server, and the
+          # first preview against production is what surfaced it. That is the
+          # argument for preview mode existing at all — a rehearsal can only
+          # contain what you thought to put in it.
           rsync -rlptDvz $DRY --checksum --delete \
             --exclude '/api/config.php' \
             --exclude '/api/check.php' \
             --exclude '/.well-known/' \
             --exclude '/cgi-bin/' \
+            --exclude '/.private/' \
             --exclude '.ftp-deploy-sync-state.json' \
             --itemize-changes \
             -e "ssh -p ${PORT:-22} -o StrictHostKeyChecking=yes" \
