@@ -101,13 +101,24 @@ jobs:
           # deploy reporting success. Comparing content costs a few seconds on
           # a site this size and removes that whole class of failure.
           #
-          # --exclude protects a file from being written AND, because
+          # --exclude protects a path from being written AND, because
           # --delete-excluded is absent, from being deleted. Verified before
           # this workflow was written: a --delete sync leaves config.php
           # byte-identical.
+          #
+          # .well-known and cgi-bin belong to the server, not to this
+          # repository, so they are absent from every build — which is exactly
+          # what --delete removes. .well-known is where a certificate authority
+          # looks when renewing SSL: deleting it does nothing visible today and
+          # fails the renewal weeks later, with the site showing a security
+          # warning and no recent change to blame it on. Found by rehearsing a
+          # real --delete sync against a copy of the live server, not by
+          # reading the flags.
           rsync -rlptDvz $DRY --checksum --delete \
             --exclude '/api/config.php' \
             --exclude '/api/check.php' \
+            --exclude '/.well-known/' \
+            --exclude '/cgi-bin/' \
             --exclude '.ftp-deploy-sync-state.json' \
             --itemize-changes \
             -e "ssh -p ${PORT:-22} -o StrictHostKeyChecking=yes" \
