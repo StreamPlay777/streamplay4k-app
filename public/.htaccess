@@ -46,6 +46,12 @@ RewriteRule ^ index.html [QSA,L]
 # ── Dashboard ─────────────────────────────────────────────────────────────────
 # /admin/ is a real directory with index.php, so the fallback above already
 # leaves it alone. What it must never do is get cached or indexed.
+
+# index.php is the only entry point. lib/ holds the session, CSRF and action
+# handling and pages/ holds the screens; both expect to be included after the
+# login check has already passed, so neither may be requested on its own.
+# (Each file refuses to run without SP_ADMIN as well — this is the second lock.)
+RewriteRule ^admin/(lib|pages)/ - [F,L]
 <IfModule mod_headers.c>
   <FilesMatch "^index\.php$">
     Header set Cache-Control "no-store, private"

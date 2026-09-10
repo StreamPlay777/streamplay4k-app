@@ -52,6 +52,7 @@ require $base . '/lib/mailer.php';
 require $base . '/lib/store.php';
 require $base . '/lib/stripe.php';
 require $base . '/lib/sheets.php';
+require $base . '/lib/settings.php';
 require $base . '/templates/emails.php';
 require $base . '/templates/followups.php';
 
@@ -105,8 +106,12 @@ foreach (sp_list_orders($cfg, 1000) as $order) {
                     $fresh['payUrl'] = $pay['url'];
                     sp_update_order($cfg, $order['id'], ['payUrl' => $pay['url']]);
                 }
-            } elseif (!empty($cfg['payment_link'])) {
-                $fresh['payLink'] = (string) $cfg['payment_link'];
+            } else {
+                // Read at send time, not at order time: the owner rotates this
+                // from the admin every few days, and a nudge carrying last
+                // week's link is a nudge towards a dead page.
+                $payLink = sp_payment_link($cfg);
+                if ($payLink !== '') $fresh['payLink'] = $payLink;
             }
         }
 

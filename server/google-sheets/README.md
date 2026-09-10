@@ -124,12 +124,20 @@ Click any cell in an order's row, then use the **StreamPlay4K** menu:
 
 | | |
 |---|---|
+| 📨 **Mark as invoice sent** | Row turns pale blue |
 | ✅ **Mark as paid** | Row turns green, stamps today's date in **Paid** |
 | 🚀 **Mark as activated** | Row turns blue, stamps **Activated** |
 | ↩️ **Back to new** | Row turns amber, clears both dates |
 | 🚫 **Mark as cancelled** | Row turns grey |
+| 💸 **Mark as refunded** | Row turns orange |
 
 Select several rows first and it marks all of them at once.
+
+**This menu changes the sheet only.** It does not send anything and does not
+reach the website. Sending an invoice, and every other action that touches a
+customer, happens in the site's own admin at `/admin/` — which then updates
+this sheet by itself. Use the menu here to correct the mirror, or when you are
+in the sheet anyway and want to note something down.
 
 The colour is on the **whole row**, not a chip in one column, so you can see
 what still needs paying from across the room. The dates are stamped for you

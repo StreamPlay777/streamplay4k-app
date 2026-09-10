@@ -45,7 +45,19 @@ const COL = {
   email: 7, phone: 8, country: 9, paid: 10, activated: 11, notes: 12,
 };
 
-const STATUSES = ['new', 'paid', 'activated', 'cancelled'];
+/*
+ * The lifecycle, mirroring server/api/lib/status.php.
+ *
+ * These two lists have to agree. The Orders sheet validates this column with
+ * setAllowInvalid(false), so a status the site sends and this list does not
+ * know arrives flagged as an error, uncoloured, and — worse — invisible to the
+ * Summary formulas, which match on exact strings. An order the site has
+ * invoiced would silently stop counting as money still to collect.
+ */
+const STATUSES = ['new', 'invoice_sent', 'paid', 'activated', 'expired', 'cancelled', 'refunded'];
+
+/** Everything still waiting on money, for the Summary formulas. */
+const OPEN_STATUSES = ['new', 'invoice_sent'];
 
 /* ═══════════════════════════════════════════════════════════════════════
    THE MENU — this is what makes the sheet usable rather than just readable
@@ -58,20 +70,31 @@ const STATUSES = ['new', 'paid', 'activated', 'cancelled'];
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('StreamPlay4K')
+    .addItem('📨  Mark as invoice sent', 'markInvoiceSent')
     .addItem('✅  Mark as paid', 'markPaid')
     .addItem('🚀  Mark as activated', 'markActivated')
     .addItem('↩️  Back to new', 'markNew')
     .addSeparator()
     .addItem('🚫  Mark as cancelled', 'markCancelled')
+    .addItem('💸  Mark as refunded', 'markRefunded')
     .addSeparator()
     .addItem('⚙️  Setup / repair formatting', 'setup')
     .addToUi();
 }
 
-function markPaid()      { setStatus_('paid'); }
-function markActivated() { setStatus_('activated'); }
-function markNew()       { setStatus_('new'); }
-function markCancelled() { setStatus_('cancelled'); }
+function markInvoiceSent() { setStatus_('invoice_sent'); }
+function markPaid()        { setStatus_('paid'); }
+function markActivated()   { setStatus_('activated'); }
+function markNew()         { setStatus_('new'); }
+function markCancelled()   { setStatus_('cancelled'); }
+function markRefunded()    { setStatus_('refunded'); }
+
+/*
+ * Marking a row here changes the SHEET only — it does not reach the website.
+ * The site's own admin is the place to send an invoice or take an action; this
+ * menu is for correcting the mirror, and for the times you are in the sheet
+ * anyway. The site overwrites a row whenever that order changes there.
+ */
 
 function setStatus_(status) {
   const ui = SpreadsheetApp.getUi();
@@ -228,10 +251,13 @@ function applyStatusColours_(sheet, rows) {
       .build();
 
   sheet.setConditionalFormatRules([
-    rule('=$C2="paid"',      '#E7F8EE', '#0F5132'),
-    rule('=$C2="activated"', '#E8F1FE', '#0B3D91'),
-    rule('=$C2="cancelled"', '#F2F3F5', '#8A8F9C'),
-    rule('=$C2="new"',       '#FFF7E6', '#7A4E00'),
+    rule('=$C2="paid"',         '#E7F8EE', '#0F5132'),
+    rule('=$C2="activated"',    '#E8F1FE', '#0B3D91'),
+    rule('=$C2="invoice_sent"', '#EAF2FB', '#1F5FA8'),
+    rule('=$C2="cancelled"',    '#F2F3F5', '#8A8F9C'),
+    rule('=$C2="expired"',      '#F2F3F5', '#8A8F9C'),
+    rule('=$C2="refunded"',     '#FDF0E6', '#8A4B06'),
+    rule('=$C2="new"',          '#FFF7E6', '#7A4E00'),
   ]);
 }
 
@@ -244,13 +270,19 @@ function buildSummary_(ss) {
   const rows = [
     ['StreamPlay4K', ''],
     ['', ''],
+    // "Still to collect" must count invoice_sent as well as new. An invoiced
+    // order is the one most likely to be paid next; leaving it out of the
+    // figure is leaving out the part of the pipeline you are actually chasing.
     ['Paid revenue',      '=SUMIFS(Orders!F:F,Orders!C:C,"paid")+SUMIFS(Orders!F:F,Orders!C:C,"activated")'],
-    ['Still to collect',  '=SUMIFS(Orders!F:F,Orders!C:C,"new")'],
+    ['Still to collect',  '=SUMIFS(Orders!F:F,Orders!C:C,"new")+SUMIFS(Orders!F:F,Orders!C:C,"invoice_sent")'],
+    ['Money refunded',    '=SUMIFS(Orders!F:F,Orders!C:C,"refunded")'],
     ['', ''],
     ['Orders',            '=COUNTA(Orders!A2:A)'],
-    ['Awaiting payment',  '=COUNTIF(Orders!C:C,"new")'],
+    ['Awaiting payment',  '=COUNTIF(Orders!C:C,"new")+COUNTIF(Orders!C:C,"invoice_sent")'],
+    ['   invoice sent',   '=COUNTIF(Orders!C:C,"invoice_sent")'],
     ['Paid',              '=COUNTIF(Orders!C:C,"paid")+COUNTIF(Orders!C:C,"activated")'],
     ['Cancelled',         '=COUNTIF(Orders!C:C,"cancelled")'],
+    ['Refunded',          '=COUNTIF(Orders!C:C,"refunded")'],
     ['', ''],
     ['By plan', ''],
     ['Basic — 3 months',     '=COUNTIF(Orders!D:D,"Basic")'],
@@ -261,14 +293,24 @@ function buildSummary_(ss) {
 
   sm.setColumnWidth(1, 230);
   sm.setColumnWidth(2, 150);
+  // These row numbers follow the `rows` array above. Find the labels rather
+  // than counting by hand: adding one line to that array used to silently move
+  // every format one row down, which is how a money column ends up formatted
+  // as a count.
+  const rowOf = (label) => rows.findIndex((r) => r[0] === label) + 1;
+
   sm.getRange('A1').setFontSize(18).setFontWeight('bold').setFontColor('#111114');
-  sm.getRange('A11').setFontWeight('bold').setFontColor('#656A78');
-  sm.getRange('B3:B4').setNumberFormat('$#,##0.00');
-  sm.getRange('B1:B20').setFontWeight('bold').setFontSize(13).setHorizontalAlignment('right');
-  sm.getRange('B3').setFontColor('#0F5132');
-  sm.getRange('B4').setFontColor('#B45309');
-  sm.getRange(1, 1, 20, 2).setVerticalAlignment('middle');
-  sm.setRowHeights(1, 20, 26);
+  sm.getRange(rowOf('By plan'), 1).setFontWeight('bold').setFontColor('#656A78');
+  // One at a time: a single range spanning them only stays correct while the
+  // three money rows happen to be adjacent.
+  ['Paid revenue', 'Still to collect', 'Money refunded']
+    .forEach((label) => sm.getRange(rowOf(label), 2).setNumberFormat('$#,##0.00'));
+  sm.getRange(1, 2, rows.length, 1).setFontWeight('bold').setFontSize(13).setHorizontalAlignment('right');
+  sm.getRange(rowOf('Paid revenue'), 2).setFontColor('#0F5132');
+  sm.getRange(rowOf('Still to collect'), 2).setFontColor('#B45309');
+  sm.getRange(rowOf('Money refunded'), 2).setFontColor('#8A4B06');
+  sm.getRange(1, 1, rows.length, 2).setVerticalAlignment('middle');
+  sm.setRowHeights(1, rows.length, 26);
   sm.setHiddenGridlines(true);
 }
 
