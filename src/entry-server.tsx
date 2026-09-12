@@ -49,7 +49,7 @@ export async function warm(urls: string[]): Promise<void> {
  * markup from the same TypeScript modules the app uses, instead of keeping a
  * duplicate list in a build script that would drift.
  */
-export { pageSeo, renderHeadHtml, absolute, articleLd, breadcrumbLd, DEFAULT_OG_IMAGE } from './data/seo';
+export { pageSeo, notFoundSeo, renderHeadHtml, absolute, articleLd, breadcrumbLd, DEFAULT_OG_IMAGE } from './data/seo';
 export { posts } from './data/blog';
 export { site, routes } from './data/site';
 export { landings } from './data/landings';

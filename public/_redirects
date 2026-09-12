@@ -1,6 +1,19 @@
 # Netlify equivalent of the rules in .htaccess, in case the site is hosted there.
-# Netlify serves pre-rendered files before consulting this file, so the SPA
-# fallback here only catches URLs with nothing on disk.
-/setup     /setup-guide/     301!
-/setup/    /setup-guide/     301!
-/*         /index.html       200
+# Netlify serves pre-rendered files before consulting this file, so only URLs
+# with nothing on disk reach the rules below.
+https://www.streamplay4k.com/*  https://streamplay4k.com/:splat  301!
+/setup                  /setup-guide/  301!
+/setup/                 /setup-guide/  301!
+/package                /pricing/      301
+/checkout-pack-*        /pricing/      301
+/subscribe-us-*         /pricing/      301
+/premium-4-devices      /pricing/      301
+/tv-guide               /channels/     301
+/wp-admin/*             /404.html      410
+/wp-content/*           /404.html      410
+/wp-includes/*          /404.html      410
+/wp-json/*              /404.html      410
+/wp-*.php               /404.html      410
+/xmlrpc.php             /404.html      410
+# Anything else with nothing on disk is a real 404 — never the homepage.
+/*                      /404.html      404

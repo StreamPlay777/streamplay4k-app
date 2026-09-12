@@ -22,7 +22,7 @@ const dist = path.join(root, 'dist');
 const serverDir = path.join(dist, 'server');
 
 const server = await import(pathToFileURL(path.join(serverDir, 'entry-server.js')).href);
-const { render, warm, pageSeo, renderHeadHtml, posts, site, routes, landings, articleLd, breadcrumbLd, DEFAULT_OG_IMAGE } = server;
+const { render, warm, pageSeo, notFoundSeo, renderHeadHtml, posts, site, routes, landings, articleLd, breadcrumbLd, DEFAULT_OG_IMAGE } = server;
 
 // Resolve React.lazy routes first — see the note on warm() in entry-server.tsx.
 await warm([
@@ -36,8 +36,10 @@ if (!template.includes('<!--app-html-->') || !template.includes('<!--app-head-->
   throw new Error('index.html is missing the <!--app-html--> or <!--app-head--> placeholder');
 }
 
-/** Route -> file path. "/" becomes index.html, "/pricing/" becomes pricing/index.html. */
+/** Route -> file path. "/" becomes index.html, "/pricing/" becomes pricing/index.html.
+    A route that already names a file, like "/404.html", is written as that file. */
 const outFile = (route) => {
+  if (/\.html$/.test(route)) return path.join(dist, route.replace(/^\//, ''));
   const clean = route.replace(/^\/|\/$/g, '');
   return clean ? path.join(dist, clean, 'index.html') : path.join(dist, 'index.html');
 };
@@ -101,6 +103,13 @@ for (const l of landings.filter((x) => x.status === 'published')) {
   });
 }
 
+/* ── 404 ─────────────────────────────────────────────────────────────────── */
+/* Rendered at a path no route claims, so the router's catch-all produces the
+   NotFound screen inside the normal shell. Apache serves this file for every
+   URL with nothing on disk — with a real 404 status, which the old SPA
+   fallback never sent. Excluded from the sitemap by its own noindex. */
+await emit(notFoundSeo.path, notFoundSeo);
+
 /* ── sitemap.xml ─────────────────────────────────────────────────────────── */
 const today = new Date().toISOString().slice(0, 10);
 const sitemapEntries = written
@@ -122,9 +131,13 @@ await fs.writeFile(
 );
 
 /* ── robots.txt ──────────────────────────────────────────────────────────── */
+/* No Disallow for /thank-you/. It carries a noindex tag, and a page a crawler
+   is forbidden to fetch is a page whose noindex it never reads — a disallowed
+   URL can still be indexed, URL-only, if anything links to it. The tag is the
+   stronger control, and it only works if the page can be read. */
 await fs.writeFile(
   path.join(dist, 'robots.txt'),
-  ['User-agent: *', 'Allow: /', 'Disallow: /thank-you/', '', `Sitemap: ${site.url}/sitemap.xml`, ''].join('\n'),
+  ['User-agent: *', 'Allow: /', '', `Sitemap: ${site.url}/sitemap.xml`, ''].join('\n'),
   'utf8',
 );
 

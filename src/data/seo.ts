@@ -34,6 +34,13 @@ export interface PageSeo {
   jsonLd?: Record<string, unknown>[];
   /** Set false to keep the page out of sitemap.xml. */
   sitemap?: boolean;
+  /**
+   * Title and robots only — no description, canonical, Open Graph or JSON-LD.
+   * For the 404 page: a canonical on an error response tells search engines
+   * that the missing URL is a real page living somewhere else, which is the
+   * opposite of what a 404 means.
+   */
+  bare?: boolean;
 }
 
 export function absolute(pathOrUrl: string): string {
@@ -237,6 +244,21 @@ export const pageSeo: Record<string, PageSeo> = {
   },
 };
 
+/**
+ * The 404 page. Not a route — Apache serves it via ErrorDocument for any URL
+ * with nothing on disk, with a real 404 status. It is deliberately not in
+ * pageSeo: nothing links to it, it must never enter the sitemap, and it has no
+ * canonical of its own.
+ */
+export const notFoundSeo: PageSeo = {
+  path: '/404.html',
+  title: `Page not found — ${site.name}`,
+  description: '',
+  robots: 'noindex,nofollow',
+  sitemap: false,
+  bare: true,
+};
+
 /** Routes that get pre-rendered and (unless excluded) listed in the sitemap. */
 export const staticRoutes = Object.keys(pageSeo);
 
@@ -245,6 +267,13 @@ export const staticRoutes = Object.keys(pageSeo);
 interface Tag { tag: 'meta' | 'link'; attrs: Record<string, string>; }
 
 function headTags(seo: PageSeo): { title: string; tags: Tag[]; jsonLd: Record<string, unknown>[] } {
+  if (seo.bare) {
+    return {
+      title: seo.title,
+      tags: [{ tag: 'meta', attrs: { name: 'robots', content: seo.robots || 'noindex,nofollow' } }],
+      jsonLd: [],
+    };
+  }
   const url = absolute(seo.path);
   const image = absolute(seo.ogImage || DEFAULT_OG_IMAGE);
   const tags: Tag[] = [

@@ -8,6 +8,50 @@
 Options -MultiViews
 RewriteEngine On
 
+# ── One hostname ──────────────────────────────────────────────────────────────
+# www and the bare domain both resolve — www by CNAME to the Hostinger CDN, the
+# bare domain aliased onto the same edges — and both served the identical site.
+# Two hostnames for one site is two copies of every page for a search engine to
+# crawl and choose between. The canonical tag was the only thing preventing that
+# from becoming an index problem; this makes it a non-question.
+#
+# FIRST, above every other rule, so no legacy or slash redirect below can fire
+# on the www host and produce a two-hop chain.
+#
+# The target is https:// regardless of how the request arrived, so a www visit
+# over http is fixed in one hop. There is deliberately NO separate http -> https
+# rule for the bare domain: behind a CDN that terminates TLS and talks plain
+# HTTP to the origin, such a rule redirects every request forever. Force HTTPS
+# is Hostinger's job, in hPanel, where it knows which side of the CDN it is on.
+RewriteCond %{HTTP_HOST} ^www\.streamplay4k\.com$ [NC]
+RewriteRule ^ https://streamplay4k.com%{REQUEST_URI} [R=301,L]
+
+# ── Old WordPress URLs ────────────────────────────────────────────────────────
+# Google still holds addresses from the previous site. Each gets the one honest
+# answer for what it was:
+#
+#   moved  — a 301 to the page that now does the same job. Only where the job
+#            genuinely is the same: every old checkout and subscribe URL sold a
+#            plan, and /pricing/ is where plans are sold now.
+#   gone   — a 410 for WordPress's own machinery. These never had page content,
+#            a redirect would tell probes that WordPress once lived here, and
+#            410 drops them from the index faster than 404.
+#
+# Nothing else from the old site is redirected. A URL that matches none of
+# these is a real 404 (see "Not found" below) — never a bounce to the homepage,
+# which search engines read as a soft 404 and hold against the whole site.
+# Absolute https targets, so the hop count is one however the CDN speaks to
+# the origin: a relative target would be built from the origin's own scheme,
+# and behind an edge that terminates TLS that can mean http:// — one more
+# redirect before the customer arrives.
+RewriteRule ^package/?$                       https://streamplay4k.com/pricing/  [R=301,L]
+RewriteRule ^checkout-pack-[a-z0-9-]+/?$      https://streamplay4k.com/pricing/  [R=301,L]
+RewriteRule ^subscribe-us-[a-z0-9-]+/?$       https://streamplay4k.com/pricing/  [R=301,L]
+RewriteRule ^premium-4-devices/?$             https://streamplay4k.com/pricing/  [R=301,L]
+RewriteRule ^tv-guide/?$                      https://streamplay4k.com/channels/ [R=301,L]
+RewriteRule ^(wp-admin|wp-content|wp-includes|wp-json)(/|$) - [G,L]
+RewriteRule ^(wp-[a-z-]+|xmlrpc)\.php$        -          [G,L]
+
 # ── Permanent redirect for the renamed setup route ────────────────────────────
 RewriteRule ^setup/?$ /setup-guide/ [R=301,L]
 
@@ -20,10 +64,8 @@ RewriteCond %{REQUEST_URI} !/$
 RewriteRule ^(.*)$ /$1/ [R=301,L]
 
 # ── API ───────────────────────────────────────────────────────────────────────
-# /api/order has no extension and no file on disk under that exact name, so the
-# SPA fallback below would match it first and hand the browser index.html — a
-# 200 with an HTML body, which fetch() parses as a failed JSON response. This
-# rule must stay ABOVE the fallback.
+# /api/order has no extension and no file on disk under that exact name. Without
+# these rules it would be a 404, and fetch() would report the order as failed.
 RewriteRule ^api/order/?$ /api/order.php [L]
 RewriteRule ^api/lead/?$ /api/lead.php [L]
 RewriteRule ^api/stripe-webhook/?$ /api/stripe-webhook.php [L]
@@ -36,12 +78,19 @@ RewriteRule ^api/stripe-webhook/?$ /api/stripe-webhook.php [L]
 RewriteRule ^api/(lib|templates|cron)/ - [F,L]
 RewriteRule ^api/config(\.example)?\.php$ - [F,L]
 
-# ── SPA fallback ──────────────────────────────────────────────────────────────
-# Only for URLs with nothing on disk: campaign routes not yet pre-rendered,
-# /blog/<slug>/ for a post added after deploy, and client-side navigation.
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.html [QSA,L]
+# ── Not found ─────────────────────────────────────────────────────────────────
+# There is no SPA fallback, on purpose. Every route the app has is pre-rendered
+# to a real file at build time — pages, every blog post, every campaign landing
+# — so a URL with nothing on disk is not a page that has yet to hydrate; it is
+# a URL that does not exist. The previous fallback rewrote every such request
+# to index.html: a 200, the homepage's content, the homepage's canonical. To a
+# crawler that was sixty copies of the homepage, which is precisely what Search
+# Console reported.
+#
+# 404.html is pre-rendered like every other page, inside the normal shell, and
+# Apache serves it with the status a missing page deserves.
+ErrorDocument 404 /404.html
+ErrorDocument 410 /404.html
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
 # /admin/ is a real directory with index.php, so the fallback above already

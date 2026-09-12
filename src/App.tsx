@@ -6,6 +6,8 @@ import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import { useScrollTop } from './hooks/useScrollTop';
 import { routes } from './data/site';
+import Seo from './components/Seo';
+import { notFoundSeo } from './data/seo';
 
 import Home from './pages/Home';
 import Pricing from './pages/Pricing';
@@ -38,13 +40,33 @@ const Refund = lazy(() => import('./pages/legal/Refund'));
 const Cookies = lazy(() => import('./pages/legal/Cookies'));
 const Dmca = lazy(() => import('./pages/legal/Dmca'));
 
+/**
+ * The 404 page.
+ *
+ * Pre-rendered to dist/404.html and served by Apache's ErrorDocument with a real
+ * 404 status. It used to be reachable only after hydration: the server sent the
+ * homepage — title, content and canonical included — for every unknown URL,
+ * with a 200. To a crawler that was sixty copies of the homepage, and Google
+ * declined to index the site accordingly.
+ *
+ * Client-side it also catches in-app navigation to a bad route, which is why
+ * it still sets the document head itself.
+ */
 function NotFound() {
   return (
     <section className="grid min-h-[60vh] place-items-center px-7 text-center">
+      <Seo seo={notFoundSeo} />
       <div>
         <h1 className="font-display text-[72px] font-extrabold leading-none text-accent-ink">404</h1>
-        <p className="mt-4 text-[18px] text-ink-3">That page does not exist.</p>
+        <p className="mt-4 text-[18px] text-ink-3">That page does not exist, or it has moved.</p>
         <Link to={routes.home} className="btn-accent mt-7">Back home</Link>
+        <nav aria-label="Popular pages" className="mt-9 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[14.5px]">
+          <Link to={routes.pricing} className="text-accent-link hover:underline">Plans &amp; pricing</Link>
+          <Link to={routes.channels} className="text-accent-link hover:underline">Channel list</Link>
+          <Link to={routes.setup} className="text-accent-link hover:underline">Setup guide</Link>
+          <Link to={routes.faq} className="text-accent-link hover:underline">FAQ</Link>
+          <Link to={routes.contact} className="text-accent-link hover:underline">Contact</Link>
+        </nav>
       </div>
     </section>
   );

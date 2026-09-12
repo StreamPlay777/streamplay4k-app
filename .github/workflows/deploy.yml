@@ -139,18 +139,52 @@ jobs:
             echo "changed: $(grep -cE '^(>f|<f)' /tmp/rsync.log || echo 0) · deleted: $(grep -c '^\*deleting' /tmp/rsync.log || echo 0)"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # After a live deploy, confirm the site actually answers. A green tick
-      # on a broken site is worse than a red one.
+      # After a live deploy, confirm the site actually answers — and that what
+      # answers is THIS build. An HTTP 200 alone proves nothing: the old
+      # WordPress site returned 200 too, and this check passed three times
+      # while a CDN was handing visitors a site that no longer existed.
       - name: Check the site is alive
         if: inputs.mode == 'live'
         run: |
           set -e
           sleep 5
-          for path in / /pricing/ /channels/; do
+
+          # The hashed bundle name is unique to this build. Finding it in the
+          # served HTML is proof that the deploy landed where the site is served
+          # from; its absence tells you which of two things went wrong.
+          hash=$(grep -o 'assets/index-[A-Za-z0-9_-]*\.js' dist/index.html | head -1)
+          [ -n "$hash" ] || { echo "::error::could not read the bundle name from dist/index.html"; exit 1; }
+          echo "  this build: ${hash}"
+
+          # A unique query string reaches the origin past the CDN's cache.
+          if curl -s "https://streamplay4k.com/?deploy=$(date +%s)" | grep -q "$hash"; then
+            echo "  origin → serving this build"
+          else
+            echo "::error::the origin is not serving this build. Either the CDN ignores query strings and is still holding the previous build — purge it in hPanel and re-run — or the deploy target is not the directory the site is served from."
+            exit 1
+          fi
+
+          # What a visitor gets, through the CDN. Stale here is a warning, not
+          # a failure: the files are right, the cache is behind.
+          if curl -s https://streamplay4k.com/ | grep -q "$hash"; then
+            echo "  / → serving this build"
+          else
+            echo "::warning::/ is still serving a previous build through the Hostinger CDN. Purge the CDN cache in hPanel; visitors see the old site until you do."
+          fi
+
+          for path in /pricing/ /channels/; do
             code=$(curl -s -o /dev/null -w '%{http_code}' "https://streamplay4k.com${path}")
             echo "  ${path} → ${code}"
             [ "$code" = "200" ] || { echo "::error::${path} returned ${code}"; exit 1; }
           done
+
+          # A URL that does not exist must say so. The site once answered every
+          # unknown URL with the homepage and a 200, and Google indexed almost
+          # nothing as a result.
+          code=$(curl -s -o /dev/null -w '%{http_code}' "https://streamplay4k.com/deploy-check-$(date +%s)/")
+          echo "  unknown URL → ${code}"
+          [ "$code" = "404" ] || { echo "::error::an unknown URL returned ${code}, not 404 — the soft-404 is back"; exit 1; }
+
           # The order endpoint must answer as PHP, not as the website.
           body=$(curl -s https://streamplay4k.com/api/order)
           echo "$body" | grep -q '"ok":false' \
