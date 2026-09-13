@@ -66,7 +66,12 @@ jobs:
           cache: npm
 
       - run: npm ci
-      - run: npm run build
+      - name: Build
+        env:
+          # Same key as the build workflow — see the note there. Without it the
+          # deployed site falls back to the bundled title list.
+          VITE_TMDB_KEY: ${{ secrets.VITE_TMDB_KEY }}
+        run: npm run build
 
       # Exactly the same script the build workflow runs. A deploy must never
       # be the first time these questions are asked.

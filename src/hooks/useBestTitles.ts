@@ -1,33 +1,52 @@
 import { useEffect, useState } from 'react';
-import { fetchBest, TMDB_ENABLED } from '../lib/tmdb';
-import { railA, railB, type Title } from '../data/vod';
+import { fetchTitles, TMDB_ENABLED } from '../lib/tmdb';
+import type { Title } from '../data/vod';
 
 /**
- * Recent best-rated films and series, 20 in total.
+ * The two live US rails: highest rated, and most watched.
  *
- * Starts from the bundled list so the section renders instantly with no layout
- * shift, then swaps in live titles once they arrive. If TMDB is unreachable,
- * rate-limited, or no key is configured, the bundled list simply stays — the
- * section never ends up empty.
+ * RETURNS NOTHING UNTIL REAL DATA ARRIVES, and that is the whole design.
+ *
+ * The obvious alternative — seed from the bundled list, swap in live titles
+ * when they land — was built first and looked wrong on screen. The bundled
+ * titles in vod.ts carry no poster artwork, so every card rendered as a striped
+ * placeholder: twenty grey boxes on the homepage whenever the key was missing
+ * or TMDB was slow. And the fallback titles are the same films the curated row
+ * below already shows with real artwork, so filling these rails from it would
+ * print the same posters twice.
+ *
+ * So: no key, no data, or a failed request means the section renders only the
+ * curated row — exactly what the site shows today. There is no state in which
+ * this adds empty-looking furniture to the page.
  */
-export function useBestTitles() {
-  const [films, setFilms] = useState<Title[]>(() => railA.slice(0, 10));
-  const [series, setSeries] = useState<Title[]>(() => railB.slice(0, 10));
-  const [live, setLive] = useState(false);
+export interface LiveTitles {
+  best: Title[];
+  popular: Title[];
+  /** True only when TMDB actually returned titles. Gates both the rails and
+   *  the attribution their licence requires. */
+  live: boolean;
+}
+
+export function useBestTitles(): LiveTitles {
+  const [state, setState] = useState<LiveTitles>({ best: [], popular: [], live: false });
 
   useEffect(() => {
     if (!TMDB_ENABLED) return;
     let cancelled = false;
 
     // Both lists in parallel; one failing does not sink the other.
-    Promise.all([fetchBest('movie', 10), fetchBest('tv', 10)]).then(([m, t]) => {
+    Promise.all([
+      fetchTitles('best', 'movie', 10),
+      fetchTitles('popular', 'movie', 10),
+    ]).then(([b, p]) => {
       if (cancelled) return;
-      if (m?.length) { setFilms(m); setLive(true); }
-      if (t?.length) { setSeries(t); setLive(true); }
+      const best = b ?? [];
+      const popular = p ?? [];
+      if (best.length || popular.length) setState({ best, popular, live: true });
     });
 
     return () => { cancelled = true; };
   }, []);
 
-  return { films, series, live };
+  return state;
 }

@@ -32,8 +32,10 @@ export default function Poster({ title, width = 160, height = 240 }: {
         />
       )}
 
+      {/* accent-chip, not accent: white on the brand red measures 3.74:1, which
+          fails AA at 9px. See the note on --accent-chip in src/index.css. */}
       {title.badge && (
-        <span className="absolute right-2 top-2 rounded bg-accent px-1.5 py-0.5 font-display text-[9px] font-extrabold uppercase text-white">
+        <span className="absolute right-2 top-2 rounded bg-accent-chip px-1.5 py-0.5 font-display text-[9px] font-extrabold uppercase text-white">
           {title.badge}
         </span>
       )}

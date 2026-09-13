@@ -78,6 +78,13 @@
   --accent-link: #FF8A72;
 
   --accent-ink: #FF2B20;
+  /* Small chips that carry white text. The brand red is 3.74:1 against white,
+     which fails AA for anything under 18.7px bold — and a genre or "Top rated"
+     chip is 9px. This is the same red one step darker (5.92:1), already in the
+     palette as the light theme's accent, so the identity is unchanged and the
+     label is actually readable. Deliberately one value for both themes: the
+     text on it is always white, so the background must always be dark enough. */
+  --accent-chip: #C41F0F;
   --grad-from: #FF2B20;
   --grad-to: #FF7A18;
 

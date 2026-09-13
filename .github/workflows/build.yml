@@ -33,6 +33,14 @@ jobs:
       - run: npm ci
 
       - name: Build
+        env:
+          # Vite bakes this into the bundle at build time, so it has to exist
+          # HERE — a key present only on a laptop produces a deployed site that
+          # silently shows the bundled fallback. A v3 TMDB key is visible to
+          # visitors by design and is rate-limited per key, not treated as a
+          # secret; it is stored as a repository secret to keep it out of the
+          # diff, not because exposure would be a breach.
+          VITE_TMDB_KEY: ${{ secrets.VITE_TMDB_KEY }}
         run: npm run build
 
       # ── The build must never contain a secret ────────────────────────

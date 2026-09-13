@@ -1,11 +1,22 @@
 import type { Title } from '../data/vod';
 
 /**
- * TMDB film and series feed.
+ * TMDB film and series feed — United States.
  *
- * What this fetches: RECENT releases only, best-rated first, capped at 20
- * titles in total (10 films + 10 series) to keep the page light — 20 posters
- * rather than the 46 the section used to lay out.
+ * What this fetches, in two flavours:
+ *   'best'    recent releases, highest-rated first
+ *   'popular' what US audiences are actually watching right now
+ *
+ * Both are region-locked to the US, because this site sells to the US and a
+ * global list is a different list: it surfaces releases that never reached
+ * American screens and buries ones that did.
+ *
+ * ON "MOST SEARCHED". TMDB has no Google-search data and neither do we, so
+ * 'popular' uses TMDB's own US popularity ranking. It is the closest honest
+ * proxy. Their /trending endpoint sounds like a better fit but takes no region
+ * parameter — it is worldwide — which is why it is not used here.
+ *
+ * Capped at 10 titles per rail to keep the page light.
  *
  * Sorting note: TMDB's own /top_rated list lets a title with a few hundred
  * votes outrank a classic with thirty thousand, so its first page comes back
@@ -24,6 +35,10 @@ import type { Title } from '../data/vod';
 const KEY = import.meta.env.VITE_TMDB_KEY as string | undefined;
 const BASE = 'https://api.themoviedb.org/3';
 const IMG = 'https://image.tmdb.org/t/p';
+
+/** Every request is scoped to this market. See the note on regions above. */
+const REGION = 'US';
+const LANG = 'en-US';
 
 export const TMDB_ENABLED = Boolean(KEY);
 
@@ -87,26 +102,31 @@ function toTitle(item: TmdbItem, kind: 'movie' | 'tv'): Title | null {
 }
 
 /** Cached for the browsing session so a page change does not re-request. */
-const CACHE_KEY = (kind: string) => `sp4k:tmdb:${kind}`;
+const CACHE_KEY = (kind: string, mode: string) => `sp4k:tmdb:${mode}:${kind}`;
 
-function readCache(kind: string): Title[] | null {
+function readCache(kind: string, mode: string): Title[] | null {
   try {
-    const raw = sessionStorage.getItem(CACHE_KEY(kind));
+    const raw = sessionStorage.getItem(CACHE_KEY(kind, mode));
     return raw ? (JSON.parse(raw) as Title[]) : null;
   } catch {
     return null;
   }
 }
 
-function writeCache(kind: string, titles: Title[]): void {
-  try { sessionStorage.setItem(CACHE_KEY(kind), JSON.stringify(titles)); } catch { /* private mode */ }
+function writeCache(kind: string, mode: string, titles: Title[]): void {
+  try { sessionStorage.setItem(CACHE_KEY(kind, mode), JSON.stringify(titles)); } catch { /* private mode */ }
 }
 
 /** How far back counts as "new". */
 const MONTHS_BACK = 24;
 
-/** Enough votes to be a real release rather than an unknown, but reachable
- *  for something out in the last two years. */
+/**
+ * Enough votes to be a real release rather than an unknown, but reachable for
+ * something out in the last two years.
+ *
+ * Without a floor, TMDB's rating sort hands back films with eleven votes and a
+ * perfect score. The floor is what makes "best rated" mean anything.
+ */
 const MIN_VOTES = 400;
 
 function sinceDate(): string {
@@ -115,30 +135,46 @@ function sinceDate(): string {
   return d.toISOString().slice(0, 10);
 }
 
-/**
- * Recent best-rated films or series. Returns null on any failure so the caller
- * keeps its bundled list rather than showing an empty rail.
- */
-export async function fetchBest(kind: 'movie' | 'tv', limit = 10): Promise<Title[] | null> {
-  if (!KEY) return null;
+export type Mode = 'best' | 'popular';
 
-  const cached = readCache(kind);
-  if (cached?.length) return cached.slice(0, limit);
-
-  const since = sinceDate();
-  const params = new URLSearchParams({
-    api_key: KEY,
-    sort_by: 'vote_average.desc',
-    'vote_count.gte': String(MIN_VOTES),
+function endpoint(mode: Mode, kind: 'movie' | 'tv'): string {
+  const p = new URLSearchParams({
+    api_key: KEY as string,
     include_adult: 'false',
-    language: 'en-US',
+    language: LANG,
+    region: REGION,
     page: '1',
-    // Films and series use different date fields for the same idea.
-    [kind === 'movie' ? 'primary_release_date.gte' : 'first_air_date.gte']: since,
   });
 
+  if (mode === 'popular') {
+    // /movie/popular and /tv/popular honour `region`; /trending does not.
+    return `${BASE}/${kind}/popular?${p}`;
+  }
+
+  p.set('sort_by', 'vote_average.desc');
+  p.set('vote_count.gte', String(MIN_VOTES));
+  p.set('with_original_language', 'en');
+  // Films and series use different date fields for the same idea.
+  p.set(kind === 'movie' ? 'primary_release_date.gte' : 'first_air_date.gte', sinceDate());
+  return `${BASE}/discover/${kind}?${p}`;
+}
+
+/**
+ * US films or series, either best-rated-recent or currently-popular.
+ *
+ * Returns null on ANY failure — no key, offline, rate-limited, blocked by an
+ * extension, empty result — so the caller keeps its bundled list rather than
+ * rendering an empty rail. A missing poster is dropped rather than shown as a
+ * gap, which is why the result can be shorter than `limit`.
+ */
+export async function fetchTitles(mode: Mode, kind: 'movie' | 'tv', limit = 10): Promise<Title[] | null> {
+  if (!KEY) return null;
+
+  const cached = readCache(kind, mode);
+  if (cached?.length) return cached.slice(0, limit);
+
   try {
-    const res = await fetch(`${BASE}/discover/${kind}?${params}`);
+    const res = await fetch(endpoint(mode, kind));
     if (!res.ok) return null;
     const data = (await res.json()) as { results?: TmdbItem[] };
     const titles = (data.results ?? [])
@@ -146,9 +182,9 @@ export async function fetchBest(kind: 'movie' | 'tv', limit = 10): Promise<Title
       .filter((t): t is Title => t !== null)
       .slice(0, limit);
     if (!titles.length) return null;
-    writeCache(kind, titles);
+    writeCache(kind, mode, titles);
     return titles;
   } catch {
-    return null;   // offline, blocked, rate-limited — caller keeps its fallback
+    return null;
   }
 }

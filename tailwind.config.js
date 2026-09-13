@@ -23,6 +23,7 @@ export default {
           // The brand red used AS TEXT. Identical to the brand red on dark;
           // on white #FF2B20 measures 3.74:1, so light takes it deeper.
           ink: 'var(--accent-ink)',
+          chip: 'var(--accent-chip)',
           bright: 'var(--accent-bright)',
           soft: 'var(--accent-soft)',
           link: 'var(--accent-link)',

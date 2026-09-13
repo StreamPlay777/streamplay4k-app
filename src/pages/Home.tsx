@@ -20,6 +20,7 @@ import { logoRows } from '../data/logos';
 import PosterWall from '../components/PosterWall';
 import SavingsSection from '../components/SavingsSection';
 import ShowcaseRow from '../components/ShowcaseRow';
+import FreshRails from '../components/FreshRails';
 import TrustpilotBadge from '../components/TrustpilotBadge';
 import ReviewWall from '../components/ReviewWall';
 import TrustCards from '../components/TrustCards';
@@ -277,7 +278,13 @@ function OnDemand() {
         </div>
 
         {/* Labelled cards */}
+        {/* Live US charts first — they answer "is there anything new?" — then
+            the curated row, which answers "do you have the films I know?" */}
         <div className="mt-12">
+          <FreshRails />
+        </div>
+
+        <div className="mt-10">
           <ShowcaseRow />
         </div>
 
